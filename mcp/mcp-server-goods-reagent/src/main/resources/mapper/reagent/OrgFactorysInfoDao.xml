@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.reagent.dao.OrgFactorysInfoDao">
+    <select id="selectByName" resultType="com.ebig.hdi.modules.reagent.entity.OrgFactorysInfoEntity">
+        SELECT
+            *
+        FROM
+        hdi_org_factory_info
+        <where>
+            factory_name = #{factoryName}
+        </where>
+
+    </select>
+
+</mapper>

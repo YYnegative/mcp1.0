@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.coretransform.dao.TempDistributionDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.coretransform.entity.TempDistributionEntity" id="tempDistributionMap">
+        <result property="distributionid" column="distributionid"/>
+        <result property="uorganid" column="uorganid"/>
+        <result property="horganid" column="horganid"/>
+        <result property="uorganno" column="uorganno"/>
+        <result property="uorganname" column="uorganname"/>
+        <result property="horganno" column="horganno"/>
+        <result property="horganname" column="horganname"/>
+        <result property="salid" column="salid"/>
+        <result property="salno" column="salno"/>
+        <result property="saldate" column="saldate"/>
+        <result property="addressid" column="addressid"/>
+        <result property="credate" column="credate"/>
+        <result property="memo" column="memo"/>
+        <result property="stageflag" column="stageflag"/>
+        <result property="udflag" column="udflag"/>
+    </resultMap>
+
+
+	<!-- HDI转换用  查询是否存在此原始标识对应的库房 -->
+	<select id="selectByDistributionid" resultType="com.ebig.hdi.modules.coretransform.entity.TempDistributionEntity">
+		SELECT
+			* 
+		FROM
+			temp_hdi_distribution hd
+		WHERE
+			hd.distributionid = #{distributionid}
+	</select>
+
+
+	<delete id="deleteTempDistribution">
+        DELETE 
+		FROM
+			temp_hdi_distribution
+		WHERE
+			distributionid = #{distributionid}
+    </delete>
+    
+    
+    <!-- HDI转换用  查询医院是否存在 -->
+	<select id="getDeptIdAndHorgIdAndSupplierId" resultType="java.util.Map">
+		SELECT
+			uss.hospital_id horgId,
+			uss.supplier_id supplierId,
+			osi.dept_id deptId
+		FROM
+			hdi_unicode_supply_ship uss,
+			hdi_org_supplier_info osi
+		WHERE
+			osi.id = uss.supplier_id
+			AND	uss.sources_supplier_id = #{uorganid}
+			AND uss.sources_hospital_id = #{horganid}
+			and uss.del_flag=0
+			and osi.del_flag=0
+	</select>
+    
+</mapper>

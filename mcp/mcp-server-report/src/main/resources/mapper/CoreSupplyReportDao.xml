@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.report.dao.CoreSupplyReportDao">
+
+	<select id="getListBySupplyMasterId" resultType="com.ebig.hdi.modules.report.vo.CoreSupplyDetailVo">
+		SELECT
+		m.supply_master_id AS supplyMasterId,
+		m.supplyno,
+		m.supplier_name AS supplierName,
+		m.hospital_name AS hospitalName,
+		m.storehouse_name AS storehouseName,
+		m. purplanno,
+		DATE_FORMAT(m.supply_time,'%Y-%m-%d %h:%i:%s') AS supplyTime,
+		IF(
+		m.supply_type = 0,
+		'非票货同行',
+		'票货同行'
+		) AS supplyType,
+		d.goodsname,
+		d.goodstype,
+		d.goodsunit,
+		d.supply_qty AS supplyQty,
+		d.supply_unitprice AS supplyUnitprice,
+		d.lotno,
+		(SELECT `value` FROM  sys_dict WHERE `code` = s.store_way) AS storeWay,
+		s.approvals,
+		DATE_FORMAT(d.proddate,'%Y-%m-%d') AS proddate,
+		DATE_FORMAT(d.invadate,'%Y-%m-%d') AS invadate,
+		d.factory_name AS factoryName,
+		(SELECT COUNT(1) FROM hdi_core_supply_detail
+		 WHERE supply_master_id = #{supplyMasterId}) AS total,
+		(SELECT
+		SUM(t.supply_qty * t.supply_unitprice)
+		FROM
+		hdi_core_supply_detail t
+		WHERE t.supply_master_id = #{supplyMasterId}) AS totalAmount
+		FROM
+		hdi_core_supply_master m,
+		hdi_core_supply_detail d,
+		view_hdi_goods_specs_supplier s
+		WHERE d.supply_master_id = m.supply_master_id
+		AND s.goods_id = d.goodsid
+		AND s.goods_type = d.goodsclass
+		AND m.del_flag = 0
+		AND m.supply_master_id = #{supplyMasterId}
+	</select>
+</mapper>

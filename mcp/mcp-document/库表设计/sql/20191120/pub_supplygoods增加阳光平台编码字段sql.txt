@@ -1,0 +1,1 @@
+ALTER TABLE pub_supplygoods  ADD sunshine_pno VARCHAR(128) COMMENT '阳光平台编码';

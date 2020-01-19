@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.sys.dao.SysDictDao">
+
+    <!-- 根据类型获取字典信息 -->
+	<select id="selectDictByType" resultType="com.ebig.hdi.modules.sys.entity.SysDictEntity">
+		select type,parent_code,code,value from sys_dict where del_flag='0' and type in (${type}) order by order_num
+	</select>
+	
+	<!-- 根据类型和父编码获取字典信息 -->
+	<select id="selectDictByTypeAndParentCode" resultType="com.ebig.hdi.modules.sys.entity.SysDictEntity">
+		select type,parent_code,code,value from sys_dict where del_flag='0' and type=#{type} and parent_code=#{parentCode} order by order_num
+	</select>
+
+	<!-- 根据字典码获取字典信息 -->
+	<select id="selectDictByCode" resultType="com.ebig.hdi.modules.sys.entity.SysDictEntity">
+		select * from sys_dict where del_flag='0' and type=#{type} and code = #{code}
+	</select>
+	<!-- 根据字典码获取字典信息 -->
+	<select id="selectDictByCodeAndParentCode" resultType="com.ebig.hdi.modules.sys.entity.SysDictEntity">
+		select * from sys_dict where del_flag='0' and parent_code=#{parentCode} and value = #{value}
+	</select>
+</mapper>

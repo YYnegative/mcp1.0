@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.job.dao.TempSpdSurgeryDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.job.entity.TempSpdSurgeryEntity" id="spdSurgeryMap">
+        <result property="surgeryid" column="surgeryid"/>
+        <result property="uorganid" column="uorganid"/>
+        <result property="opsubtitle" column="opsubtitle"/>
+        <result property="customno" column="customno"/>
+        <result property="customid" column="customid"/>
+        <result property="customname" column="customname"/>
+        <result property="customsex" column="customsex"/>
+        <result property="customage" column="customage"/>
+        <result property="bedno" column="bedno"/>
+        <result property="apppovemanid" column="apppovemanid"/>
+        <result property="apppovemanname" column="apppovemanname"/>
+        <result property="storehouseid" column="storehouseid"/>
+        <result property="storehouseno" column="storehouseno"/>
+        <result property="storehousename" column="storehousename"/>
+        <result property="apppovedate" column="apppovedate"/>
+        <result property="podx" column="podx"/>
+        <result property="originid" column="originid"/>
+        <result property="originno" column="originno"/>
+        <result property="surgeonno" column="surgeonno"/>
+        <result property="surgeonname" column="surgeonname"/>
+        <result property="assistantno1" column="assistantno1"/>
+        <result property="assistantname1" column="assistantname1"/>
+        <result property="assistantno2" column="assistantno2"/>
+        <result property="assistantname2" column="assistantname2"/>
+        <result property="assistantno3" column="assistantno3"/>
+        <result property="assistantname3" column="assistantname3"/>
+        <result property="anestype" column="anestype"/>
+        <result property="anesmanno" column="anesmanno"/>
+        <result property="anesmanname" column="anesmanname"/>
+        <result property="posture" column="posture"/>
+        <result property="examined" column="examined"/>
+        <result property="infection" column="infection"/>
+        <result property="instruments" column="instruments"/>
+        <result property="memo" column="memo"/>
+        <result property="orgdataid" column="orgdataid"/>
+        <result property="orgdatano" column="orgdatano"/>
+        <result property="datasource" column="datasource"/>
+        <result property="surgerystatus" column="surgerystatus"/>
+        <result property="printflag" column="printflag"/>
+        <result property="printtime" column="printtime"/>
+        <result property="printmanid" column="printmanid"/>
+        <result property="printmanname" column="printmanname"/>
+        <result property="returnerrmsg" column="returnerrmsg"/>
+        <result property="perfstorehouseid" column="perfstorehouseid"/>
+        <result property="perfstorehouseno" column="perfstorehouseno"/>
+        <result property="perfstorehousename" column="perfstorehousename"/>
+        <result property="roomname" column="roomname"/>
+        <result property="roomid" column="roomid"/>
+        <result property="hvchecked" column="hvchecked"/>
+        <result property="dvchecked" column="dvchecked"/>
+        <result property="rollbackflag" column="rollbackflag"/>
+        <result property="udflag" column="udflag"/>
+    </resultMap>
+	
+	<select id="selectAll" resultType="com.ebig.hdi.modules.surgery.entity.SurgeryInfoEntity">
+		SELECT DISTINCT
+			ship.hospital_id,
+			surgery.surgeryid AS source_id,
+			hospital.dept_id,
+			surgery.originno AS surgery_no,
+			surgery.opsubtitle AS surgery_title,
+			surgery.customno AS custom_no,
+			surgery.customname AS custom_name,
+			surgery.customsex AS custom_sex,
+			surgery.customage AS custom_age,
+			surgery.apppovedate AS apppove_date,
+			surgerystatus AS status 
+		FROM
+			temp_spd_surgery surgery
+			LEFT JOIN hdi_unicode_supply_ship ship ON surgery.originid = ship.sources_hospital_id
+			LEFT JOIN hdi_org_hospital_info hospital ON hospital.id = ship.hospital_id 
+			LIMIT 300
+	</select>
+
+</mapper>

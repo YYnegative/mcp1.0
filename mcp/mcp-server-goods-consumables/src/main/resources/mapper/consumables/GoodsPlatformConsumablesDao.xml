@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.consumables.dao.GoodsPlatformConsumablesDao">
+
+    <resultMap type="com.ebig.hdi.modules.consumables.vo.GoodsPlatformConsumablesEntityVo"
+               id="goodsPlatformConsumablesMap">
+        <result property="id" column="consumables_id"/>
+        <result property="goodsUnicode" column="goods_unicode"/>
+        <result property="consumablesCode" column="consumables_code"/>
+        <result property="consumablesName" column="consumables_name"/>
+        <result property="commonName" column="common_name"/>
+        <result property="goodsNature" column="goods_nature"/>
+        <result property="typeId" column="type_id"/>
+        <result property="typeName" column="type_name"/>
+        <result property="factoryId" column="consumables_factory_id"/>
+        <result property="status" column="consumables_status"/>
+        <result property="goodsUnit" column="goods_unit"/>
+        <result property="storeWay" column="store_way"/>
+        <result property="picUrl" column="pic_url"/>
+        <result property="factoryName" column="factory_name"/>
+        <collection property="specsEntityList"
+                    ofType="com.ebig.hdi.modules.consumables.entity.GoodsPlatformConsumablesSpecsEntity">
+            <id property="id" column="specs_id"/>
+            <result property="specs" column="specs"/>
+            <result property="guid" column="guid"/>
+            <result property="status" column="specs_status"/>
+        </collection>
+        <collection property="approvalsEntityList"
+                    ofType="com.ebig.hdi.modules.consumables.entity.GoodsPlatformConsumablesApprovalsEntity">
+            <id property="id" column="approvals_id"/>
+            <result property="approvals" column="approvals"/>
+            <result property="status" column="approvals_status"/>
+        </collection>
+    </resultMap>
+
+    <select id="selectPlatformConsumablesById" resultMap="goodsPlatformConsumablesMap">
+		SELECT
+			c.id AS consumables_id,
+			c.goods_unicode,
+			c.consumables_code,
+			c.consumables_name,
+			c.common_name,
+			c.goods_nature,
+			c.type_id,
+			c.factory_id AS consumables_factory_id,
+			c.status AS consumables_status,
+			c.goods_unit,
+			c.store_way,
+			c.pic_url,
+			c.dept_id,
+			f.factory_name,
+			s.id AS specs_id,
+			s.specs,
+			s.guid,
+			s.status AS specs_status,
+			a.id AS approvals_id,
+			a.approvals,
+			a.status AS approvals_status
+		FROM hdi_goods_platform_consumables c
+			LEFT JOIN hdi_org_factory_info f ON c.factory_id = f.id
+			LEFT JOIN hdi_goods_platform_consumables_specs s ON c.id = s.consumables_id
+			LEFT JOIN hdi_goods_platform_consumables_approvals a ON c.id = a.consumables_id
+		WHERE c.id = #{id}
+	</select>
+
+    <select id="selectPlatformConsumablesList" resultMap="goodsPlatformConsumablesMap">
+        SELECT
+        c.id AS consumables_id,
+        c.goods_unicode,
+        c.consumables_name,
+        c.common_name,
+        c.goods_nature,
+        c.type_id,
+        c.factory_id AS consumables_factory_id,
+        c.status AS consumables_status,
+        c.goods_unit,
+        c.store_way,
+        c.pic_url,
+        c.dept_id,
+        f.factory_name,
+        u.cate_name AS type_name
+        FROM hdi_goods_platform_consumables c
+        LEFT JOIN hdi_org_factory_info f ON c.factory_id = f.id
+        LEFT JOIN hdi_unicode_consumables_cate u ON c.type_id = u.cate_id
+        <where>
+            c.del_flag = 0
+            <if test="goodsNature != null">
+                AND c.goods_nature = #{goodsNature}
+            </if>
+            <if test="typeId != null">
+                AND c.type_id IN
+                <foreach collection="typeId" item="item" separator="," open="(" close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="status != null">
+                AND c.status = #{status}
+            </if>
+            <if test="consumablesName != null and consumablesName != ''">
+                AND c.consumables_name like CONCAT('%', #{consumablesName}, '%')
+            </if>
+            <if test="factoryName != null and factoryName != ''">
+                AND f.factory_name like CONCAT('%', #{factoryName}, '%')
+            </if>
+            <if test="sql_filter != null and sql_filter != ''">
+                AND ${sql_filter}
+            </if>
+        </where>
+        ORDER BY IFNULL(c.edit_time, c.create_time) DESC
+    </select>
+
+    <select id="selectByConsumablesName"
+            resultType="com.ebig.hdi.modules.consumables.entity.GoodsPlatformConsumablesEntity">
+		SELECT * FROM hdi_goods_platform_consumables WHERE del_flag = 0 AND consumables_name = #{consumablesName}
+	</select>
+
+    <select id="selectMatch" resultType="map">
+        SELECT
+        f.id AS consumablesId,
+        f.consumables_name AS consumables_name,
+        f.goods_nature,
+        f.factory_id,
+        f.factory_name,
+        f.specs_id AS specsId,
+        f.specs,
+        f.guid,
+        f.approvals_id AS approvalsId,
+        g.approvals
+        FROM
+        (SELECT
+        c.id,
+        c.consumables_name,
+        c.goods_nature,
+        info.id AS factory_id,
+        info.factory_name,
+        s.id AS specs_id,
+        s.specs,
+        s.guid,
+        (SELECT
+        a.id AS approvals_id
+        FROM
+        (SELECT
+        id,
+        consumables_id,
+        approvals,
+        CASE
+        WHEN approvals REGEXP '食药监械'
+        THEN SUBSTRING_INDEX(
+        SUBSTRING_INDEX(approvals, '字', - 1),
+        '第',
+        1
+        )
+        WHEN approvals REGEXP '械注'
+        THEN SUBSTRING(approvals, 5, 4)
+        WHEN approvals REGEXP '械备'
+        THEN SUBSTRING(approvals, 5, 4)
+        ELSE '0'
+        END AS approvals_year
+        FROM
+        hdi_goods_platform_consumables_approvals
+        WHERE STATUS = 1) a
+        WHERE a.consumables_id = c.id
+        ORDER BY a.approvals_year DESC
+        LIMIT 1) AS approvals_id
+        FROM
+        (SELECT
+        id,
+        consumables_name,
+        factory_id,
+        goods_nature
+        FROM
+        hdi_goods_platform_consumables
+        WHERE del_flag = 0
+        AND STATUS = 1) c
+        LEFT JOIN hdi_goods_platform_consumables_specs s
+        ON c.id = s.consumables_id
+        LEFT JOIN hdi_org_factory_info info
+        ON info.id = c.factory_id
+        WHERE s.status = 1 AND info.del_flag = 0) f
+        LEFT JOIN hdi_goods_platform_consumables_approvals g
+        ON f.approvals_id = g.id
+        <where>
+            <choose>
+                <when test="guid != null and guid != ''">
+                    f.guid = #{guid} OR (g.approvals = #{approvals} AND f.specs = #{specs})
+                </when>
+                <otherwise>
+                    g.approvals = #{approvals} AND f.specs = #{specs}
+                </otherwise>
+            </choose>
+        </where>
+    </select>
+
+
+</mapper>

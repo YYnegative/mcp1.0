@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.sys.dao.SysSequenceDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.sys.entity.SysSequenceEntity" id="sysSequenceMap">
+        <result property="id" column="id"/>
+        <result property="seqCode" column="seq_code"/>
+        <result property="seqName" column="seq_name"/>
+        <result property="currentVal" column="current_val"/>
+    </resultMap>
+
+    <!-- 根据序列编码获取序列信息 -->
+	<select id="selectBySeqCode" resultType="com.ebig.hdi.modules.sys.entity.SysSequenceEntity">
+		select * from sys_sequence where seq_code=#{seqCode} limit 1
+	</select>
+
+</mapper>

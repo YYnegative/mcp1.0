@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.surgery.dao.SurgeryStageDetailInfoDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.surgery.entity.SurgeryStageDetailInfoEntity" id="surgeryStageDetailInfoMap">
+        <result property="id" column="id"/>
+        <result property="surgeryStageId" column="surgery_stage_id"/>
+        <result property="consumablesId" column="consumables_id"/>
+        <result property="consumablesSpecsId" column="consumables_specs_id"/>
+        <result property="plotId" column="plot_id"/>
+        <result property="plotNo" column="plot_no"/>
+        <result property="plotProddate" column="plot_proddate"/>
+        <result property="plotValidto" column="plot_validto"/>
+        <result property="slotId" column="slot_id"/>
+        <result property="slotNo" column="slot_no"/>
+        <result property="slotProddate" column="slot_proddate"/>
+        <result property="slotValidto" column="slot_validto"/>
+        <result property="factoryId" column="factory_id"/>
+        <result property="factoryNo" column="factory_no"/>
+        <result property="consumablesQuantity" column="consumables_quantity"/>
+        <result property="dataSource" column="data_source"/>
+    </resultMap>
+    
+    <select id="selectToSave" resultType="com.ebig.hdi.modules.surgery.entity.vo.SurgeryStageDetailInfoVO">
+    	<choose>
+    		<when test="params.consumablesId == null">
+    			select 
+    				t1.id as consumablesId,
+    				t1.consumables_name as goodsName,
+    				t2.id as factoryId,
+    				t2.factory_name as factoryName,
+    				t2.factory_code as factoryNo,
+    				t1.goods_unit as goodsUnit
+    			from
+    				hdi_goods_supplier_consumables t1
+    			left join
+    				hdi_org_factory_info t2
+    			on 
+    				t1.factory_id = t2.id
+    			where 
+    				t1.supplier_id = #{params.supplierId} 
+    		</when>
+    		<when test="params.consumablesId != null and params.consumablesSpecsId == null">
+    			select 
+    				specs,
+    				id as consumablesSpecsId
+    			from 
+    				hdi_goods_supplier_consumables_specs
+    			where 
+    				consumables_id = #{params.consumablesId}
+    			and
+    				status = 1
+    		</when>
+    		<when test="params.consumablesSpecsId != null">
+    			select
+    				lotid as plotId,
+    				lotno as plotNo,
+    				proddate as plotProddate,
+    				invadate as plotValidto
+    			from 
+    				hdi_core_lot
+    			where 
+    				goodsid = #{params.consumablesId}
+    			and
+    				goodsclass = 3
+    			and 
+    				goodstypeid = #{params.consumablesSpecsId}
+    			and 
+    				lottype = 1
+    			and
+    				lotstatus = 1
+    		</when>
+    	</choose>
+    </select>
+	
+	<select id="selectBySurgeryStageId" resultType="com.ebig.hdi.modules.surgery.entity.vo.SurgeryStageDetailInfoVO">
+		select
+			t1.*,
+			t2.consumables_name as goodsName,
+			t3.factory_name,
+			t4.specs,
+			t2.goods_unit
+		from 
+			mcp_surgery_stage_detail_info t1
+		left join hdi_goods_supplier_consumables t2
+		on 
+			t1.consumables_id = t2.id
+			and t2.del_flag = 0
+			and t2.status = 1
+		left join hdi_org_factory_info t3
+		on
+			t1.factory_id = t3.id
+			and t3.del_flag = 0
+		left join hdi_goods_supplier_consumables_specs t4
+		on 
+			t1.consumables_specs_id = t4.id
+			and t4.status = 1
+		where
+			t1.surgery_stage_id = #{id}
+	</select>
+	
+	<select id="listForPage" resultType="com.ebig.hdi.modules.surgery.entity.vo.SurgeryStageDetailInfoVO">
+		select 	
+			t1.*,
+			t2.consumables_name as goodsName,
+			t3.factory_name,
+			t4.specs,
+			t2.goods_unit
+		from 
+			mcp_surgery_stage_detail_info t1
+		left join hdi_goods_supplier_consumables t2
+		on 
+			t1.consumables_id = t2.id
+			and t2.del_flag = 0
+			and t2.status = 1
+		left join hdi_org_factory_info t3
+		on
+			t1.factory_id = t3.id
+			and t3.del_flag = 0
+		left join hdi_goods_supplier_consumables_specs t4
+		on 
+			t1.consumables_specs_id = t4.id
+			and t4.status = 1
+		where
+			t1.surgery_stage_id = #{id}
+	</select>
+</mapper>

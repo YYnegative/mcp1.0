@@ -1,0 +1,516 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.core.dao.CorePurchaseDetailDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.core.entity.CorePurchaseDetailEntity" id="corePurchaseDetailMap">
+        <result property="purchaseDetailId" column="purchase_detail_id"/>
+        <result property="purchaseMasterId" column="purchase_master_id"/>
+        <result property="hgoodsid" column="hgoodsid"/>
+        <result property="yhgoodsid" column="yhgoodsid"/>
+        <result property="goodsclass" column="goodsclass"/>
+        <result property="hgoodsno" column="hgoodsno"/>
+        <result property="hgoodstypeid" column="hgoodstypeid"/>
+        <result property="yhgoodstypeid" column="yhgoodstypeid"/>
+        <result property="hgoodstype" column="hgoodstype"/>
+        <result property="hgoodsunit" column="hgoodsunit"/>
+        <result property="hqty" column="hqty"/>
+        <result property="shipedqty" column="shipedqty"/>
+        <result property="hunitprice" column="hunitprice"/>
+        <result property="sgoodsid" column="sgoodsid"/>
+        <result property="sgoodsno" column="sgoodsno"/>
+        <result property="sgoodstypeid" column="sgoodstypeid"/>
+        <result property="sgoodstype" column="sgoodstype"/>
+        <result property="sgoodsunit" column="sgoodsunit"/>
+        <result property="sqty" column="sqty"/>
+        <result property="sunitprice" column="sunitprice"/>
+        <result property="orgdataid" column="orgdataid"/>
+        <result property="orgdatadtlid" column="orgdatadtlid"/>
+        <result property="shipFlag" column="ship_flag"/>
+        <result property="sourceid" column="sourceid"/>
+        <result property="sourcedtlid" column="sourcedtlid"/>
+        <result property="memo" column="memo"/>
+        <result property="factoryName" column="factory_name"/>
+        <result property="goodsName" column="goods_name"/>
+        <result property="factoryId" column="factory_id"/>
+        <result property="supplyQty" column="supply_qty"/>
+    </resultMap>
+
+
+    <!-- 根据PurchaseMasterId查询采购细单信息 -->
+    <select id="selectByPurchaseMasterId" resultType="com.ebig.hdi.modules.core.entity.CorePurchaseDetailEntity">
+		SELECT DISTINCT
+			cpd.purchase_detail_id,
+			cpd.purchase_master_id,
+			cpd.goodsclass,
+			cpd.hgoodsunit,
+			cpd.hqty,
+			cpd.hunitprice,
+			cpd.hgoodsid,
+			cpd.hgoodsno,
+			cpd.hgoodsname,
+			cpd.hgoodstypeid,
+			cpd.hgoodstype,
+			cpd.orgdataid,
+			cpd.orgdatadtlid,
+			cpd.sourceid AS purplanid,
+			cpd.sourcedtlid AS purplandtlid,
+			gsh.factory_id, 
+			gsh.factory_name,
+			gsm.supplier_goods_id AS sgoodsid, 
+			gsm.supplier_goods_name AS sgoodsname, 
+			gsm.supplier_goods_code AS sgoodsno, 
+			gsm.supplier_goods_specs_id AS sgoodstypeid, 
+			gsm.supplier_goods_specs_name AS sgoodstype, 
+			gsm.supplier_goods_unit AS sgoodsunit, 
+			gsm.supplier_factory_id sfactory_id, 
+			gsm.supplier_factory_name sfactory_name,
+			(cpd.hqty - (SELECT CASE WHEN SUM(supply_qty) IS NULL THEN 0 ELSE SUM(supply_qty) END FROM hdi_core_supply_detail 
+            WHERE purchase_master_id=cpd.purchase_master_id AND purchase_detail_id=cpd.purchase_detail_id)) AS supply_qty
+		FROM
+			hdi_core_purchase_detail cpd
+			LEFT JOIN (select * from view_hdi_goods_specs_match where supplier_id = #{supplierId}) gsm ON cpd.goodsclass = gsm.goods_type
+			AND cpd.hgoodsid = gsm.hospital_goods_id 
+			AND cpd.hgoodstypeid = gsm.hospital_goods_specs_id
+			LEFT JOIN view_hdi_goods_specs_hospital gsh ON cpd.goodsclass=gsh.goods_type 
+			AND cpd.hgoodsid=gsh.goods_id 
+			AND cpd.hgoodstypeid=gsh.goods_specs_id
+		WHERE
+			cpd.purchase_master_id = #{purchaseMasterId} 
+	</select>
+
+
+    <!-- 根据PurchaseMasterId查询采购细单信息 -->
+    <select id="selectByMasterid" resultType="com.ebig.hdi.modules.core.entity.CorePurchaseDetailEntity">
+        SELECT
+        cpd.*,
+        gsc.consumables_name goods_name,
+        ofi.id factory_id,
+        ofi.factory_name
+        FROM
+        hdi_core_purchase_detail cpd,
+        hdi_goods_supplier_consumables gsc,
+        hdi_org_factory_info ofi
+        <where>
+            cpd.goodsclass = 3
+            AND cpd.hgoodsid = gsc.id
+            AND gsc.factory_id = ofi.id
+            and gsc.del_flag=0
+            and ofi.del_flag=0
+            <if test="purchaseMasterId != null and purchaseMasterId != ''">
+                AND cpd.purchase_master_id = #{purchaseMasterId}
+            </if>
+        </where>
+        UNION
+        SELECT
+        cpd.*,
+        gsc.drugs_name goods_name,
+        ofi.id factory_id,
+        ofi.factory_name
+        FROM
+        hdi_core_purchase_detail cpd,
+        hdi_goods_supplier_drugs gsc,
+        hdi_org_factory_info ofi
+        <where>
+            cpd.goodsclass = 1
+            AND cpd.hgoodsid = gsc.id
+            AND gsc.factory_id = ofi.id
+            and gsc.del_flag=0
+            and ofi.del_flag=0
+            <if test="purchaseMasterId != null and purchaseMasterId != ''">
+                AND cpd.purchase_master_id = #{purchaseMasterId} UNION
+            </if>
+        </where>
+        SELECT
+        cpd.*,
+        gsc.reagent_name goods_name,
+        ofi.id factory_id,
+        ofi.factory_name
+        FROM
+        hdi_core_purchase_detail cpd,
+        hdi_goods_supplier_reagent gsc,
+        hdi_org_factory_info ofi
+        <where>
+            cpd.goodsclass = 2
+            AND cpd.hgoodsid = gsc.id
+            AND gsc.factory_id = ofi.id
+            and gsc.del_flag=0
+            and ofi.del_flag=0
+            <if test="purchaseMasterId != null and purchaseMasterId != ''">
+                AND cpd.purchase_master_id = #{purchaseMasterId}
+            </if>
+        </where>
+    </select>
+
+
+    <!-- 生成供货单细单时 根据PurchaseMasterId查询采购细单信息 -->
+    <select id="queryDetails" resultType="com.ebig.hdi.modules.core.entity.CorePurchaseDetailEntity">
+		SELECT DISTINCT 
+		  cpd.purchase_detail_id,
+		  cpd.purchase_master_id,
+		  cpd.goodsclass,
+		  cpd.hgoodsunit,
+		  cpd.hqty,
+		  cpd.hunitprice,
+		  cpd.hgoodsid,
+		  cpd.hgoodsno,
+		  cpd.hgoodsname,
+		  cpd.hgoodstypeid,
+		  cpd.hgoodstype,
+		  cpd.orgdataid,
+		  cpd.orgdatadtlid,
+		  cpd.sourceid,
+		  cpd.sourcedtlid,
+		  gsh.factory_id,
+		  gsh.factory_name,
+		  gsm.supplier_goods_id AS sgoodsid,
+		  gsm.supplier_goods_name AS sgoodsName,
+		  gsm.supplier_goods_code AS sgoodsno,
+		  gsm.supplier_goods_specs_id AS sgoodstypeid,
+		  gsm.supplier_goods_specs_name AS sgoodstype,
+		  gsm.supplier_goods_specs_code AS sgoodstypeno,
+		  gsm.supplier_goods_unit AS sgoodsunit,
+		  gsm.supplier_factory_id sfactory_id,
+		  gsm.supplier_factory_name sfactory_name,
+	      (
+		    cpd.hqty -
+		    (SELECT
+		      IFNULL(SUM(supply_qty), 0)
+		    FROM
+		      hdi_core_supply_detail
+		    WHERE purchase_master_id = cpd.purchase_master_id
+		      AND supply_master_id IN
+		      (SELECT
+		        supply_master_id
+		      FROM
+		        hdi_core_supply_master
+		      WHERE del_flag = 0 AND purchase_master_id = cpd.purchase_master_id))
+		  ) AS supply_qty
+		FROM
+		  hdi_core_purchase_detail cpd
+		  LEFT JOIN hdi_core_purchase_master cpm ON cpd.purchase_master_id=cpm.purchase_master_id
+		  LEFT JOIN 
+		    (SELECT 
+		      * 
+		    FROM
+		      view_hdi_goods_specs_match 
+		    WHERE supplier_id = #{supplierId}) gsm 
+		    ON cpd.goodsclass = gsm.goods_type 
+		    AND cpd.hgoodsid = gsm.hospital_goods_id 
+		    AND cpd.hgoodstypeid = gsm.hospital_goods_specs_id 
+		  LEFT JOIN view_hdi_goods_specs_hospital gsh 
+		    ON cpd.goodsclass = gsh.goods_type 
+		    AND cpd.hgoodsid = gsh.goods_id 
+		    AND cpd.hgoodstypeid = gsh.goods_specs_id 
+		WHERE 1=1 
+		    <if test="purchaseMasterId != null and purchaseMasterId != ''">
+		        AND cpd.purchase_master_id = #{purchaseMasterId}
+		    </if>
+		    <if test="purplanno != null and purplanno != ''">
+                AND cpm.purplanno LIKE CONCAT( '%',#{purplanno}, '%')
+            </if>
+	</select>
+
+
+    <!-- 根据PurchaseMasterId查询采购细单信息 -->
+    <select id="selectByMasterId" resultType="com.ebig.hdi.modules.core.entity.CorePurchaseDetailEntity">
+        SELECT
+        cpd.*,
+        gsc.consumables_name goods_name,
+        ofi.id factory_id,
+        ofi.factory_name,
+        (cpd.sqty-cpd.shipedqty) supply_qty
+        FROM
+        hdi_core_purchase_detail cpd,
+        hdi_goods_supplier_consumables gsc,
+        hdi_org_factory_info ofi
+        <where>
+            cpd.goodsclass = 3
+            AND cpd.sgoodsid = gsc.id
+            AND gsc.factory_id = ofi.id
+            and gsc.del_flag=0
+            and ofi.del_flag=0
+            <if test="purchaseMasterId != null and purchaseMasterId != ''">
+                AND cpd.purchase_master_id = #{purchaseMasterId}
+            </if>
+        </where>
+        UNION
+        SELECT
+        cpd.*,
+        gsc.drugs_name goods_name,
+        ofi.id factory_id,
+        ofi.factory_name,
+        (cpd.sqty-cpd.shipedqty) supply_qty
+        FROM
+        hdi_core_purchase_detail cpd,
+        hdi_goods_supplier_drugs gsc,
+        hdi_org_factory_info ofi
+        <where>
+            cpd.goodsclass = 1
+            AND cpd.sgoodsid = gsc.id
+            AND gsc.factory_id = ofi.id
+            and gsc.del_flag=0
+            and ofi.del_flag=0
+            <if test="purchaseMasterId != null and purchaseMasterId != ''">
+                AND cpd.purchase_master_id = #{purchaseMasterId}
+            </if>
+        </where>
+        UNION
+        SELECT
+        cpd.*,
+        gsc.reagent_name goods_name,
+        ofi.id factory_id,
+        ofi.factory_name,
+        (cpd.sqty-cpd.shipedqty) supply_qty
+        FROM
+        hdi_core_purchase_detail cpd,
+        hdi_goods_supplier_reagent gsc,
+        hdi_org_factory_info ofi
+        <where>
+            cpd.goodsclass = 2
+            AND cpd.sgoodsid = gsc.id
+            AND gsc.factory_id = ofi.id
+            and gsc.del_flag=0
+            and ofi.del_flag=0
+            <if test="purchaseMasterId != null and purchaseMasterId != ''">
+                AND cpd.purchase_master_id = #{purchaseMasterId}
+            </if>
+        </where>
+    </select>
+
+
+    <!-- 根据PurchaseMasterId查询采购细单信息 -->
+    <select id="selectGoodsName" resultType="com.ebig.hdi.modules.core.entity.CorePurchaseDetailEntity">
+        SELECT
+        cpd.*,
+        gsc.consumables_name goods_name,
+        ofi.id factory_id,
+        ofi.factory_name,
+        (cpd.sqty-cpd.shipedqty) supply_qty
+        FROM
+        hdi_core_purchase_detail cpd,
+        hdi_goods_supplier_consumables gsc,
+        hdi_org_factory_info ofi
+        <where>
+            cpd.goodsclass = 3
+            AND cpd.sgoodsid = gsc.id
+            AND gsc.factory_id = ofi.id
+            and gsc.del_flag=0
+            and ofi.del_flag=0
+            <if test="purchaseMasterId != null and purchaseMasterId != ''">
+                AND cpd.purchase_master_id = #{purchaseMasterId}
+            </if>
+        </where>
+        UNION
+        SELECT
+        cpd.*,
+        gsc.drugs_name goods_name,
+        ofi.id factory_id,
+        ofi.factory_name,
+        (cpd.sqty-cpd.shipedqty) supply_qty
+        FROM
+        hdi_core_purchase_detail cpd,
+        hdi_goods_supplier_drugs gsc,
+        hdi_org_factory_info ofi
+        <where>
+            cpd.goodsclass = 1
+            AND cpd.sgoodsid = gsc.id
+            AND gsc.factory_id = ofi.id
+            and gsc.del_flag=0
+            and ofi.del_flag=0
+            <if test="purchaseMasterId != null and purchaseMasterId != ''">
+                AND cpd.purchase_master_id = #{purchaseMasterId}
+            </if>
+        </where>
+        UNION
+        SELECT
+        cpd.*,
+        gsc.reagent_name goods_name,
+        ofi.id factory_id,
+        ofi.factory_name,
+        (cpd.sqty-cpd.shipedqty) supply_qty
+        FROM
+        hdi_core_purchase_detail cpd,
+        hdi_goods_supplier_reagent gsc,
+        hdi_org_factory_info ofi
+        <where>
+            cpd.goodsclass = 2
+            AND cpd.sgoodsid = gsc.id
+            AND gsc.factory_id = ofi.id
+            and gsc.del_flag=0
+            and ofi.del_flag=0
+            <if test="purchaseMasterId != null and purchaseMasterId != ''">
+                AND cpd.purchase_master_id = #{purchaseMasterId}
+            </if>
+        </where>
+    </select>
+
+
+    <!-- 根据PurchaseMasterId查询未匹对采购细单信息 -->
+    <select id="selectHgoodsName" resultType="com.ebig.hdi.modules.core.entity.CorePurchaseDetailEntity">
+        SELECT
+        cpd.*,
+        ghc.consumables_name goods_name,
+        ofi.id factory_id,
+        ofi.factory_name,
+        ( cpd.sqty - cpd.shipedqty ) supply_qty
+        FROM
+        hdi_core_purchase_detail cpd,
+        hdi_goods_hospital_consumables ghc,
+        hdi_org_factory_info ofi
+        <where>
+            cpd.goodsclass = 3
+            AND cpd.ship_flag = 0
+            AND cpd.hgoodsid = ghc.id
+            AND ghc.factory_id = ofi.id
+            and ghc.del_flag=0
+            and ofi.del_flag=0
+            <if test="purchaseMasterId != null and purchaseMasterId != ''">
+                AND cpd.purchase_master_id = #{purchaseMasterId}
+            </if>
+        </where>
+        UNION
+        SELECT
+        cpd.*,
+        gsc.drugs_name goods_name,
+        ofi.id factory_id,
+        ofi.factory_name,
+        ( cpd.sqty - cpd.shipedqty ) supply_qty
+        FROM
+        hdi_core_purchase_detail cpd,
+        hdi_goods_hospital_drugs gsc,
+        hdi_org_factory_info ofi
+        <where>
+            cpd.goodsclass = 1
+            AND cpd.ship_flag = 0
+            AND cpd.hgoodsid = gsc.id
+            AND gsc.factory_id = ofi.id
+            and gsc.del_flag=0
+            and ofi.del_flag=0
+            <if test="purchaseMasterId != null and purchaseMasterId != ''">
+                AND cpd.purchase_master_id = #{purchaseMasterId}
+            </if>
+        </where>
+        UNION
+        SELECT
+        cpd.*,
+        gsc.reagent_name goods_name,
+        ofi.id factory_id,
+        ofi.factory_name,
+        ( cpd.sqty - cpd.shipedqty ) supply_qty
+        FROM
+        hdi_core_purchase_detail cpd,
+        hdi_goods_hospital_reagent gsc,
+        hdi_org_factory_info ofi
+        <where>
+            cpd.goodsclass = 2
+            AND cpd.ship_flag = 0
+            AND cpd.hgoodsid = gsc.id
+            AND gsc.factory_id = ofi.id
+            and gsc.del_flag=0
+            and ofi.del_flag=0
+            <if test="purchaseMasterId != null and purchaseMasterId != ''">
+                AND cpd.purchase_master_id = #{purchaseMasterId}
+            </if>
+        </where>
+    </select>
+
+
+    <!-- 根据医院商品规格，商品类型，商品id 查询供应商商品信息-->
+    <select id="selectSupplierGoods" resultType="com.ebig.hdi.modules.core.entity.CorePurchaseDetailEntity">
+		SELECT
+			gsm.supplier_goods_id sgoodsid,
+			gsm.supplier_goods_code sgoodsno,
+			gsm.supplier_goods_specs_id sgoodstypeid,
+			gsm.supplier_goods_specs_name sgoodstype,
+			gsm.supplier_goods_unit sgoodsunit
+		FROM
+			view_hdi_goods_specs_match gsm
+		WHERE
+			gsm.hospital_goods_id = #{hgoodsid}
+			and gsm.goods_type = #{goodsclass}
+			AND gsm.hospital_goods_specs_name = #{hgoodstype}
+	</select>
+
+    <!-- 查询原医院商品标识和原医院商品规格ID -->
+    <select id="selectYHospital" resultType="java.util.Map">
+        SELECT
+        gsh.sources_specs_id AS yhgoodstypeid,
+        gsh.goods_code,
+        gsh.goods_specs_id,
+        gsh.specs_code
+        FROM
+        view_hdi_goods_specs_hospital gsh
+        <where>
+            <if test="goodsclass != null and goodsclass != ''">
+                gsh.goods_type = #{goodsclass}
+            </if>
+            <if test="hgoodsid != null and hgoodsid != ''">
+                AND gsh.goods_id = #{hgoodsid}
+            </if>
+            <if test="hgoodstypeid != null and hgoodstypeid != ''">
+                AND gsh.goods_specs_id = #{hgoodstypeid}
+            </if>
+        </where>
+    </select>
+
+
+    <!-- 查询细单的状态  已匹对/未匹对 -->
+    <select id="selectShipFlag" resultType="java.util.Map">
+		SELECT
+			cpd.purchase_detail_id purchaseDetailId,
+			cpd.ship_flag shipFlag	
+		FROM
+			hdi_core_purchase_detail cpd 
+		WHERE
+			cpd.purchase_master_id = #{purchaseMasterId}
+	</select>
+
+    <!-- 查询采购细单剩余供货数量 -->
+    <select id="selectDetailLeaveSupplyQty" resultType="int">
+		SELECT 
+		  (
+		    t1.hqty - 
+		    (SELECT 
+		      IFNULL(SUM(supply_qty), 0) 
+		    FROM
+		      hdi_core_supply_detail 
+		    WHERE purchase_master_id = t1.purchase_master_id 
+		      AND purchase_detail_id = t1.purchase_detail_id 
+		      AND supply_master_id IN 
+		      (SELECT 
+		        supply_master_id 
+		      FROM
+		        hdi_core_supply_master 
+		      WHERE del_flag = 0))
+		  ) AS leave_supply_qty 
+		FROM
+		  hdi_core_purchase_detail t1 
+		WHERE t1.purchase_detail_id = #{purchaseDetailId}
+	</select>
+
+    <select id="getPurchaseNumberByPurchaseMasterId" resultType="int">
+		SELECT IFNULL(SUM(hqty), 0) FROM hdi_core_purchase_detail WHERE purchase_master_id = #{purchaseMasterId}
+	</select>
+
+
+    <select id="selectByOrgdatadtlid" resultType="com.ebig.hdi.modules.core.entity.CorePurchaseDetailEntity">
+		SELECT
+			*
+		FROM
+		hdi_core_purchase_detail
+		WHERE
+		 orgdatadtlid = #{orgdatadtlid}
+	</select>
+
+    <select id="selectViewByGoodsNameAndSpecs" resultType="java.util.Map">
+        select * from view_hdi_goods_specs_hospital
+        where
+        hospital_id = #{hospitalId}
+        and goods_name = #{hgoodsname}
+        and specs = #{hgoodstype}
+        and factory_name =#{factoryName}
+    </select>
+
+</mapper>

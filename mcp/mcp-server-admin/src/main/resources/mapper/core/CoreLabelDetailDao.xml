@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.core.dao.CoreLabelDetailDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.core.entity.CoreLabelDetailEntity" id="coreLabelDetailMap">
+        <result property="labeldtlid" column="labeldtlid"/>
+        <result property="labelid" column="labelid"/>
+        <result property="labelQty" column="label_qty"/>
+        <result property="supplyMasterId" column="supply_master_id"/>
+        <result property="supplyDetailId" column="supply_detail_id"/>
+		<result property="factoryName" column="factory_name"/>
+        <result property="goodsName" column="goods_name"/>  
+        <result property="goodstype" column="goodstype"/>
+        <result property="goodsunit" column="goodsunit"/>
+        <result property="lotno" column="lotno"/>
+        <result property="proddate" column="proddate"/>
+        <result property="invadate" column="invadate"/>
+    </resultMap>
+    
+    <!-- 根据LabelId查询标签细单信息 -->
+	<select id="selectByLabelId" resultType="com.ebig.hdi.modules.core.entity.CoreLabelDetailEntity">
+		SELECT
+			cld.*,
+			gsc.consumables_name goods_name,
+			ofi.factory_name,
+			csd.goodstype,
+			csd.goodsunit,
+			csd.lotno,
+			csd.proddate,
+			csd.invadate
+		FROM
+			hdi_core_label_detail cld
+			LEFT JOIN 	hdi_core_supply_detail csd on cld.supply_detail_id = csd.supply_detail_id
+			LEFT JOIN	hdi_goods_supplier_consumables gsc on csd.goodsid = gsc.id
+			LEFT JOIN	hdi_org_factory_info ofi on gsc.factory_id = ofi.id
+			LEFT JOIN	hdi_core_lot cl on csd.lotno = cl.lotno
+		<where>
+				csd.goodsclass = 3
+		<if test="labelid != null and labelid != ''">
+			AND cld.labelid = #{labelid} 
+		</if>
+		</where>
+		UNION
+		SELECT
+			cld.*,
+			gsc.drugs_name goods_name,
+			ofi.factory_name,
+			csd.goodstype,
+			csd.goodsunit,
+			csd.lotno,
+			csd.proddate,
+			csd.invadate
+		FROM
+			hdi_core_label_detail cld
+			LEFT JOIN 	hdi_core_supply_detail csd on cld.supply_detail_id = csd.supply_detail_id
+			LEFT JOIN	hdi_goods_supplier_drugs gsc on csd.goodsid = gsc.id
+			LEFT JOIN	hdi_org_factory_info ofi on gsc.factory_id = ofi.id
+			LEFT JOIN	hdi_core_lot cl on csd.lotno = cl.lotno
+		<where>
+			csd.goodsclass = 1
+		<if test="labelid != null and labelid != ''">
+			AND cld.labelid = #{labelid} 
+		</if>
+		</where>
+		UNION
+		SELECT
+			cld.*,
+			gsc.reagent_name goods_name,
+			ofi.factory_name,
+			csd.goodstype,
+			csd.goodsunit,
+			csd.lotno,
+			csd.proddate,
+			csd.invadate
+		FROM
+			hdi_core_label_detail cld
+			LEFT JOIN 	hdi_core_supply_detail csd on cld.supply_detail_id = csd.supply_detail_id
+			LEFT JOIN	hdi_goods_supplier_reagent gsc on csd.goodsid = gsc.id
+			LEFT JOIN	hdi_org_factory_info ofi on gsc.factory_id = ofi.id
+			LEFT JOIN	hdi_core_lot cl on csd.lotno = cl.lotno
+		<where>
+			csd.goodsclass = 2
+		<if test="labelid != null and labelid != ''">
+			AND cld.labelid = #{labelid} 
+		</if>
+		</where>
+	</select>
+
+
+</mapper>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.activiti.dao.ActApprovalDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.activiti.entity.ActApprovalEntity" id="actApprovalMap">
+        <result property="id" column="id"/>
+        <result property="approvalCode" column="approval_code"/>
+        <result property="type" column="type"/>
+        <result property="changeType" column="change_type"/>
+        <result property="submitTime" column="submit_time"/>
+        <result property="userId" column="user_id"/>
+        <result property="userName" column="user_name"/>
+        <result property="approvalStatus" column="approval_status"/>
+        <result property="foreignId" column="foreign_id"/>
+        <result property="processId" column="process_id"/>
+        <result property="code" column="code"/>
+        <result property="name" column="name"/>
+    </resultMap>
+
+    <select id="selectByDeptId" resultType="com.ebig.hdi.modules.activiti.entity.ActApprovalEntity">
+        SELECT
+        csm.id,csm.approval_code,csm.TYPE,
+        csm.change_type,csm.submit_time,
+        csm.user_name,csm.approval_status,
+        csm.foreign_id,
+        csm.process_id,
+        csm.code,
+        csm.name
+        FROM
+        hdi_act_approval csm
+        <where>
+            1=1
+            <if test="deptIds != null and deptIds != ''">
+                AND ${deptIds}
+            </if>
+            <if test="type != null">
+                AND csm.type = #{type}
+            </if>
+            <if test="foreignId != null and foreignId != ''">
+                AND csm.foreign_id like CONCAT('%',#{foreignId}, '%')
+            </if>
+            ORDER BY csm.submit_time DESC
+        </where>
+
+    </select>
+</mapper>

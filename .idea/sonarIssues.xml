@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="issues">
+    <option name="index">
+      <map>
+        <entry key="/fragment.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/mcp/mcp-common-code/src/main/java/com/ebig/hdi/common/constant/ActivitiConstant.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/mcp/mcp-common-code/src/main/java/com/ebig/hdi/common/enums/GoodsNaturesEnum.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/mcp/mcp-common-code/src/main/java/com/ebig/hdi/common/enums/ImportEnum.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/mcp/mcp-common-code/src/main/java/com/ebig/hdi/common/enums/StorageCondictionEnum.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/mcp/mcp-common-code/src/main/java/com/ebig/hdi/common/enums/SysConfigEnum.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/mcp/mcp-server-admin/src/main/java/com/ebig/hdi/modules/common/ImportController.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/mcp/mcp-server-admin/src/main/java/com/ebig/hdi/modules/org/param/OrgHospitalParam.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/mcp/mcp-server-admin/src/main/java/com/ebig/hdi/modules/org/service/impl/OrgFactoryInfoApprovalServiceImpl.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/mcp/mcp-server-admin/src/main/resources/static/swagger/index.yaml">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/mcp/mcp-server-goods-drugs/pom.xml">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/mcp/mcp-server-goods-drugs/src/main/java/com/ebig/hdi/modules/drugs/common/UnicodeDrugsCate.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/mcp/mcp-server-goods-drugs/src/main/java/com/ebig/hdi/modules/drugs/controller/GoodsPlatformDrugsApprovalController.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/mcp/mcp-server-goods-drugs/src/main/java/com/ebig/hdi/modules/drugs/controller/GoodsSupplierDrugsController.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/mcp/mcp-server-goods-drugs/src/main/java/com/ebig/hdi/modules/drugs/dao/GoodsPlatformDrugsApprovalDao.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/mcp/mcp-server-goods-drugs/src/main/java/com/ebig/hdi/modules/drugs/dao/GoodsSupplierDrugsDao.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/mcp/mcp-server-goods-drugs/src/main/java/com/ebig/hdi/modules/drugs/dao/OrgFactoryDao.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/mcp/mcp-server-goods-drugs/src/main/java/com/ebig/hdi/modules/drugs/dao/UnicodeDrugsCateDao.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/mcp/mcp-server-goods-drugs/src/main/java/com/ebig/hdi/modules/drugs/entity/GoodsPlatformDrugsApprovalEntity.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/mcp/mcp-server-goods-drugs/src/main/java/com/ebig/hdi/modules/drugs/entity/GoodsPlatformDrugsEntity.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/mcp/mcp-server-goods-drugs/src/main/java/com/ebig/hdi/modules/drugs/entity/GoodsSupplierDrugsEntity.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/mcp/mcp-server-goods-drugs/src/main/java/com/ebig/hdi/modules/drugs/service/GoodsPlatformDrugsApprovalService.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/mcp/mcp-server-goods-drugs/src/main/java/com/ebig/hdi/modules/drugs/service/GoodsPlatformDrugsService.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/mcp/mcp-server-goods-drugs/src/main/java/com/ebig/hdi/modules/drugs/service/GoodsSupplierDrugsService.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/mcp/mcp-server-goods-drugs/src/main/java/com/ebig/hdi/modules/drugs/service/OrgFactoryService.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/mcp/mcp-server-goods-drugs/src/main/java/com/ebig/hdi/modules/drugs/service/UnicodeDrugsCateService.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/mcp/mcp-server-goods-drugs/src/main/java/com/ebig/hdi/modules/drugs/service/impl/GoodsPlatformDrugsApprovalServiceImpl.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/mcp/mcp-server-goods-drugs/src/main/java/com/ebig/hdi/modules/drugs/service/impl/GoodsPlatformDrugsServiceImpl.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/mcp/mcp-server-goods-drugs/src/main/java/com/ebig/hdi/modules/drugs/service/impl/GoodsSupplierDrugsServiceImpl.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/mcp/mcp-server-goods-drugs/src/main/java/com/ebig/hdi/modules/drugs/service/impl/UnicodeDrugsCateServiceImpl.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/mcp/mcp-server-goods-drugs/src/main/java/com/ebig/hdi/modules/drugs/vo/GoodsPlatformDrugsEntityVo.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/mcp/mcp-server-goods-drugs/src/main/java/com/ebig/hdi/modules/drugs/vo/GoodsPlatformDrugsParams.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/mcp/mcp-server-goods-drugs/src/main/resources/mapper/drugs/GoodsPlatformDrugsApprovalDao.xml">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/mcp/mcp-server-goods-drugs/src/main/resources/mapper/drugs/GoodsPlatformDrugsSpecsDao.xml">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/mcp/mcp-server-goods-drugs/src/main/resources/mapper/drugs/GoodsSupplierDrugsDao.xml">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/mcp/mcp-server-goods-drugs/src/main/resources/mapper/drugs/UnicodeDrugsCateDao.xml">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/mcp/mcp-server-goods-reagent/src/main/java/com/ebig/hdi/modules/reagent/common/UnicodeConsumablesCate.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/mcp/mcp-server-goods-reagent/src/main/java/com/ebig/hdi/modules/reagent/service/impl/GoodsPlatformReagentApprovalServiceImpl.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>

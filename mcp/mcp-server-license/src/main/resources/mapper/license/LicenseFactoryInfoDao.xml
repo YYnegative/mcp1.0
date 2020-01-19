@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.license.dao.LicenseFactoryInfoDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.license.vo.LicenseFactoryInfoEntityVo" id="licenseFactoryInfoMap">
+        <result property="id" column="id"/>
+        <result property="supplierId" column="supplier_id"/>
+        <result property="factoryId" column="factory_id"/>
+        <result property="classifyId" column="classify_id"/>
+        <result property="name" column="name"/>
+        <result property="number" column="number"/>
+        <result property="beginTime" column="begin_time"/>
+        <result property="endTime" column="end_time"/>
+        <result property="picUrl" column="pic_url"/>
+        <result property="status" column="status"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="createId" column="create_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="editId" column="edit_id"/>
+        <result property="editTime" column="edit_time"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="newLicenseId" column="new_license_id"/>
+        <result property="supplierName" column="supplier_name"/>
+        <result property="factoryName" column="factory_name"/>
+        <result property="licenseType" column="license_type"/>
+        <result property="classifyName" column="classify_name"/>
+        <result property="isWarning" column="is_warning"/>
+        <result property="earlyDate" column="early_date"/>
+        <result property="loseTime" column="lose_time"/>
+        <result property="licenseStatus" column="license_status"/>
+    </resultMap>
+
+	<insert id="saveFactory" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+		INSERT INTO hdi_org_factory_info (
+		  factory_code,
+		  factory_name,
+		  status,
+		  dept_id,
+		  create_id,
+		  create_time
+		) 
+		VALUES (
+		  #{factoryCode},
+		  #{factoryName},
+		  #{status},
+		  #{deptId},
+		  #{createId},
+		  #{createTime} 
+		)
+		<selectKey resultType="int" order="AFTER" keyProperty="id">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
+	
+	<select id="selectLicenseFactoryInfoById" resultMap="licenseFactoryInfoMap">
+		SELECT * FROM view_hdi_license_factory WHERE id = #{id}
+	</select>
+	
+	<select id="selectLicenseFactoryInfoByNewLicenseId" resultMap="licenseFactoryInfoMap">
+		SELECT * FROM view_hdi_license_factory WHERE new_license_id = #{newLicenseId}
+	</select>
+	
+	<select id="selectLicenseFactoryInfoList" resultMap="licenseFactoryInfoMap">
+		SELECT * FROM view_hdi_license_factory
+		<where>
+			del_flag = 0
+			<if test="classifyId != null">
+				AND classify_id = #{classifyId}
+			</if>
+			<if test="beginTime != null and beginTime != '' and endTime != null and endTime != ''">
+				AND end_time BETWEEN #{beginTime} AND #{endTime}
+			</if>
+			<if test="licenseStatus != null">
+				AND license_status = #{licenseStatus}
+			</if>
+			<if test="sql_filter != null and sql_filter != ''">
+				AND ${sql_filter}
+			</if>
+			<if test="factoryName != null and factoryName != ''">
+				AND factory_name LIKE CONCAT('%', #{factoryName}, '%')
+			</if>
+			<if test="nameOrNumber != null and nameOrNumber != ''">
+				AND (name LIKE CONCAT('%', #{nameOrNumber}, '%') OR number LIKE CONCAT('%', #{nameOrNumber}, '%'))
+			</if>
+		</where>
+		ORDER BY IFNULL(edit_time, create_time) DESC
+	</select>
+	
+	<select id="selectBySupplierIdAndTime" resultType="com.ebig.hdi.modules.license.entity.LicenseFactoryInfoEntity">
+		select
+			*
+		from 
+			hdi_license_factory_info
+		where
+			supplier_id = #{supplierId}
+		and
+			del_flag = 0
+		and
+			ifnull(edit_time,create_time) between #{scheduleJob.begin_time} and #{scheduleJob.end_time}
+		ORDER BY edit_time desc,create_time desc
+	</select>
+</mapper>

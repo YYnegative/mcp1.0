@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.coretransform.dao.SpdPurplandtlDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.coretransform.entity.SpdPurplandtlEntity" id="spdPurplandtlMap">
+        <result property="purplandtlid" column="purplandtlid"/>
+        <result property="purplandocid" column="purplandocid"/>
+        <result property="uorganid" column="uorganid"/>
+        <result property="hgoodsid" column="hgoodsid"/>
+        <result property="hgoodsno" column="hgoodsno"/>
+        <result property="hgoodstype" column="hgoodstype"/>
+        <result property="hgoodsunit" column="hgoodsunit"/>
+        <result property="hpacksize" column="hpacksize"/>
+        <result property="hgoodsname" column="hgoodsname"/>
+        <result property="purplanqty" column="purplanqty"/>
+        <result property="purprice" column="purprice"/>
+        <result property="purmoney" column="purmoney"/>
+        <result property="purrate" column="purrate"/>
+        <result property="tpid" column="tpid"/>
+        <result property="orgdataid" column="orgdataid"/>
+        <result property="orgdatadtlid" column="orgdatadtlid"/>
+        <result property="datasource" column="datasource"/>
+        <result property="credate" column="credate"/>
+        <result property="cremanid" column="cremanid"/>
+        <result property="cremanname" column="cremanname"/>
+        <result property="memo" column="memo"/>
+        <result property="annultime" column="annultime"/>
+        <result property="annulmanid" column="annulmanid"/>
+        <result property="annulmanname" column="annulmanname"/>
+        <result property="ppdtlstatus" column="ppdtlstatus"/>
+        <result property="model" column="model"/>
+        <result property="goodstype" column="goodstype"/>
+        <result property="factoryname" column="factoryname"/>
+        <result property="plotno" column="plotno"/>
+        <result property="pvaliddate" column="pvaliddate"/>
+        <result property="hunitid" column="hunitid"/>
+        <result property="defaultunitqty" column="defaultunitqty"/>
+        <result property="goodsfinishstatus" column="goodsfinishstatus"/>
+        <result property="shipedqty" column="shipedqty"/>
+        <result property="receivedqty" column="receivedqty"/>
+    </resultMap>
+
+	<select id="selectHospitalGoodsBySourcesSpecsId" resultType="map">
+		SELECT 
+		  goods_type,
+		  goods_id,
+		  goods_code,
+		  goods_name,
+		  goods_specs_id,
+		  specs,
+		  specs_code
+		FROM
+		  view_hdi_goods_specs_hospital 
+		WHERE sources_specs_id = #{sourcesSpecsId}
+	</select>
+
+    <select id="queryList" resultType="com.ebig.hdi.modules.coretransform.entity.SpdPurplandtlEntity">
+        SELECT *
+        FROM
+        spd_purplandtl
+        limit  #{row}
+    </select>
+
+</mapper>

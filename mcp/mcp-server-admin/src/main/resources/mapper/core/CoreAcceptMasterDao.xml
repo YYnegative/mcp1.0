@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.core.dao.CoreAcceptMasterDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.core.entity.CoreAcceptMasterEntity" id="coreAcceptMasterMap">
+        <result property="acceptMasterId" column="accept_master_id"/>
+        <result property="acceptno" column="acceptno"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="horgId" column="horg_id"/>
+        <result property="storehouseid" column="storehouseid"/>
+        <result property="sourceid" column="sourceid"/>
+        <result property="settleFlag" column="settle_flag"/>
+        <result property="memo" column="memo"/>
+        <result property="cremanid" column="cremanid"/>
+        <result property="cremanname" column="cremanname"/>
+        <result property="credate" column="credate"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="hospitalName" column="hospital_name"/>
+        <result property="supplyno" column="supplyno"/>
+        <result property="storehousename" column="storehousename"/>
+    </resultMap>
+
+		<!-- 根据deptId查询采购主单信息 -->
+	<select id="selectByDeptId" resultType="com.ebig.hdi.modules.core.entity.CoreAcceptMasterEntity">
+		SELECT
+			cam.*,
+			ohi.hospital_name,
+			csm.supplyno,
+			cs.storehousename
+		FROM
+			hdi_core_accept_master cam,
+			hdi_org_hospital_info ohi,
+			hdi_core_supply_master csm,
+			hdi_core_storehouse cs
+		<where>
+			cam.horg_id = ohi.id
+			AND cam.storehouseid = cs.storehouseid
+			AND cam.sourceid = csm.supply_master_id
+			AND cam.del_flag = 0	
+		<if test="deptIds != null and deptIds != ''">
+			AND ${deptIds}
+		</if>	
+			ORDER BY cam.credate DESC
+		</where> 
+	</select>
+	
+		<!-- 根据deptId条件 查询验收主单信息 -->
+	<select id="selectByBedingungen" resultType="com.ebig.hdi.modules.core.entity.CoreAcceptMasterEntity">
+		SELECT 
+		  cam.*,
+		  ohi.hospital_name,
+		  csm.supplyno,
+		  cs.storehousename 
+		FROM
+		  hdi_core_accept_master cam 
+		  LEFT JOIN hdi_org_hospital_info ohi 
+		    ON cam.horg_id = ohi.id 
+		  LEFT JOIN hdi_core_supply_master csm 
+		    ON cam.sourceid = csm.supply_master_id 
+		  LEFT JOIN hdi_core_storehouse cs 
+		    ON cam.storehouseid = cs.storehouseid 
+		<where>
+			cam.del_flag = 0
+			and ohi.del_flag=0
+			and csm.del_flag=0
+
+		<if test="deptIds != null and deptIds != ''">
+			AND ${deptIds}
+		</if>			
+		<if test="settleFlag != null ">
+			AND cam.settle_flag = #{settleFlag}
+		</if> 
+		<if test="hospitalName != null and hospitalName != ''">
+			AND ohi.hospital_name like CONCAT('%',#{hospitalName}, '%')
+		</if>
+		<if test="acceptno != null and acceptno != ''">
+			AND cam.acceptno like CONCAT('%',#{acceptno}, '%')
+		</if>
+		<if test="storehousename != null and storehousename != ''">
+			AND cs.storehousename like CONCAT('%',#{storehousename}, '%')
+		</if>
+		<if test="supplyno != null and supplyno != ''">
+			AND csm.supplyno like CONCAT('%',#{supplyno}, '%')
+		</if>
+		<if test="credate != null and credate != ''">
+			AND cam.credate like CONCAT('%',#{credate}, '%')
+		</if>
+			ORDER BY cam.credate DESC
+		</where> 
+	</select>
+
+
+	<!-- 根据deptId  horgId  storehouseid 查询信息 -->
+	<select id="selectAcceptMaster" resultType="com.ebig.hdi.modules.core.entity.CoreAcceptMasterEntity">
+		SELECT
+			uss.sources_supplier_id his_supplyid,
+			cs.orgdataid ystorehouseid,
+			uss.sources_hospital_id uorganid 
+		FROM
+			hdi_unicode_supply_ship uss,
+			hdi_org_supplier_info osi,
+			hdi_core_storehouse cs
+		WHERE
+			osi.id = uss.supplier_id
+			and uss.del_flag=0
+			and osi.del_flag=0
+			AND uss.hospital_id = #{horgId}
+			AND osi.dept_id = #{deptId}
+			AND cs.storehouseid = #{storehouseid}
+
+	</select>
+
+
+	<!-- 转换 -->
+	<select id="selectByOrgdataid" resultType="com.ebig.hdi.modules.core.entity.CoreAcceptMasterEntity">
+		SELECT
+			* 
+		FROM
+			hdi_core_accept_master 
+		WHERE
+			orgdataid = #{orgdataid}
+	</select>
+</mapper>

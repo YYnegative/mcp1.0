@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.coretransform.dao.TempspdStorehouseDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.coretransform.entity.TempSpdStorehouseEntity" id="tempSpdStorehouseMap">
+        <result property="storehouseid" column="storehouseid"/>
+        <result property="uorganid" column="uorganid"/>
+        <result property="shaddressid" column="shaddressid"/>
+        <result property="storehouseno" column="storehouseno"/>
+        <result property="storehousename" column="storehousename"/>
+        <result property="shaddress" column="shaddress"/>
+        <result property="storehousetype" column="storehousetype"/>
+        <result property="storehousestatus" column="storehousestatus"/>
+        <result property="rackflow" column="rackflow"/>
+        <result property="pickflow" column="pickflow"/>
+        <result property="preloadflow" column="preloadflow"/>
+        <result property="autorelease" column="autorelease"/>
+        <result property="cremanid" column="cremanid"/>
+        <result property="cremanname" column="cremanname"/>
+        <result property="credate" column="credate"/>
+        <result property="editmanid" column="editmanid"/>
+        <result property="editmanname" column="editmanname"/>
+        <result property="editdate" column="editdate"/>
+        <result property="mastername" column="mastername"/>
+        <result property="datasource" column="datasource"/>
+        <result property="vwarndays" column="vwarndays"/>
+        <result property="memo" column="memo"/>
+        <result property="storehouseinfo" column="storehouseinfo"/>
+        <result property="orgdataid" column="orgdataid"/>
+        <result property="receiveflow" column="receiveflow"/>
+        <result property="storehousecategory" column="storehousecategory"/>
+        <result property="ipaddress" column="ipaddress"/>
+        <result property="autoallocate" column="autoallocate"/>
+        <result property="lable" column="lable"/>
+        <result property="udflag" column="udflag"/>
+    </resultMap>
+
+	
+	<!-- HDI转换用  查询是否存在此原始标识对应的库房 -->
+	<select id="selectByShaddress" resultType="com.ebig.hdi.modules.coretransform.entity.TempSpdStorehouseEntity">
+		SELECT
+			* 
+		FROM
+			spd_storehouse ss
+		WHERE
+			ss.shaddressid = #{shaddressid} 
+			AND ss.uorganid = #{horganid}
+	</select>
+	
+	
+	<!-- HDI转换用  查询是否存在此原始标识和医院标识对应的库房 -->
+	<select id="selectShaddress" resultType="java.util.Map">
+		SELECT
+			cs.shaddress 
+		FROM
+			spd_storehouse ss,
+			hdi_core_storehouse cs
+		WHERE
+			cs.orgdataid = ss.storehouseid
+			AND ss.uorganid = #{horganid}
+			AND ss.shaddressid = #{shaddressid}
+	</select>
+
+</mapper>

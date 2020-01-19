@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.job.dao.TempPubUcompanyDao">
+
+	<select id="selectHospitalList" resultType="map">
+		SELECT 
+		  pucompanyid AS parent_id,
+		  ucompanyid AS sources_id,
+		  ucompanyno AS hospital_code,
+		  ucompanyname AS hospital_name,
+		  taxnamber AS credit_code,
+		  usestatus AS status,
+		  address AS hospital_address,
+		  legalpersion AS corporate,
+		  linktel AS phone,
+		  fax AS fax,
+		  credate AS create_time,
+		  editdate AS edit_time 
+		FROM
+		  pub_ucompany 
+		WHERE ucompanytype = 2 
+		  AND udflag = 0
+		  AND ((credate BETWEEN #{beginTime,jdbcType=TIMESTAMP} AND #{endTime,jdbcType=TIMESTAMP}) OR (editdate BETWEEN #{beginTime,jdbcType=TIMESTAMP} AND #{endTime,jdbcType=TIMESTAMP}))
+	</select>
+	
+	<select id="selectSupplierList" resultType="map">
+		SELECT 
+		  pucompanyid AS parent_id,
+		  ucompanyid AS sources_id,
+		  ucompanyno AS supplier_code,
+		  ucompanyname AS supplier_name,
+		  taxnamber AS credit_code,
+		  usestatus AS status,
+		  address AS supplier_address,
+		  legalpersion AS corporate,
+		  linktel AS phone,
+		  fax AS fax,
+		  credate AS create_time,
+		  editdate AS edit_time 
+		FROM
+		  pub_ucompany 
+		WHERE ucompanytype = 3 
+		  AND udflag = 0
+		  AND ((credate BETWEEN #{beginTime,jdbcType=TIMESTAMP} AND #{endTime,jdbcType=TIMESTAMP}) OR (editdate BETWEEN #{beginTime,jdbcType=TIMESTAMP} AND #{endTime,jdbcType=TIMESTAMP}))
+	</select> 
+	
+	<insert id="insertOne">
+		INSERT INTO pub_ucompany (
+		  ucompanyid,
+		  ucompanyno,
+		  ucompanyname,
+		  taxnamber,
+		  usestatus,
+		  address,
+		  legalpersion,
+		  linktel,
+		  fax,
+		  credate,
+		  editdate,
+		  ucompanytype,
+		  udflag
+		) 
+		VALUES
+		  (
+		    #{ucompanyid},
+		    #{ucompanyno},
+		    #{ucompanyname},
+		    #{taxnamber},
+		    #{usestatus},
+		    #{address},
+		    #{legalpersion},
+		    #{linktel},
+		    #{fax},
+		    #{credate},
+		    #{editdate},
+		    #{ucompanytype},
+		    #{udflag}
+		  )
+	</insert>
+	
+	<select id="selectByIdAndType" resultType="map">
+		SELECT 
+		  * 
+		FROM
+		  pub_ucompany 
+		WHERE udflag = 1 
+		  AND ucompanyid = #{ucompanyid} 
+		  AND ucompanytype = #{ucompanytype}  
+	</select>
+	
+	<update id="updateByIdAndType">
+		UPDATE 
+		  pub_ucompany
+		SET 
+		  ucompanyno = #{ucompanyno},
+		  ucompanyname = #{ucompanyname},
+		  taxnamber = #{taxnamber},
+		  usestatus = #{usestatus},
+		  address = #{address},
+		  legalpersion = #{legalpersion},
+		  linktel = #{linktel},
+		  fax = #{fax},
+		  credate = #{credate},
+		  editdate = #{editdate}
+		WHERE udflag = 1 
+		  AND ucompanyid = #{ucompanyid}
+		  AND ucompanytype = #{ucompanytype}
+	</update>
+</mapper>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.consumables.dao.GoodsSupplierConsumablesApprovalsDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.consumables.entity.GoodsSupplierConsumablesApprovalsEntity" id="goodsSupplierConsumablesApprovalsMap">
+        <result property="id" column="id"/>
+        <result property="consumablesId" column="consumables_id"/>
+        <result property="approvals" column="approvals"/>
+        <result property="status" column="status"/>
+        <result property="createId" column="create_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="editId" column="edit_id"/>
+        <result property="editTime" column="edit_time"/>
+    </resultMap>
+	
+	<select id="selectByConsumablesId" resultType="com.ebig.hdi.modules.consumables.entity.GoodsSupplierConsumablesApprovalsEntity">
+		select * from hdi_goods_supplier_consumables_approvals
+		where consumables_id = #{id} and status = 1
+	</select>
+	
+	<select id="selectByApprovals"
+		resultType="com.ebig.hdi.modules.consumables.entity.GoodsSupplierConsumablesApprovalsEntity">
+		SELECT * FROM hdi_goods_supplier_consumables_approvals WHERE approvals = #{approvals}
+	</select>
+
+</mapper>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.reagent.dao.GoodsPlatformReagentSpecsDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.reagent.entity.GoodsPlatformReagentSpecsEntity" id="goodsPlatformReagentSpecsMap">
+        <result property="id" column="id"/>
+        <result property="reagenId" column="reagen_id"/>
+        <result property="specsCode" column="specs_code"/>
+        <result property="specs" column="specs"/>
+        <result property="guid" column="guid"/>
+        <result property="status" column="status"/>
+        <result property="createId" column="create_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="editId" column="edit_id"/>
+        <result property="editTime" column="edit_time"/>
+    </resultMap>
+
+	<select id="selectByReagenIdAndSpecs" resultType="com.ebig.hdi.modules.reagent.entity.GoodsPlatformReagentSpecsEntity">
+		SELECT * FROM hdi_goods_platform_reagent_specs WHERE reagen_id = #{reagenId} AND specs = #{specs}
+	</select>
+	
+	<select id="selectByGuid" resultType="com.ebig.hdi.modules.reagent.entity.GoodsPlatformReagentSpecsEntity">
+		SELECT * FROM hdi_goods_platform_reagent_specs WHERE  guid = #{guid}
+	</select>
+	
+	<select id="selectListByReagentId" resultType="com.ebig.hdi.modules.reagent.entity.GoodsPlatformReagentSpecsEntity">
+		SELECT * FROM hdi_goods_platform_reagent_specs WHERE reagen_id = #{reagentId}
+	</select>
+    <select id="selectByReagentIdAndSpecs"
+            resultType="com.ebig.hdi.modules.reagent.entity.GoodsPlatformReagentSpecsEntity">
+        SELECT * FROM hdi_goods_platform_reagent_specs WHERE reagen_id = #{ReagentId} AND specs = #{specs}
+    </select>
+
+</mapper>

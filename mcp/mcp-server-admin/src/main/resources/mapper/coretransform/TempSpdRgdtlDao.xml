@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.coretransform.dao.TempSpdRgdtlDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.coretransform.entity.TempSpdRgdtlEntity" id="tempSpdRgdtlMap">
+        <result property="rgdtlid" column="rgdtlid"/>
+        <result property="rgid" column="rgid"/>
+        <result property="storehouseid" column="storehouseid"/>
+        <result property="uorganid" column="uorganid"/>
+        <result property="sgoodsid" column="sgoodsid"/>
+        <result property="hgoodsid" column="hgoodsid"/>
+        <result property="sourceid" column="sourceid"/>
+        <result property="sourcedtlid" column="sourcedtlid"/>
+        <result property="originid" column="originid"/>
+        <result property="originno" column="originno"/>
+        <result property="uorganno" column="uorganno"/>
+        <result property="uorganname" column="uorganname"/>
+        <result property="supplyid" column="supplyid"/>
+        <result property="supplyno" column="supplyno"/>
+        <result property="supplyname" column="supplyname"/>
+        <result property="labelno" column="labelno"/>
+        <result property="labeltype" column="labeltype"/>
+        <result property="sgoodsno" column="sgoodsno"/>
+        <result property="sgoodsname" column="sgoodsname"/>
+        <result property="sgoodstype" column="sgoodstype"/>
+        <result property="sgoodsunit" column="sgoodsunit"/>
+        <result property="hgoodsno" column="hgoodsno"/>
+        <result property="hgoodsname" column="hgoodsname"/>
+        <result property="hgoodstype" column="hgoodstype"/>
+        <result property="hgoodsunit" column="hgoodsunit"/>
+        <result property="approvedocno" column="approvedocno"/>
+        <result property="factorydoc" column="factorydoc"/>
+        <result property="factoryname" column="factoryname"/>
+        <result property="prodarea" column="prodarea"/>
+        <result property="spacksize" column="spacksize"/>
+        <result property="hpacksize" column="hpacksize"/>
+        <result property="rgflag" column="rgflag"/>
+        <result property="sunitprice" column="sunitprice"/>
+        <result property="sgoodsqty" column="sgoodsqty"/>
+        <result property="hunitprice" column="hunitprice"/>
+        <result property="hgoodsqty" column="hgoodsqty"/>
+        <result property="hrgqty" column="hrgqty"/>
+        <result property="plotno" column="plotno"/>
+        <result property="pproddate" column="pproddate"/>
+        <result property="pvaliddate" column="pvaliddate"/>
+        <result property="pinvaliddate" column="pinvaliddate"/>
+        <result property="slotid" column="slotid"/>
+        <result property="slotno" column="slotno"/>
+        <result property="sproddate" column="sproddate"/>
+        <result property="svaliddate" column="svaliddate"/>
+        <result property="sinvaliddate" column="sinvaliddate"/>
+        <result property="shaddressid" column="shaddressid"/>
+        <result property="invno" column="invno"/>
+        <result property="invfirstno" column="invfirstno"/>
+        <result property="invorder" column="invorder"/>
+        <result property="invdate" column="invdate"/>
+        <result property="invmoney" column="invmoney"/>
+        <result property="tpid" column="tpid"/>
+        <result property="credate" column="credate"/>
+        <result property="ccinputflag" column="ccinputflag"/>
+        <result property="memo" column="memo"/>
+        <result property="checkpotime" column="checkpotime"/>
+        <result property="checkpomanid" column="checkpomanid"/>
+        <result property="checkpomanname" column="checkpomanname"/>
+        <result property="purplandocid" column="purplandocid"/>
+        <result property="purplandtlid" column="purplandtlid"/>
+        <result property="batchid" column="batchid"/>
+        <result property="plotid" column="plotid"/>
+        <result property="srgqty" column="srgqty"/>
+        <result property="qualitystatus" column="qualitystatus"/>
+        <result property="unitid" column="unitid"/>
+        <result property="unitcode" column="unitcode"/>
+        <result property="hunitid" column="hunitid"/>
+        <result property="hgoodsunitqty" column="hgoodsunitqty"/>
+        <result property="hrgunitqty" column="hrgunitqty"/>
+        <result property="origindtlid" column="origindtlid"/>
+        <result property="bankaccount" column="bankaccount"/>
+        <result property="stageflag" column="stageflag"/>
+        <result property="orderno" column="orderno"/>
+        <result property="pageno" column="pageno"/>
+        <result property="rowno" column="rowno"/>
+        <result property="ordertime" column="ordertime"/>
+        <result property="orderquantity" column="orderquantity"/>
+        <result property="platform" column="platform"/>
+        <result property="signforno" column="signforno"/>
+        <result property="signforqty" column="signforqty"/>
+        <result property="udflag" column="udflag"/>
+    </resultMap>
+	
+	<!-- 根据标签id查询有没有生成过rgdtl -->
+	<select id="getSpdRg" resultType="java.util.Map">
+		SELECT
+			COUNT( * ) count 
+		FROM
+			spd_rgdtl sr
+		WHERE
+			sr.sourceid = #{labelid}
+	</select>
+	
+	
+	<!-- 根据标签细单id查询有没有生成过rgdtl -->
+	<select id="getSpdRgdtl" resultType="java.util.Map">
+		SELECT
+			COUNT( * ) count 
+		FROM
+			spd_rgdtl sr
+		WHERE
+			sr.sourceid = #{labelid}
+	</select>
+	
+	
+	<!-- 根据供货细单id找到所有相关的标签细单 -->
+	<select id="getLabelEntity" resultType="java.util.Map">
+		SELECT
+			cld.* 
+		FROM
+			hdi_core_label_detail cld,
+			hdi_core_label_master clm	
+		WHERE
+			clm.labelid = cld.labelid
+			AND clm.del_flag = 0
+			AND cld.supply_detail_id = #{supplyDetailId}
+			AND clm.labelid = #{labelid}
+	</select>
+	
+
+	<!-- 查询医院商品信息 -->
+	<select id="selectGoods" resultType="com.ebig.hdi.modules.coretransform.entity.TempSpdRgdtlEntity">
+		SELECT DISTINCT
+			gsm.hospital_goods_id,
+			gsm.hospital_sources_specs_id hgoodsid,
+			gsm.hospital_goods_specs_code hgoodsno, 
+			gsm.hospital_goods_name hgoodsname,
+			gsm.hospital_goods_specs_name hgoodstype,
+			gsm.hospital_goods_unit hgoodsunit,
+			gsm.supplier_goods_id sgoodsid,
+			gsm.supplier_goods_specs_code sgoodsno, 
+			gsm.supplier_goods_name sgoodsname,
+			gsm.supplier_goods_specs_name sgoodstype,
+			gsm.supplier_goods_unit sgoodsunit,
+			gsm.hospital_sources_specs_id mgoodsid,
+			uss.sources_hospital_id uorganid,
+			ohi.hospital_code uorganno,
+			ohi.hospital_name uorganname,
+			uss.sources_supplier_id supplyid,
+			osi.supplier_code supplyno,
+			osi.supplier_name supplyname,
+			ofi.factory_name factoryname,
+			ofi.factory_address prodarea,
+			tsg.goodsunitid unitid,
+			tsg.unitcode unitcode 
+		FROM
+			(select * from view_hdi_goods_specs_match gsm where supplier_goods_id = #{goodsid}
+			AND supplier_goods_specs_id = #{goodstypeid}
+			AND goods_type = #{goodsclass} AND hospital_id = #{horgId}) gsm
+		    LEFT JOIN hdi_org_hospital_info ohi ON gsm.hospital_id = ohi.id 
+			LEFT JOIN hdi_org_supplier_info osi ON gsm.supplier_id = osi.id 
+			LEFT JOIN hdi_org_factory_info ofi ON gsm.supplier_factory_id = ofi.id 
+			LEFT JOIN temp_spd_goodsunit tsg ON gsm.supplier_sources_specs_id = tsg.mgoodsid 
+			AND gsm.supplier_sources_id = tsg.uorganid 
+			AND gsm.supplier_goods_unit = tsg.goodsunit
+			LEFT JOIN hdi_unicode_supply_ship uss ON gsm.supplier_id = uss.supplier_id
+				AND gsm.hospital_id = uss.hospital_id
+				and ohi.del_flag=0
+				and osi.del_flag=0
+				and ofi.del_flag=0
+				and uss.del_flag=0
+	</select>
+
+
+    <!-- 查询商品批准文号信息 -->
+	<select id="selectApprovals" resultType="java.util.Map">
+		SELECT
+			pg.approvedocno
+		FROM
+			temp_pub_goods pg
+		WHERE
+			pg.mgoodsid = #{mgoodsid}
+			AND pg.goodstype = #{goodstype}
+	</select>
+
+	<!-- 查询医院药品商品批准文号信息 -->
+	<select id="selectDrugsApprovals" resultType="java.util.Map">
+		SELECT
+			approvals 
+		FROM
+			hdi_goods_hospital_drugs 
+		WHERE
+			del_flag=0
+			and id = #{goodsid}
+	</select>
+	
+	<!-- 查询医院试剂商品批准文号信息 -->
+	<select id="selectReagentApprovals" resultType="java.util.Map">
+		SELECT
+			approvals 
+		FROM
+			hdi_goods_hospital_reagent 
+		WHERE
+			del_flag=0
+			and id = #{goodsid}
+	</select>
+	
+	<!-- 查询医院耗材商品批准文号信息 -->
+	<select id="selectConsumablesApprovals" resultType="java.util.Map">
+		SELECT a.approvals FROM (
+		     SELECT id,consumables_id,approvals,
+                    CASE
+                    WHEN approvals REGEXP '食药监械'
+                    	THEN SUBSTRING_INDEX(SUBSTRING_INDEX(approvals, '字', -1), '第', 1)
+                    WHEN approvals REGEXP '械注'
+                    	THEN SUBSTRING(approvals, 5, 4)
+                    WHEN approvals REGEXP '械备'
+                    	THEN SUBSTRING(approvals, 5, 4)
+                  	ELSE '0' END AS approvals_year
+             FROM hdi_goods_hospital_consumables_approvals WHERE STATUS = 1) a 
+        WHERE a.consumables_id = #{goodsid}
+        ORDER BY a.approvals_year DESC LIMIT 1
+	</select>
+	
+	<insert id="save" parameterType="com.ebig.hdi.modules.coretransform.entity.TempSpdRgEntity" >
+		INSERT INTO spd_rgdtl (
+		rgdtlid,
+		rgid,
+		uorganid,
+		sgoodsid,
+		hgoodsid,
+		sourceid,
+		sourcedtlid,
+		originid,
+		originno,
+		uorganno,
+		uorganname,
+		supplyid,
+		supplyno,
+		supplyname,
+		labelno,
+		labeltype,
+		sgoodsno,
+		sgoodsname,
+		sgoodstype,
+		sgoodsunit,
+		hgoodsno,
+		hgoodsname,
+		hgoodstype,
+		hgoodsunit,
+		approvedocno,
+		factorydoc,
+		factoryname,
+		prodarea,
+		sunitprice,
+		sgoodsqty,
+		hunitprice,
+		hgoodsqty,
+		plotno,
+		pproddate,
+		pinvaliddate,
+		slotid,
+		slotno,
+		sproddate,
+		sinvaliddate,
+		credate,
+		purplandocid,
+		purplandtlid,
+		plotid,
+		unitid,
+		unitcode,
+		batchid
+		)
+		VALUES
+			( #{rgdtlid},#{rgid},#{uorganid},#{sgoodsid},#{hgoodsid},#{sourceid},#{sourcedtlid},#{originid},#{originno},#{uorganno},#{uorganname},
+			#{supplyid},#{supplyno},#{supplyname},#{labelno},#{labeltype},#{sgoodsno},#{sgoodsname},#{sgoodstype},#{sgoodsunit},#{hgoodsno},#{hgoodsname},
+			#{hgoodstype},#{hgoodsunit},#{approvedocno},#{factorydoc},#{factoryname},#{prodarea},#{sunitprice},#{sgoodsqty},#{hunitprice},#{hgoodsqty},
+			#{plotno},#{pproddate},#{pinvaliddate},#{slotid},#{slotno},#{sproddate},#{sinvaliddate},#{credate},#{purplandocid},#{purplandtlid},
+			#{plotid},#{unitid},#{unitcode},#{batchid})
+	</insert>
+</mapper>

@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.refunds.dao.RefundsApplyMasterDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.refunds.entity.RefundsApplyMasterEntity" id="refundsApplyMasterMap">
+        <result property="id" column="id"/>
+        <result property="supplierCode" column="supplier_code"/>
+        <result property="hospitalCode" column="hospital_code"/>
+        <result property="storeHouseCode" column="store_house_code"/>
+        <result property="refundsApplyNo" column="refunds_apply_no"/>
+        <result property="applyTime" column="apply_time"/>
+        <result property="status" column="status"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="createId" column="create_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="editId" column="edit_id"/>
+        <result property="editTime" column="edit_time"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="dataSource" column="data_source"/>
+    </resultMap>
+	
+	<select id="listForPage" parameterType="com.ebig.hdi.modules.refunds.entity.vo.RefundsApplyMasterVO" resultType="com.ebig.hdi.modules.refunds.entity.vo.RefundsApplyMasterVO">
+		select 
+			t1.*,
+			(select count(id) from hdi_refunds_apply_detail where apply_master_id = t1.id) as detailNumber,
+			t2.hospital_name as hospitalName,
+			t3.storehousename as storeHouseName
+		from hdi_refunds_apply_master t1
+		left join hdi_org_hospital_info t2 on t1.hospital_id = t2.id
+		left join hdi_core_storehouse t3 on t1.store_house_id = t3.storehouseid 
+		where t1.del_flag = 0
+		<if test="fileterDept != null and fileterDept != ''">
+			and ${fileterDept}
+		</if>
+		<if test="hospitalName != null and hospitalName != ''">
+			and t2.hospital_name like CONCAT('%',#{hospitalName},'%')
+		</if>
+		<if test="storeHouseName != null and storeHouseName != ''">
+			and t3.storehousename like CONCAT('%',#{storeHouseName},'%')
+		</if>
+		<if test="refundsApplyNo != null and refundsApplyNo != ''">
+			and t1.refunds_apply_no like CONCAT('%',#{refundsApplyNo},'%') 
+		</if>
+		<if test="applyTimeBeginStr != null and applyTimeBeginStr != ''">
+			and t1.apply_time &gt;= #{applyTimeBeginStr,jdbcType=DATE}
+		</if>
+		<if test="applyTimeEndStr != null and applyTimeEndStr != ''">
+			and t1.apply_time &lt;= #{applyTimeEndStr,jdbcType=DATE}
+		</if>
+		<if test="status != null">
+			and t1.status = #{status}
+		</if>
+		<if test="isDefaultOrder == 1">
+			order by t1.edit_time , t1.create_time desc
+		</if>
+	</select>
+	
+	<select id="selectRefundsApplyById" resultType="com.ebig.hdi.modules.refunds.entity.vo.RefundsApplyMasterVO">
+		select 
+			t1.id,
+			t1.supplier_id as supplierId,
+			t1.sources_supplier_id as sourcesSupplierId,
+			t1.hospital_id as hospitalId,
+			t1.sources_hospital_id as sourcesHospitalId,
+			t1.store_house_id as storeHouseId,
+			t1.sources_store_house_id as sourcesStoreHouseId,
+			t2.hospital_name as hospitalName,
+			t3.storehousename as storeHouseName,
+			t1.refunds_apply_no as refundsApplyNo,
+			t1.apply_time as applyTime
+		from hdi_refunds_apply_master t1
+		left join hdi_org_hospital_info t2 on t1.hospital_id = t2.id
+		left join hdi_core_storehouse t3 on t1.store_house_id = t3.storehouseid
+		where t1.id = #{id}
+	</select>
+	
+	<select id="selectToSave" resultType="com.ebig.hdi.modules.refunds.entity.vo.RefundsApplyDetailVO">
+		<choose>
+			<when test="params.acceptNo == null or params.acceptNo == ''">
+				select 
+					distinct accept_no
+				from 
+					view_hdi_core_accept_detail
+				where 
+					hospital_id = #{params.hospitalId}
+				and
+					store_house_id = #{params.storeHouseId}
+				and 
+					supplier_id = #{params.supplierId}
+			</when>
+			<when test="params.hospitalGoodsId == null and params.acceptNo != null">
+				select 
+					distinct hospital_goods_name as goodsName,
+					hospital_goods_id as goodsId,
+					hospital_factory_name as factoryName
+				from 
+					view_hdi_core_accept_detail
+				where 
+					hospital_id = #{params.hospitalId}
+				and
+					store_house_id = #{params.storeHouseId}
+				and 
+					supplier_id = #{params.supplierId}
+				and 
+					accept_no = #{params.acceptNo}
+			</when>
+			<when test="params.hospitalGoodsSpecsId == null and params.hospitalGoodsId != null and params.acceptNo != null">
+				select 
+					hospital_goods_specs_name as specsName,
+					hospital_goods_specs_id as specsId
+				from 
+					view_hdi_core_accept_detail
+				where 
+					hospital_id = #{params.hospitalId}
+				and
+					store_house_id = #{params.storeHouseId}
+				and 
+					supplier_id = #{params.supplierId}
+				and 
+					accept_no = #{params.acceptNo}
+			</when>
+			<otherwise>
+				select 
+					accept_no as acceptNo,
+					hospital_goods_id as goodsId,
+					sources_hospital_goods_id as sourcesGoodsId,
+					hospital_goods_name as goodsName,
+					hospital_factory_name as factoryName,
+					hospital_goods_specs_name as specsName,
+					lot_no as lotName,
+					hospital_goods_unit as goodsUnitName,
+					supply_number as applyRefundsNumber,
+					supply_price as supplyPrice,
+					lot_id as lotId,
+					sources_hospital_goods_specs_id as sourcesSpecsId,
+					hospital_goods_specs_id as specsId,
+					goods_type as goodsType,
+					accept_detail_id as acceptDetailId,
+					accept_master_id as acceptMasterId
+				from view_hdi_core_accept_detail
+				where 
+					hospital_id = #{params.hospitalId}
+				and
+					store_house_id = #{params.storeHouseId}
+				and 
+					supplier_id = #{params.supplierId}
+				and 
+					accept_no = #{params.acceptNo}
+				and 
+					hospital_goods_id = #{params.hospitalGoodsId}
+				and 
+					hospital_goods_specs_id = #{params.hospitalGoodsSpecsId}
+			</otherwise>		
+		</choose>
+			
+	</select>
+	
+	<select id="selectRefundsApplyNo" resultType="java.lang.String">
+		select
+			refunds_apply_no
+		from 
+			hdi_refunds_apply_master
+		where 
+			supplier_id = #{params.supplierId}
+		and
+			hospital_id = #{params.hospitalId}
+		and
+			store_house_id = #{params.storeHouseId}
+		and 
+			status = 2
+			
+	</select>
+	
+	<select id="changeMaster" resultType="com.ebig.hdi.modules.refunds.entity.vo.RefundsMasterVO">
+		select 
+			supplier_id as supplierId,
+			sources_supplier_id as sourcesSupplierId,
+			hospital_id as hospitalId,
+			sources_hospital_id as sourcesHospitalId,
+			store_house_id as storeHouseId,
+			sources_store_house_id as sourcesStoreHouseId,
+			refunds_apply_no as refundsApplyNo,
+			apply_time as applyTime,
+			t1.dept_id as deptId,
+			t2.hospital_name as hospitalName,
+			t3.storehousename as storeHouseName
+		from hdi_refunds_apply_master t1
+		left join hdi_org_hospital_info t2 on t1.hospital_id = t2.id 
+		left join hdi_core_storehouse t3 on t1.store_house_id = t3.storehouseid
+		where t1.id = #{id}
+	</select>
+
+</mapper>

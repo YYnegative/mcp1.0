@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.org.dao.OrgHospitalInfoDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.org.entity.OrgHospitalInfoEntity" id="orgHospitalInfoMap">
+        <result property="id" column="id"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="hospitalCode" column="hospital_code"/>
+        <result property="hospitalGrade" column="hospital_grade"/>
+        <result property="hospitalName" column="hospital_name"/>
+        <result property="creditCode" column="credit_code"/>
+        <result property="provinceCode" column="province_code"/>
+        <result property="cityCode" column="city_code"/>
+        <result property="areaCode" column="area_code"/>
+        <result property="status" column="status"/>
+        <result property="hospitalAddress" column="hospital_address"/>
+        <result property="corporate" column="corporate"/>
+        <result property="phone" column="phone"/>
+        <result property="email" column="email"/>
+        <result property="isGroup" column="is_group"/>
+        <result property="childNumber" column="child_number"/>
+        <result property="fax" column="fax"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="createId" column="create_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="editId" column="edit_id"/>
+        <result property="editTime" column="edit_time"/>
+    </resultMap>
+
+    <!-- 根据医院名称查询信息 -->
+    <select id="selectByHospitalName" resultType="com.ebig.hdi.modules.org.entity.OrgHospitalInfoEntity">
+		select * from hdi_org_hospital_info_approval where hospital_name = #{hospitalName} and del_flag = 0
+	</select>
+
+    <!-- 根据医院统一社会信用代码查询信息 -->
+    <select id="selectByCreditCode" resultType="com.ebig.hdi.modules.org.entity.OrgHospitalInfoEntity">
+		select * from hdi_org_hospital_info_approval where credit_code = #{creditCode} and del_flag = 0
+	</select>
+
+    <insert id="insertApproval" parameterType="com.ebig.hdi.common.entity.OrgHospitalInfoApprovalEntity">
+    INSERT INTO hdi_org_hospital_info (
+	    id,
+	    parent_id,
+	    hospital_code,
+	    hospital_grade,
+	    hospital_name,
+	    credit_code,
+	    province_code,
+	    city_code,
+	    area_code,
+	    status,
+	    hospital_address,
+	    corporate,
+	    phone,
+	    email,
+	    is_group,
+	    child_number,
+	    fax,
+	    dept_id,
+	    create_id,
+	    create_time,
+	    edit_id,
+	    edit_time,
+	    del_flag,
+	    data_source
+    )
+    VALUES
+	(
+		#{id},
+		#{parentId},
+		#{hospitalCode},
+		#{hospitalGrade},
+		#{hospitalName},
+		#{creditCode},
+		#{provinceCode},
+        #{cityCode},
+		#{areaCode},
+		#{status},
+		#{hospitalAddress},
+		#{corporate},
+		#{phone},
+		#{email},
+		#{isGroup},
+		#{childNumber},
+		#{fax},
+		#{deptId},
+		#{createId},
+		#{createTime},
+		#{editId},
+		#{editTime},
+		#{delFlag},
+		#{dataSource}
+	);
+    </insert>
+
+    <update id="updateApproval" parameterType="com.ebig.hdi.common.entity.OrgHospitalInfoApprovalEntity">
+        UPDATE hdi_org_hospital_info
+        SET id =  #{id},
+         parent_id = #{parentId},
+         hospital_code = #{hospitalCode},
+         hospital_grade = #{hospitalGrade},
+         hospital_name = #{hospitalName},
+         credit_code = #{creditCode},
+         province_code = #{provinceCode},
+         city_code = #{cityCode},
+         area_code = #{areaCode},
+         status = #{status},
+         hospital_address = #{hospitalAddress},
+         corporate = #{corporate},
+         phone =#{phone},
+         email = #{email},
+         is_group = #{isGroup},
+         child_number = #{childNumber},
+         fax = #{fax},
+         dept_id = #{deptId},
+         create_id = #{createId},
+         create_time =#{createTime},
+         edit_id = #{editId},
+         edit_time = #{editTime},
+         del_flag = #{delFlag},
+         data_source = #{dataSource}
+        WHERE
+	      (id = #{id});
+    </update>
+</mapper>

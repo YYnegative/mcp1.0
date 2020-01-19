@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.core.dao.CoreLabelSizeDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.core.entity.CoreLabelSizeEntity" id="coreLabelSizeMap">
+        <result property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="typeId" column="type_id"/>
+        <result property="qrcodeWidth" column="qrcode_width"/>
+        <result property="qrcodeHeight" column="qrcode_height"/>
+        <result property="pdfWidth" column="pdf_width"/>
+        <result property="pdfHeight" column="pdf_height"/>
+        <result property="createId" column="create_id"/>
+        <result property="createName" column="create_name"/>
+        <result property="createTime" column="create_time"/>
+        <result property="editId" column="edit_id"/>
+        <result property="editName" column="edit_name"/>
+        <result property="editTime" column="edit_time"/>
+    </resultMap>
+
+    <select id="getUserDetail" resultType="com.ebig.hdi.modules.core.entity.CoreLabelSizeEntity">
+         select * from hdi_core_label_size where user_id = #{userId} and type_id = #{typeId}
+    </select>
+
+
+
+</mapper>

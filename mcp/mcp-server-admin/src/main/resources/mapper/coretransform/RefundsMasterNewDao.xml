@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.coretransform.dao.RefundsMasterNewDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.refunds.entity.RefundsMasterEntity" id="refundsMasterMap">
+        <result property="id" column="id"/>
+        <result property="refundsNo" column="refunds_no"/>
+        <result property="sourcesSupplierId" column="sources_supplier_id"/>
+        <result property="sourcesSupplierCode" column="sources_supplier_code"/>
+        <result property="sourcesSupplierName" column="sources_supplier_name"/>
+        <result property="supplierId" column="supplier_id"/>
+        <result property="supplierCode" column="supplier_code"/>
+        <result property="supplierName" column="supplier_name"/>
+        <result property="sourcesHospitalId" column="sources_hospital_id"/>
+        <result property="sourcesHospitalCode" column="sources_hospital_code"/>
+        <result property="sourcesHospitalName" column="sources_hospital_name"/>
+        <result property="hospitalId" column="hospital_id"/>
+        <result property="hospitalCode" column="hospital_code"/>
+        <result property="hospitalName" column="hospital_name"/>
+        <result property="sourcesStoreHouseId" column="sources_store_house_id"/>
+        <result property="storeHouseId" column="store_house_id"/>
+        <result property="storehouseNo" column="storehouse_no"/>
+        <result property="storehouseName" column="storehouse_name"/>
+        <result property="refundsApplyNo" column="refunds_apply_no"/>
+        <result property="regressionNumber" column="regression_number"/>
+        <result property="refundsTime" column="refunds_time"/>
+        <result property="status" column="status"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="createId" column="create_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="editId" column="edit_id"/>
+        <result property="editTime" column="edit_time"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="dataSource" column="data_source"/>
+    </resultMap>
+
+    <select id="selectByOrgdataid" resultType="com.ebig.hdi.modules.refunds.entity.RefundsMasterEntity">
+        select *
+        from hdi_refunds_master
+        where orgdata_id= #{orgdataid}
+          and del_flag=0
+    </select>
+</mapper>

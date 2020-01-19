@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.license.dao.LicenseHospitalExamineDao">
+
+    <resultMap type="com.ebig.hdi.modules.license.entity.LicenseHospitalExamineEntity" id="licenseHospitalExamineMap">
+        <result property="id" column="id"/>
+        <result property="licenseId" column="license_id"/>
+        <result property="licenseType" column="license_type"/>
+        <result property="classifyId" column="classify_id"/>
+        <result property="name" column="name"/>
+        <result property="number" column="number"/>
+        <result property="beginTime" column="begin_time"/>
+        <result property="endTime" column="end_time"/>
+        <result property="picUrl" column="pic_url"/>
+        <result property="businessId" column="business_id"/>
+        <result property="businessName" column="business_name"/>
+        <result property="hospitalId" column="hospital_id"/>
+        <result property="hospitalName" column="hospital_name"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="createId" column="create_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="status" column="status"/>
+        <result property="examineOpinion" column="examine_opinion"/>
+        <result property="examineTime" column="examine_time"/>
+    </resultMap>
+
+	<select id="selectLicenseHospitalExamineList" resultMap="licenseHospitalExamineMap">
+		SELECT 
+		  *
+		FROM
+		  hdi_license_hospital_examine 
+		WHERE license_id = #{licenseId} 
+		  AND license_type = #{licenseType}
+		  <if test="sql_filter != null and sql_filter != ''">
+		  	AND ${sql_filter}
+		  </if>
+		ORDER BY create_time DESC
+	</select>
+	
+	<select id="selectHospitalInfoByHospitalId" resultType="map">
+		SELECT * FROM hdi_org_hospital_info WHERE id = #{hospitalId}
+	</select>
+
+</mapper>

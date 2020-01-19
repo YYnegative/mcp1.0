@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.unicode.dao.UnicodeSupplyShipDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.unicode.entity.UnicodeSupplyShipEntity" id="unicodeSupplyShipMap">
+        <result property="shipId" column="ship_id"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="horgId" column="horg_id"/>
+        <result property="supplyNo" column="supply_no"/>
+        <result property="supplyName" column="supply_name"/>
+        <result property="supplyCode" column="supply_code"/>
+        <result property="porgId" column="porg_id"/>
+        <result property="shipFlag" column="ship_flag"/>
+        <result property="checkStatus" column="check_status"/>
+        <result property="cremanid" column="cremanid"/>
+        <result property="cremanname" column="cremanname"/>
+        <result property="credate" column="credate"/>
+        <result property="editmanid" column="editmanid"/>
+        <result property="editmanname" column="editmanname"/>
+        <result property="editdate" column="editdate"/>
+        <result property="datasource" column="datasource"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="memo" column="memo"/>
+        <result property="creditCode" column="credit_code"/>
+        <result property="supplierName" column="supplier_name"/>
+        <result property="hospitalName" column="hospital_name"/>
+        <result property="factoryName" column="factory_name"/>
+        <result property="creditCode" column="credit_code"/>
+        <result property="orgdataid" column="orgdataid"/>
+    </resultMap>
+
+    <!-- 查询匹对平台供应商 -->
+    <select id="selectMatchSupplier" resultType="map">
+        SELECT
+        t1.id AS hospitalId,
+        t2.id AS supplierHospitalRefId,
+        t3.id AS supplierId,
+        t3.supplier_name AS supplierName,
+        t3.credit_code AS supplierCreditCode
+        FROM
+        hdi_unicode_supply_ship t0
+        LEFT JOIN hdi_org_hospital_info t1
+        ON t0.sources_hospital_credit_code = t1.credit_code
+        LEFT JOIN hdi_org_supplier_hospital_ref t2
+        ON t1.id = t2.hospital_id
+        LEFT JOIN hdi_org_supplier_info t3
+        ON t2.supplier_id = t3.id
+        WHERE t2.del_flag = 0
+        AND t0.ship_id = #{shipId}
+        AND t2.id NOT IN
+        (SELECT
+        supplier_hospital_ref_id
+        FROM
+        hdi_unicode_supply_ship
+        WHERE ship_flag = 1
+        AND del_flag = 0
+        AND supplier_hospital_ref_id IS NOT NULL)
+        <if test="supplierCreditCode != null and supplierCreditCode != ''">
+            AND t3.credit_code like CONCAT('%',#{supplierCreditCode}, '%')
+        </if>
+        <if test="supplierName != null and supplierName != ''">
+            AND t3.supplier_name like CONCAT('%',#{supplierName}, '%')
+        </if>
+    </select>
+
+    <select id="selectView" resultType="com.ebig.hdi.modules.unicode.vo.UnicodeSupplyShipEntityVO">
+        SELECT
+        t1.*,
+        t2.supplier_name,
+        t2.credit_code AS supplier_credit_code,
+        t3.hospital_name,
+        t3.credit_code AS hospital_credit_code
+        FROM
+        hdi_unicode_supply_ship t1
+        LEFT JOIN hdi_org_supplier_info t2
+        ON t1.supplier_id = t2.id
+        LEFT JOIN hdi_org_hospital_info t3
+        ON t1.hospital_id = t3.id
+        <where>
+            t1.del_flag = 0
+            <if test="sourcesSupplierName != null and sourcesSupplierName != ''">
+                AND t1.sources_supplier_name like CONCAT('%',#{sourcesSupplierName}, '%')
+            </if>
+            <if test="sourcesHospitalName != null and sourcesHospitalName != ''">
+                AND t1.sources_hospital_name like CONCAT('%',#{sourcesHospitalName}, '%')
+            </if>
+            <if test="shipFlag != null">
+                AND t1.ship_flag = #{shipFlag}
+            </if>
+        </where>
+        ORDER BY IFNULL(t1.editdate, t1.credate) DESC
+    </select>
+
+    <select id="selectBySourcesSupplierIdAndSourcesHospitalId"
+            resultType="com.ebig.hdi.modules.unicode.entity.UnicodeSupplyShipEntity">
+		SELECT
+				t1.hospital_id AS hospitalId,
+		        t1.supplier_id AS supplierId,
+		        t1.sources_supplier_id AS sourcesSupplierId,
+		        t1.sources_supplier_name AS sourcesSupplierName,
+		        t1.sources_supplier_credit_code AS sourcesSupplierCreditCode,
+		        t1.sources_hospital_id AS sourcesHospitalId,
+		        t1.sources_hospital_name AS sourcesHospitalName,
+		        t1.sources_hospital_credit_code AS sourcesHospitalCreditCode,
+			    t2.dept_id
+		FROM
+			hdi_unicode_supply_ship t1,
+			hdi_org_supplier_info t2
+		WHERE
+			t1.del_flag = 0 
+			AND t1.supplier_id = t2.id
+			AND	t1.sources_supplier_id = #{sourcesSupplierId}
+			AND t1.sources_hospital_id = #{sourcesHospitalId}
+	</select>
+
+    <select id="selectBySupplierIdAndHospitalId"
+            resultType="com.ebig.hdi.modules.unicode.entity.UnicodeSupplyShipEntity">
+		SELECT
+		hospital_id AS hospitalId,
+		supplier_id AS supplierId,
+		sources_supplier_id AS sourcesSupplierId,
+		sources_supplier_name AS sourcesSupplierName,
+		sources_supplier_credit_code AS sourcesSupplierCreditCode,
+		sources_hospital_id AS sourcesHospitalId,
+		sources_hospital_name AS sourcesHospitalName,
+		sources_hospital_credit_code AS sourcesHospitalCreditCode
+		FROM
+		hdi_unicode_supply_ship t1
+		WHERE
+		del_flag = 0
+		AND	supplier_id = #{supplierId}
+		AND hospital_id = #{hospitalId}
+	</select>
+</mapper>

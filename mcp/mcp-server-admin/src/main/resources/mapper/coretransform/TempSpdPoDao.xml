@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.coretransform.dao.TempSpdPoDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.coretransform.entity.TempSpdPoEntity" id="tempSpdPoMap">
+        <result property="poid" column="poid"/>
+        <result property="storehouseid" column="storehouseid"/>
+        <result property="uorganid" column="uorganid"/>
+        <result property="pono" column="pono"/>
+        <result property="postatus" column="postatus"/>
+        <result property="rgtype" column="rgtype"/>
+        <result property="uorganno" column="uorganno"/>
+        <result property="uorganname" column="uorganname"/>
+        <result property="supplyid" column="supplyid"/>
+        <result property="supplyno" column="supplyno"/>
+        <result property="supplyname" column="supplyname"/>
+        <result property="sourceid" column="sourceid"/>
+        <result property="sourceno" column="sourceno"/>
+        <result property="originid" column="originid"/>
+        <result property="originno" column="originno"/>
+        <result property="credate" column="credate"/>
+        <result property="memo" column="memo"/>
+        <result property="stageflag" column="stageflag"/>
+        <result property="cremanid" column="cremanid"/>
+        <result property="cremanname" column="cremanname"/>
+    </resultMap>
+
+	<!--  -->
+	<select id="selectByPoid" resultType="com.ebig.hdi.modules.coretransform.entity.TempSpdPoEntity">
+		SELECT
+			* 
+		FROM
+			spd_po 
+		WHERE
+			poid = #{poid}
+	</select>
+
+
+	<!--  -->
+	<select id="getStorehouseid" resultType="java.util.Map">
+		SELECT
+			cs.storehouseid,
+			cs.orgdataid
+		FROM
+			hdi_core_storehouse cs 
+		WHERE
+			cs.orgdataid = #{orgdataid}
+	</select>
+	
+	
+	<!--  -->
+	<select id="getHidAndDeptId" resultType="java.util.Map">
+		SELECT
+			ohi.dept_id deptId,
+			ohi.id horgId,
+			ohi.create_id cremanid,
+			su.username cremanname
+		FROM
+			hdi_org_hospital_info ohi,
+			sys_user su
+		WHERE
+			ohi.sources_id = #{sourcesId}
+			AND su.user_id = ohi.create_id
+			and ohi.del_flag=0
+	</select>
+</mapper>

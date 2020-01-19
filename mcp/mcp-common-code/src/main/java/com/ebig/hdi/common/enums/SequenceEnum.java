@@ -1,0 +1,63 @@
+package com.ebig.hdi.common.enums;
+
+public enum SequenceEnum {
+
+	SUPPLIER_CODE("SUPPLIER_CODE", "供应商编码"),
+	HOSPITAL_CODE("HOSPITAL_CODE", "医院编码"),
+	FACTORY_CODE("FACTORY_CODE", "厂商编码"),
+	AGENT_CODE("AGENT_CODE", "代理商编码"),
+	PLATFORM_REAGENT_CODE("PLATFORM_REAGENT_CODE", "平台试剂编码"),
+	PLATFORM_REAGENT_SPECS_CODE("PLATFORM_REAGENT_SPECS_CODE", "平台试剂规格编码"),
+	HOSPITAL_REAGENT_CODE("HOSPITAL_REAGENT_CODE", "医院试剂编码"),
+	HOSPITAL_REAGENT_SPECS_CODE("HOSPITAL_REAGENT_SPECS_CODE", "医院试剂规格编码"),
+	SUPPLIER_REAGENT_CODE("SUPPLIER_REAGENT_CODE", "供应商试剂编码"),
+	SUPPLIER_REAGENT_SPECS_CODE("SUPPLIER_REAGENT_SPECS_CODE", "供应商试剂规格编码"),
+	PLATFORM_DRUGS_CODE("PLATFORM_DRUGS_CODE" ,"平台药品编码"),
+	PLATFORM_DRUGS_SPECS_CODE("PLATFORM_DRUGS_SPECS_CODE", "平台药品规格编码"),
+	SUPPLIER_DRUGS_CODE("SUPPLIER_DRUGS_CODE" ,"供应商药品编码"),
+	SUPPLIER_DRUGS_SPECS_CODE("SUPPLIER_DRUGS_SPECS_CODE" ,"供应商药品规格编码"), 
+	HOSPITAL_DRUGS_CODE("HOSPITAL_DRUGS_CODE", "医院药品编码"), 
+	HOSPITAL_DRUGS_SPECS_CODE("HOSPITAL_DRUGS_SPECS_CODE", "医院药品规格编码"),
+	SUPPLIER_CONSUMABLES_CODE("SUPPLIER_CONSUMABLES_CODE","供应商耗材编码"),
+	SUPPLIER_CONSUMABLES_SPECS_CODE("SUPPLIER_CONSUMABLES_SPECS_CODE","供应商耗材规格编码"),
+	PLATFORM_CONSUMABLES_CODE("PLATFORM_CONSUMABLES_CODE", "平台耗材编码"),
+	PLATFORM_CONSUMABLES_SPECS_CODE("PLATFORM_CONSUMABLES_SPECS_CODE", "平台耗材规格编码"),
+	HOSPITAL_CONSUMABLES_CODE("HOSPITAL_CONSUMABLES_CODE", "医院耗材编码"),
+	HOSPITAL_CONSUMABLES_SPECS_CODE("HOSPITAL_CONSUMABLES_SPECS_CODE", "医院耗材规格编码"),
+	CORE_SUPPLY_MASTER_NO("CORE_SUPPLY_MASTER_NO", "供货单编号"),
+	CORE_ACCEPT_MASTER_ACCEPTNO("CORE_ACCEPT_MASTER_ACCEPTNO", "验收单编号"),
+	HDI_CORE_STOREHOUSE("HDI_CORE_STOREHOUSE", "库房编码"),
+	CORE_LABEL_MASTER_LABELNO("CORE_LABEL_MASTER_LABELNO", "标签编码"),
+	REFUNDS_MASTER_NO("REFUNDS_MASTER_NO", "退货单编号"),
+	SURGERY_STAGE_NO("SURGERY_STAGE_NO", "跟台目录编号"),
+	TEMP_SPD_RG("TEMP_SPD_RG", "temp收货单编号"),
+	CORE_SUPPLY_DETAIL_BATCH_CODE("CORE_SUPPLY_DETAIL_BATCH_CODE", "商品批次码"), ;
+	
+	// 成员变量
+	private String key;
+	private String value;
+
+	// 构造方法
+	private SequenceEnum(String key, String value) {
+			this.key = key;
+			this.value = value;
+		}
+
+	// 普通方法
+	public static String getName(String key) {
+		for (SequenceEnum c : SequenceEnum.values()) {
+			if (c.getKey().equals(key)) {
+				return c.value;
+			}
+		}
+		return null;
+	}
+
+	public String getKey() {
+		return key;
+	}
+
+	public String getValue() {
+		return value;
+	}
+}

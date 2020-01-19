@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.core.dao.CoreSupplyMasterDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.core.entity.CoreSupplyMasterEntity" id="coreSupplyMasterMap">
+        <result property="supplyMasterId" column="supply_master_id"/>
+        <result property="supplyno" column="supplyno"/>
+        <result property="salno" column="salno"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="horgId" column="horg_id"/>
+        <result property="storehouseid" column="storehouseid"/>
+        <result property="purplanno" column="purplanno"/>
+        <result property="supplyTime" column="supply_time"/>
+        <result property="supplyType" column="supply_type"/>
+        <result property="supplyStatus" column="supply_status"/>
+        <result property="supplyAddr" column="supply_addr"/>
+        <result property="expecttime" column="expecttime"/>
+        <result property="datasource" column="datasource"/>
+        <result property="orgdataid" column="orgdataid"/>
+        <result property="sourceid" column="sourceid"/>
+        <result property="memo" column="memo"/>
+        <result property="cremanid" column="cremanid"/>
+        <result property="cremanname" column="cremanname"/>
+        <result property="credate" column="credate"/>
+        <result property="hospitalName" column="hospital_name"/>
+        <result property="storehousename" column="storehousename"/> 
+        <result property="delFlag" column="del_flag"/>
+    </resultMap>
+    
+    <!-- 生成验收单供应商商品转换医院商品 -->
+	<select id="selectByGoodsId" resultType="java.util.Map">
+		SELECT DISTINCT
+			gsm.hospital_goods_id goodsid,
+			gsm.hospital_goods_unit goodsunit,
+			gsm.hospital_goods_specs_id goodstypeid,
+			gsm.goods_type goodsclass,
+			gsm.hospital_sources_specs_id Ygoodstypeid
+		FROM
+			view_hdi_goods_specs_match gsm 
+		WHERE
+			gsm.platform_goods_id = #{goodsid}
+			AND gsm.goods_type = #{goodsclass}
+			AND gsm.platform_goods_specs_id = #{goodstypeid}
+	</select>
+
+    <!-- 根据deptId获取到供应商id -->
+	<select id="getSupplierId" resultType="com.ebig.hdi.modules.core.entity.CoreSupplyMasterEntity">
+		SELECT
+		  	osi.id supplierId
+		FROM
+			  hdi_org_supplier_info osi
+		WHERE
+			osi.dept_id = #{deptId}
+			and osi.del_flag=0
+
+	</select>
+    <!-- 根据deptId，库房id，医院id 获取到供应商（原/平台），信息及医院（原/平台）信息，库房（原/平台） -->
+	<select id="getSupplierIdNew" resultType="com.ebig.hdi.modules.core.entity.CoreSupplyMasterEntity">
+		SELECT
+		  	osi.id supplierId,
+		  	osi.supplier_code supplierCode,
+		   	osi.supplier_name supplierName,
+		   ohi.id horgId,
+		   ohi.hospital_code hospitalCode,
+		   ohi.hospital_name hospitalName,
+		   uss.sources_hospital_id sourcesHospitalId,
+		   uss.sources_hospital_name sourcesHospitalName,
+		   uss.sources_supplier_id sourcesSupplierId,
+		   uss.sources_supplier_name sourcesSupplierName,
+		    cs.orgdataid sourcesStorehouseId,
+			cs.storehouseid storehouseid,
+			cs.storehouseno storehouseno,
+			cs.storehousename storehousename
+		FROM
+			 hdi_org_supplier_info osi
+			LEFT JOIN hdi_org_supplier_hospital_ref shr on shr.supplier_id=osi.id
+			LEFT JOIN hdi_core_storehouse cs on shr.hospital_id = cs.horg_id
+			LEFT JOIN hdi_org_hospital_info ohi on ohi.id = cs.horg_id
+			LEFT JOIN hdi_unicode_supply_ship uss on uss.hospital_id=shr.hospital_id and uss.supplier_id=shr.supplier_id
+		WHERE
+			osi.dept_id = #{deptId}
+		and cs.storehouseid=#{storehouseid}
+		and ohi.id=#{id}
+		and shr.del_flag=0
+		and uss.del_flag=0
+		and osi.del_flag=0
+		and ohi.del_flag=0
+	</select>
+
+	<!-- 根据deptId查询供货主单信息 -->
+	<select id="selectByDeptId" resultType="com.ebig.hdi.modules.core.entity.CoreSupplyMasterEntity">
+		SELECT
+			csm.*,
+			ohi.hospital_name,
+			cs.storehousename 
+		FROM
+			hdi_core_supply_master csm,
+			hdi_org_hospital_info ohi,
+			hdi_core_storehouse cs 
+		<where>
+			csm.horg_id = ohi.id 
+			AND csm.storehouseid = cs.storehouseid 
+			AND csm.del_flag = 0	
+		<if test="deptIds != null and deptIds != ''">
+			AND ${deptIds}
+		</if>	
+			ORDER BY csm.credate DESC
+		</where> 
+	</select>
+
+	<!-- 根据条件查询主单信息 -->
+	<select id="selectByBedingungen" resultType="com.ebig.hdi.modules.core.entity.CoreSupplyMasterEntity">
+		SELECT
+			csm.*,
+			ohi.hospital_name,
+			cs.storehousename 
+		FROM
+			hdi_core_supply_master csm,
+			hdi_org_hospital_info ohi,
+			hdi_core_storehouse cs 
+		<where>
+			csm.horg_id = ohi.id 
+			AND csm.storehouseid = cs.storehouseid 
+			AND csm.del_flag = 0
+		<if test="deptIds != null and deptIds != ''">
+			AND ${deptIds}
+		</if>			
+		<if test="supplyStatus != null">
+			AND csm.supply_status = #{supplyStatus}
+		</if>
+		<if test="supplyType != null">
+			AND csm.supply_type = #{supplyType}
+		</if>		
+		<if test="hospitalName != null and hospitalName != ''">
+			AND ohi.hospital_name like CONCAT('%',#{hospitalName}, '%')
+		</if>
+		<if test="purplanno != null and purplanno != ''">
+			AND csm.purplanno like CONCAT('%',#{purplanno}, '%')
+		</if>
+		<if test="supplyno != null and supplyno != ''">
+			AND csm.supplyno like CONCAT('%',#{supplyno}, '%')
+		</if>
+		<if test="StartingTime != null and StartingTime != ''">
+			<![CDATA[ AND csm.supply_time > #{StartingTime} ]]>
+		</if>
+		<if test="EndTime != null and EndTime != ''">
+			<![CDATA[ AND csm.supply_time < #{EndTime} ]]>
+		</if>
+			ORDER BY csm.credate DESC
+		</where> 
+		
+	</select>
+
+	<!-- 根据条件查询主单信息 -->
+	<select id="selectBySupplyMasterId" resultType="com.ebig.hdi.modules.core.entity.CoreSupplyMasterEntity">
+		SELECT
+			csm.*,
+			cs.storehousename
+		FROM
+			hdi_core_supply_master csm,
+			hdi_org_hospital_info ohi,
+			hdi_core_storehouse cs
+		WHERE
+			csm.horg_id = ohi.id
+			AND cs.storehouseid = csm.storehouseid
+			AND supply_master_id = #{supplyMasterId}
+			and csm.del_flag=0
+			and ohi.del_flag=0
+	</select>
+
+	<!-- 根据原数据标识 查询是否存在此主单 -->
+	<select id="selectByOrgdataid" resultType="com.ebig.hdi.modules.core.entity.CoreSupplyMasterEntity">
+		SELECT
+			* 
+		FROM
+			hdi_core_supply_master csm 
+		WHERE
+			csm.orgdataid = #{orgdataid}
+			and csm.del_flag=0
+	</select>
+
+	<!-- 提交医院   根据条件查询纯粹的主单信息 -->
+	<select id="selectByMasterId" resultType="com.ebig.hdi.modules.core.entity.CoreSupplyMasterEntity">
+		SELECT
+			csm.*
+		FROM
+			hdi_core_supply_master csm
+		WHERE
+			csm.supply_master_id = #{supplyMasterId}
+			and csm.del_flag=0
+	</select>
+
+	<!-- 提交医院   根据条件查询库房信息 -->
+	<select id="getOrgdataid" resultType="java.util.Map">
+		SELECT
+			cs.orgdataid	
+		FROM
+			hdi_core_storehouse cs 
+		WHERE
+			cs.storehouseid = #{storehouseid}
+	</select>
+	<!-- 提交医院  根据条件查询医院信息 -->
+	<select id="selectByHorgIdAndSupplierId" resultType="java.util.Map">
+		SELECT
+			uss.sources_hospital_id uorganid,
+			uss.sources_hospital_credit_code uorganno,
+			uss.sources_hospital_name uorganname,
+			uss.sources_supplier_id supplyid,
+			uss.sources_supplier_credit_code supplyno,
+			uss.sources_supplier_name supplyname 
+		FROM
+			hdi_unicode_supply_ship uss
+		WHERE
+			uss.hospital_id = #{horgId}
+			AND uss.supplier_id = #{supplierId}
+			and uss.del_flag=0
+	</select>
+
+	<select id="selectLabelQtyByMasterId" resultType="int">
+		SELECT 
+		  IFNULL(SUM(label_qty), 0)
+		FROM
+		  hdi_core_label_detail cld,
+			hdi_core_label_master clm
+		WHERE
+			clm.labelid = cld.labelid
+			AND clm.del_flag = 0
+			AND cld.supply_master_id = #{supplyMasterId}
+	</select>
+	
+	<select id="selectSupplyQtyByMasterId" resultType="int">
+		SELECT 
+		  IFNULL(SUM(supply_qty), 0) 
+		FROM
+		  hdi_core_supply_detail 
+		WHERE supply_master_id = #{supplyMasterId} 
+	</select>
+    <select id="getList" resultType="java.util.Map">
+		SELECT
+		csm.*,
+		CASE  when csm.supply_type = 0 THEN '非票货同行' WHEN  csm.supply_type =1 THEN '审票货同行' END AS supplyType,
+		CASE  when csm.supply_status = 0 THEN '未提交' WHEN  csm.supply_status =1 THEN '已提交' WHEN  csm.supply_status =2 THEN '已验收' WHEN  csm.supply_status = 3 THEN '部分验收'
+		WHEN  csm.supply_status =4 THEN '拒收' END AS supplyStatus,
+		ohi.hospital_name,
+		cs.storehousename
+		FROM
+		hdi_core_supply_master csm,
+		hdi_org_hospital_info ohi,
+		hdi_core_storehouse cs
+		<where>
+			csm.horg_id = ohi.id
+			AND csm.storehouseid = cs.storehouseid
+			AND csm.del_flag = 0
+			<if test="deptIds != null and deptIds != ''">
+				AND ${deptIds}
+			</if>
+			<if test="queryParam.supplyStatus != null">
+				AND csm.supply_status = #{queryParam.supplyStatus}
+			</if>
+			<if test="queryParam.supplyType != null">
+				AND csm.supply_type = #{supplyType}
+			</if>
+			<if test="queryParam.hospitalName != null and queryParam.hospitalName != ''">
+				AND ohi.hospital_name like CONCAT('%',#{queryParam.hospitalName}, '%')
+			</if>
+			<if test="queryParam.purplanno != null and queryParam.purplanno != ''">
+				AND csm.purplanno like CONCAT('%',#{queryParam.purplanno}, '%')
+			</if>
+			<if test="queryParam.supplyno != null and queryParam.supplyno != ''">
+				AND csm.supplyno like CONCAT('%',#{queryParam.supplyno}, '%')
+			</if>
+			<if test="queryParam.StartingTime != null and queryParam.StartingTime != ''">
+				<![CDATA[ AND csm.supply_time > #{queryParam.StartingTime} ]]>
+			</if>
+			<if test="queryParam.EndTime != null and queryParam.EndTime != ''">
+				<![CDATA[ AND csm.supply_time < #{queryParam.EndTime} ]]>
+			</if>
+			ORDER BY csm.credate DESC
+		</where>
+	</select>
+</mapper>

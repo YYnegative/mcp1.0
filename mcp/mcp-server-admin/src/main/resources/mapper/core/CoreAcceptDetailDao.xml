@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.core.dao.CoreAcceptDetailDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.core.entity.CoreAcceptDetailEntity"
+               id="coreAcceptDetailMap">
+        <result property="acceptDetailId" column="accept_detail_id"/>
+        <result property="acceptMasterId" column="accept_master_id"/>
+        <result property="goodsid" column="goodsid"/>
+        <result property="goodsclass" column="goodsclass"/>
+        <result property="goodstypeid" column="goodstypeid"/>
+        <result property="ygoodstypeid" column="ygoodstypeid"/>
+        <result property="goodsunit" column="goodsunit"/>
+        <result property="acceptQty" column="accept_qty"/>
+        <result property="lotid" column="lotid"/>
+        <result property="sourceid" column="sourceid"/>
+        <result property="sourcedtlid" column="sourcedtlid"/>
+        <result property="memo" column="memo"/>
+        <result property="cremanid" column="cremanid"/>
+        <result property="cremanname" column="cremanname"/>
+        <result property="credate" column="credate"/>
+        <result property="factoryName" column="factory_name"/>
+        <result property="goodsName" column="goods_name"/>
+        <result property="specs" column="specs"/>
+        <result property="lotno" column="lotno"/>
+        <result property="supplyUnitprice" column="supply_unitprice"/>
+        <result property="proddate" column="proddate"/>
+        <result property="invadate" column="invadate"/>
+    </resultMap>
+
+
+    <!-- 根据PurchaseMasterId查询验收细单信息 -->
+    <select id="selectByAcceptMasterId"
+            resultType="com.ebig.hdi.modules.core.entity.CoreAcceptDetailEntity">
+		SELECT
+          d.supplier_goods_name AS goods_name,
+          d.supplier_factory_name AS factory_name,
+          d.supplier_goods_specs_name AS goodstype,
+          d.supplier_goods_unit AS goodsunit,
+          d.accept_number AS accept_qty,
+          d.supply_price AS supply_unitprice,
+          d.lot_no AS lot_no,
+          d.proddate AS proddate,
+          d.invadate AS invadate
+        FROM
+          view_hdi_core_accept_detail d
+         WHERE d.accept_master_id = #{acceptMasterId}
+	</select>
+
+    <!-- 查询原医院商品标识和原医院商品规格ID -->
+    <select id="selectAcceptDetail"
+            resultType="com.ebig.hdi.modules.core.entity.CoreAcceptDetailEntity">
+        SELECT
+        gsh.sources_specs_id AS ygoodstypeid
+        FROM
+        view_hdi_goods_specs_supplier gsh,
+        hdi_unicode_supply_ship uss
+        <where>
+            uss.sources_supplier_id = gsh.supplier_sources_id
+            and uss.del_flag=0
+            <if test="supplierId != null and supplierId != ''">
+                AND uss.supplier_id = #{supplierId}
+            </if>
+            <if test="hospitalId != null and hospitalId != ''">
+                AND uss.hospital_id = #{hospitalId}
+            </if>
+            <if test="goodsclass != null and goodsclass != ''">
+                AND gsh.goods_type = #{goodsclass}
+            </if>
+            <if test="goodsid != null and goodsid != ''">
+                AND gsh.goods_id = #{goodsid}
+            </if>
+            <if test="goodstypeid != null and goodstypeid != ''">
+                AND gsh.goods_specs_id = #{goodstypeid}
+            </if>
+        </where>
+    </select>
+
+    <!--根据供应商商品信息查询原医院商品信息-->
+    <select id="selectHgoodsInfo"
+            resultType="com.ebig.hdi.modules.core.entity.CoreAcceptDetailEntity">
+		SELECT
+			platform_goods_id as goodsid,
+			platform_goods_code as goodsno,
+			platform_goods_name as goodsname,
+			platform_goods_specs_id as goodstypeid,
+			platform_goods_specs_code as goodstypeno,
+			platform_goods_specs_name as goodstype,
+			hospital_goods_id as ygoodsid,
+			hospital_goods_code as ygoodsno,
+			hospital_goods_name as ygoodsname,
+			hospital_goods_specs_id as ygoodstypeid,
+			hospital_goods_specs_code as ygoodstypeno,
+			hospital_goods_specs_name as ygoodstypename
+		from
+			view_hdi_goods_specs_match
+		where
+			hospital_id=#{hospitalId}
+			and supplier_id=#{supplierId}
+			and supplier_goods_id=#{goodsid}
+			and goods_type=#{goodsclass}
+			and supplier_goods_specs_id=#{goodstypeid}
+			limit 1
+
+	</select>
+
+    <!-- 查询原医院商品标识和原医院商品规格ID -->
+    <select id="selectAcceptDetails"
+            resultType="com.ebig.hdi.modules.core.entity.CoreAcceptDetailEntity">
+        SELECT
+        gsh.sources_specs_id AS ygoodstypeid
+        FROM
+        view_hdi_goods_specs_supplier gsh,
+        hdi_unicode_supply_ship uss
+        <where>
+            uss.sources_supplier_id = gsh.supplier_sources_id
+            and uss.del_flag=0
+            <if test="supplierId != null and supplierId != ''">
+                AND uss.supplier_id = #{supplierId}
+            </if>
+            <if test="hospitalId != null and hospitalId != ''">
+                AND uss.hospital_id = #{hospitalId}
+            </if>
+            <if test="goodsclass != null and goodsclass != ''">
+                AND gsh.goods_type = #{goodsclass}
+            </if>
+            <if test="goodsid != null and goodsid != ''">
+                AND gsh.goods_id = #{goodsid}
+            </if>
+            <if test="goodstypeid != null and goodstypeid != ''">
+                AND gsh.goods_specs_id = #{goodstypeid}
+            </if>
+        </where>
+    </select>
+
+    <!-- 根据原验收主单和细单ID获取已入库的验收细单信息 -->
+    <select id="selectByOrgdataidAndOrgdatadtlid"
+            resultType="com.ebig.hdi.modules.core.entity.CoreAcceptDetailEntity">
+	    select
+	    	*
+	    from
+	   	 	hdi_core_accept_detail
+	    where
+	    	orgdataid=#{poid}
+	    and orgdatadtlid=#{podtlid}
+	</select>
+
+    <select id="getAcceptNumberBySupplyMasterId" resultType="int">
+		SELECT 
+		  IFNULL(SUM(t1.accept_qty), 0) 
+		FROM
+		  hdi_core_accept_detail t1 
+		  LEFT JOIN hdi_core_accept_master t2 
+		    ON t1.accept_master_id = t2.accept_master_id 
+		WHERE t1.sourceid = #{supplyMasterId}
+		  AND t2.del_flag = 0 
+	</select>
+</mapper>

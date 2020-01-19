@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.reagent.dao.GoodsPlatformReagentDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.reagent.vo.GoodsPlatformReagentVO" id="goodsPlatformReagentMap">
+        <result property="id" column="id"/>
+        <result property="goodsUnicode" column="goods_unicode"/>
+        <result property="reagentCode" column="reagent_code"/>
+        <result property="reagentName" column="reagent_name"/>
+        <result property="commonName" column="common_name"/>
+        <result property="goodsNature" column="goods_nature"/>
+        <result property="typeId" column="type_id"/>
+        <result property="typeName" column="type_name"/>
+        <result property="factoryId" column="factory_id"/>
+        <result property="approvals" column="approvals"/>
+        <result property="status" column="status"/>
+        <result property="goodsUnit" column="goods_unit"/>
+        <result property="storeWay" column="store_way"/>
+        <result property="picUrl" column="pic_url"/>
+        <result property="factoryName" column="factory_name"/>
+        <collection property="specsEntityList" ofType="com.ebig.hdi.modules.reagent.entity.GoodsPlatformReagentSpecsEntity">
+        	<id property="id" column="specs_id"/>
+        	<result property="specs" column="specs"/>
+        	<result property="guid" column="guid"/>
+        	<result property="status" column="specs_status"/>
+        </collection>
+    </resultMap>
+    
+    <select id="selectPlatformReagentById" resultMap="goodsPlatformReagentMap">
+		SELECT 
+		  t1.id,
+		  t1.goods_unicode,
+		  t1.reagent_code,
+		  t1.reagent_name,
+		  t1.common_name,
+		  t1.goods_nature,
+		  t1.type_id,
+		  t1.factory_id,
+		  t1.approvals,
+		  t1.status,
+		  t1.goods_unit,
+		  t1.store_way,
+		  t1.pic_url,
+		  t2.factory_name,
+		  t3.id AS specs_id,
+		  t3.specs,
+		  t3.guid,
+		  t3.status AS specs_status,
+		  t4.cate_name AS type_name 
+		FROM
+		  hdi_goods_platform_reagent t1 
+		  LEFT JOIN hdi_org_factory_info t2 
+		    ON t1.factory_id = t2.id 
+		  LEFT JOIN hdi_goods_platform_reagent_specs t3 
+		    ON t1.id = t3.reagen_id 
+		  LEFT JOIN hdi_unicode_reagent_cate t4 
+		    ON t1.type_id = t4.cate_id 
+		WHERE t1.id = #{id}
+			and t1.del_flag=0
+			and t2.del_flag=0
+
+    </select>
+    
+    <select id="selectPlatformReagentList" resultMap="goodsPlatformReagentMap">
+		SELECT 
+		  t1.id,
+		  t1.goods_unicode,
+		  t1.reagent_code,
+		  t1.reagent_name,
+		  t1.common_name,
+		  t1.goods_nature,
+		  t1.type_id,
+		  t1.factory_id,
+		  t1.approvals,
+		  t1.status,
+		  t1.goods_unit,
+		  t1.store_way,
+		  t1.pic_url,
+		  t2.factory_name,
+		  t3.cate_name AS type_name
+		FROM
+		  hdi_goods_platform_reagent t1 
+		  LEFT JOIN hdi_org_factory_info t2 
+		    ON t1.factory_id = t2.id 
+		  LEFT JOIN hdi_unicode_reagent_cate t3 
+		    ON t1.type_id = t3.cate_id 
+		<where>
+			t1.del_flag = 0
+			and t2.del_flag = 0
+			<if test="goodsNature != null">
+				AND t1.goods_nature = #{goodsNature}
+			</if>
+			<if test="typeId != null">
+				AND t1.type_id IN
+				<foreach collection="typeId" item="item" separator="," open="(" close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="status != null">
+				AND t1.status = #{status}
+			</if>
+			<if test="reagentName != null and reagentName != ''">
+				AND t1.reagent_name like CONCAT('%', #{reagentName}, '%')
+			</if>
+			<if test="factoryName != null and factoryName != ''">
+				AND t2.factory_name like CONCAT('%', #{factoryName}, '%')
+			</if>
+			<if test="sql_filter != null and sql_filter != ''">
+				AND ${sql_filter}
+			</if>
+		</where>
+		ORDER BY IFNULL(t1.edit_time, t1.create_time) DESC
+    </select>
+
+	<select id="selectMatch" resultType="map">
+		SELECT 
+		  t1.id AS reagentId,
+		  t2.id AS specsId,
+		  t1.goods_nature,
+		  t2.specs,
+		  t1.approvals,
+		  t1.reagent_name,
+		  info.id as factory_id,
+		  info.factory_name
+		FROM
+		  hdi_goods_platform_reagent t1 
+		  LEFT JOIN hdi_goods_platform_reagent_specs t2 
+		    ON t1.id = t2.reagen_id
+		  LEFT JOIN hdi_org_factory_info info
+		  ON info.id = t1.factory_id
+		WHERE t1.del_flag = 0 AND t1.status = 1
+		  and info.del_flag = 0
+		  AND t2.status = 1 
+		<choose>
+			<when test="guid != null and guid != ''">
+				AND (t2.guid = #{guid} OR (t1.approvals = #{approvals} AND t2.specs = #{specs}))
+			</when>
+			<otherwise>
+				AND (t1.approvals = #{approvals} AND t2.specs = #{specs})
+			</otherwise>
+		</choose>
+	</select>
+
+</mapper>

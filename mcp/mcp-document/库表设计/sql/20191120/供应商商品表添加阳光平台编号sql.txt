@@ -1,0 +1,5 @@
+ALTER TABLE hdi_goods_supplier_drugs ADD sunshine_pno VARCHAR(128) COMMENT '阳光平台编码';
+
+ALTER TABLE hdi_goods_supplier_reagent ADD sunshine_pno VARCHAR(128) COMMENT '阳光平台编码';
+
+ALTER TABLE hdi_goods_supplier_consumables ADD sunshine_pno VARCHAR(128) COMMENT '阳光平台编码';

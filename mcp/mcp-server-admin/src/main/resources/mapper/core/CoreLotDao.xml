@@ -1,0 +1,346 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.core.dao.CoreLotDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.core.entity.CoreLotEntity" id="coreLotMap">
+        <result property="lotid" column="lotid"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="goodsid" column="goodsid"/>
+        <result property="goodsclass" column="goodsclass"/>
+        <result property="goodstypeid" column="goodstypeid"/>
+        <result property="lottype" column="lottype"/>
+        <result property="lotstatus" column="lotstatus"/>
+        <result property="lotno" column="lotno"/>
+        <result property="proddate" column="proddate"/>
+        <result property="invadate" column="invadate"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="factoryName" column="factory_name"/>
+        <result property="goodsName" column="goods_name"/>  
+        <result property="specs" column="specs"/>
+        <result property="factoryId" column="factory_id"/>
+    </resultMap>
+
+	<!-- 根据deptId获取到供应商id -->
+	<select id="getSupplierId" resultType="com.ebig.hdi.modules.core.entity.CoreLotEntity">
+		SELECT
+			osi.id supplierId
+		FROM
+			hdi_org_supplier_info osi 
+		WHERE
+			osi.dept_id = #{deptId}
+			and osi.del_flag=0
+	</select>
+	
+	<!--根据商品及批号获取批号信息-->
+	<select id="getLotInfoByLotno" resultType="com.ebig.hdi.modules.core.entity.CoreLotEntity">
+		select
+			*
+		from
+			hdi_core_lot
+		<where>
+			 del_flag = 0
+			<if test="goodsid != null and goodsid != ''">
+				AND goodsid=#{goodsid}
+			</if>
+			<if test="goodsclass != null and goodsclass != ''">
+				AND goodsclass=#{goodsclass}
+			</if>
+			<if test="goodstypeid != null and goodstypeid != ''">
+				AND goodstypeid=#{goodstypeid}
+			</if>
+			<if test="lotno != null and lotno != ''">
+				AND lotno=#{lotno}
+			</if>
+		</where>
+
+	</select>
+	<!-- 新增供货单时保存不存在的批号信息 -->
+	<insert id="saveLot"  parameterType="com.ebig.hdi.modules.core.entity.CoreLotEntity" useGeneratedKeys="true" keyProperty="lotid" keyColumn="lotid">
+		INSERT INTO
+			hdi_core_lot(dept_id,goodsid,goodsclass,goodstypeid,lottype,lotstatus,lotno,proddate,invadate)
+		VALUES
+			(#{deptId},#{goodsid},#{goodsclass},#{goodstypeid},#{lottype},#{lotstatus},#{lotno},#{proddate},#{invadate})
+	</insert>
+
+
+	<!-- 根据DeptId查询批号信息 -->
+	<select id="selectByDeptId" resultType="com.ebig.hdi.modules.core.entity.CoreLotEntity">
+		SELECT
+			cl.*,
+			gsc.consumables_name goods_name,
+			ofi.factory_name,
+			ofi.id factory_id,
+			scs.specs
+		FROM
+			hdi_core_lot cl,
+			hdi_goods_supplier_consumables gsc,
+			hdi_org_factory_info ofi,
+			hdi_goods_supplier_consumables_specs scs
+		<where>
+			cl.goodsclass = 3
+			AND cl.lotstatus = 1
+			AND cl.goodsid = gsc.id
+			AND gsc.factory_id = ofi.id
+			AND cl.goodstypeid = scs.id
+			AND cl.del_flag = 0
+			and gsc.del_flag=0
+			and ofi.del_flag=0
+		<if test="deptIds != null and deptIds != ''">
+			AND ${deptIds}
+		</if>		
+		</where>
+		UNION
+		SELECT
+			cl.*,
+			gsc.drugs_name goods_name,
+			ofi.factory_name,
+			ofi.id factory_id,			
+			scs.specs
+		FROM
+			hdi_core_lot cl,
+			hdi_goods_supplier_drugs gsc,
+			hdi_org_factory_info ofi,
+			hdi_goods_supplier_drugs_specs scs
+		<where>
+			cl.goodsclass = 1
+			AND cl.lotstatus = 1
+			AND cl.goodsid = gsc.id
+			AND gsc.factory_id = ofi.id
+			AND cl.goodstypeid = scs.id
+			AND cl.del_flag = 0
+			and gsc.del_flag=0
+			and ofi.del_flag=0
+		<if test="deptIds != null and deptIds != ''">
+			AND ${deptIds}
+		</if>		
+		</where>
+		UNION
+		SELECT
+			cl.*,
+			gsc.reagent_name goods_name,
+			ofi.factory_name,
+			ofi.id factory_id,		
+			scs.specs
+		FROM
+			hdi_core_lot cl,
+			hdi_goods_supplier_reagent gsc,
+			hdi_org_factory_info ofi,
+			hdi_goods_supplier_reagent_specs scs
+		<where>
+			cl.goodsclass = 2
+			AND cl.lotstatus = 1
+			AND cl.goodsid = gsc.id
+			AND gsc.factory_id = ofi.id
+			AND cl.goodstypeid = scs.id
+			AND cl.del_flag = 0
+			and gsc.del_flag=0
+			and ofi.del_flag=0
+		<if test="deptIds != null and deptIds != ''">
+			AND ${deptIds}
+		</if>		
+		</where>
+	</select>
+	
+	
+	<!-- 页面条件查询 -->
+	<select id="selectByBedingungen" resultType="com.ebig.hdi.modules.core.entity.CoreLotEntity">
+		SELECT
+			cl.*,
+			gsc.consumables_name goods_name,
+			ofi.factory_name,
+			ofi.id factory_id,			
+			scs.specs
+		FROM
+			hdi_core_lot cl,
+			hdi_goods_supplier_consumables gsc,
+			hdi_org_factory_info ofi,
+			hdi_goods_supplier_consumables_specs scs
+		<where>
+			cl.goodsclass = 3
+			AND cl.goodsid = gsc.id
+			AND gsc.factory_id = ofi.id
+			AND cl.goodstypeid = scs.id
+			AND cl.del_flag = 0
+			and gsc.del_flag=0
+			and ofi.del_flag=0
+		<if test="deptIds != null and deptIds != ''">
+			AND ${deptIds}
+		</if>		
+		<if test="goodsclass != null">
+			AND cl.goodsclass = #{goodsclass} 
+		</if>
+		<if test="lotstatus != null">
+			AND cl.lotstatus = #{lotstatus} 
+		</if>				
+		<if test="goodsName != null and goodsName != ''">
+			AND gsc.consumables_name like CONCAT('%',#{goodsName}, '%')
+		</if>
+		<if test="specs != null and specs != ''">
+			AND scs.specs like CONCAT('%',#{specs}, '%')
+		</if>
+		<if test="lotno != null and lotno != ''">
+			AND cl.lotno like CONCAT('%',#{lotno}, '%')
+		</if>
+		<if test="proddate != null and proddate != ''">
+			AND cl.proddate like CONCAT('%',#{proddate}, '%')
+		</if>
+		<if test="invadate != null and invadate != ''">
+			AND cl.invadate like CONCAT('%',#{invadate}, '%')
+		</if>	
+		</where>
+		UNION
+		SELECT
+			cl.*,
+			gsc.drugs_name goods_name,
+			ofi.factory_name,
+			ofi.id factory_id,
+			scs.specs
+		FROM
+			hdi_core_lot cl,
+			hdi_goods_supplier_drugs gsc,
+			hdi_org_factory_info ofi,
+			hdi_goods_supplier_drugs_specs scs
+		<where>
+			cl.goodsclass = 1
+			AND cl.goodsid = gsc.id
+			AND gsc.factory_id = ofi.id
+			AND cl.goodstypeid = scs.id
+			AND cl.del_flag = 0
+			and gsc.del_flag=0
+			and ofi.del_flag=0
+		<if test="deptIds != null and deptIds != ''">
+			AND ${deptIds}
+		</if>		
+		<if test="goodsclass != null">
+			AND cl.goodsclass = #{goodsclass} 
+		</if>
+		<if test="lotstatus != null">
+			AND cl.lotstatus = #{lotstatus} 
+		</if>				
+		<if test="goodsName != null and goodsName != ''">
+			AND gsc.drugs_name like CONCAT('%',#{goodsName}, '%')
+		</if>
+		<if test="specs != null and specs != ''">
+			AND scs.specs like CONCAT('%',#{specs}, '%')
+		</if>
+		<if test="lotno != null and lotno != ''">
+			AND cl.lotno like CONCAT('%',#{lotno}, '%')
+		</if>
+		<if test="proddate != null and proddate != ''">
+			AND cl.proddate like CONCAT('%',#{proddate}, '%')
+		</if>
+		<if test="invadate != null and invadate != ''">
+			AND cl.invadate like CONCAT('%',#{invadate}, '%')
+		</if>	
+		</where>
+		UNION
+		SELECT
+			cl.*,
+			gsc.reagent_name goods_name,
+			ofi.factory_name,
+			ofi.id factory_id,			
+			scs.specs
+		FROM
+			hdi_core_lot cl,
+			hdi_goods_supplier_reagent gsc,
+			hdi_org_factory_info ofi,
+			hdi_goods_supplier_reagent_specs scs
+		<where>
+			cl.goodsclass = 2
+			AND cl.goodsid = gsc.id
+			AND gsc.factory_id = ofi.id
+			AND cl.goodstypeid = scs.id
+			AND cl.del_flag = 0
+			and gsc.del_flag=0
+			and ofi.del_flag=0
+		<if test="deptIds != null and deptIds != ''">
+			AND ${deptIds}
+		</if>		
+		<if test="goodsclass != null">
+			AND cl.goodsclass = #{goodsclass} 
+		</if>
+		<if test="lotstatus != null">
+			AND cl.lotstatus = #{lotstatus} 
+		</if>				
+		<if test="goodsName != null and goodsName != ''">
+			AND gsc.reagent_name like CONCAT('%',#{goodsName}, '%')
+		</if>
+		<if test="specs != null and specs != ''">
+			AND scs.specs like CONCAT('%',#{specs}, '%')
+		</if>
+		<if test="lotno != null and lotno != ''">
+			AND cl.lotno like CONCAT('%',#{lotno}, '%')
+		</if>
+		<if test="proddate != null and proddate != ''">
+			AND cl.proddate like CONCAT('%',#{proddate}, '%')
+		</if>
+		<if test="invadate != null and invadate != ''">
+			AND cl.invadate like CONCAT('%',#{invadate}, '%')
+		</if>
+		</where>
+	</select>
+	
+	
+	<!-- 启用与停用 -->
+	<update id="updateLotstatus">
+		UPDATE hdi_core_lot 
+		SET lotstatus = #{lotstatus} 
+		WHERE
+			lotid = #{lotid}
+	</update>
+	
+	
+	
+	<!-- HDI转换用  根据lotno  查询是否存在此批号 -->
+	<select id="selectByLotno" resultType="com.ebig.hdi.modules.core.entity.CoreLotEntity">
+		SELECT
+			* 
+		FROM
+			hdi_core_lot cl 
+		WHERE
+			cl.lotno = #{lotno}
+			AND cl.del_flag = 0
+	</select>
+
+	
+	<!-- HDI转换用 查询deptid等-->
+	<select id="getDeptId" resultType="java.util.Map">
+		SELECT
+			uss.hospital_id hospitalId,
+			uss.supplier_id supplierId,
+			osi.dept_id deptId,
+			su.username,
+			su.user_id userId
+		FROM
+			hdi_unicode_supply_ship uss,
+			hdi_org_supplier_info osi,
+			sys_user su
+		WHERE
+			osi.id = uss.supplier_id
+			AND uss.sources_supplier_id = #{uorganid}
+			AND uss.sources_hospital_id = #{horganid}
+			AND su.user_id = osi.create_id
+			and uss.del_flag=0
+			and osi.del_flag=0
+	</select>
+	
+	<select id="selectCoreLot" resultType="com.ebig.hdi.modules.core.entity.CoreLotEntity">
+	    SELECT
+	   		 l.*
+	    FROM
+	    	view_hdi_goods_specs_match m,
+	    	hdi_core_lot l
+        WHERE
+        	m.goods_type=#{goodsType}
+        AND m.hospital_goods_id=#{hospitalGoodsId}
+        AND m.hospital_goods_specs_id=#{hospitalGoodsSpecsId}
+        AND m.goods_type=l.goodsclass
+        AND m.supplier_goods_id=l.goodsid
+        AND m.supplier_goods_specs_id=l.goodstypeid
+        AND l.lotno=#{lotno}
+        and m.del_flag=0
+        and l.del_flag=0
+	</select>
+</mapper>

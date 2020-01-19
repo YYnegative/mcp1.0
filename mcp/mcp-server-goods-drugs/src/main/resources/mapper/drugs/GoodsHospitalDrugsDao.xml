@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.drugs.dao.GoodsHospitalDrugsDao">
+
+    <resultMap type="com.ebig.hdi.modules.drugs.vo.GoodsHospitalDrugsEntityVo" id="goodsHospitalDrugsMap">
+        <result property="id" column="drugs_id"/>
+        <result property="hospitalId" column="hospital_id"/>
+        <result property="hospitalName" column="hospital_name"/>
+        <result property="drugsName" column="drugs_name"/>
+        <result property="commonName" column="common_name"/>
+        <result property="goodsNature" column="goods_nature"/>
+        <result property="typeId" column="type_id"/>
+        <result property="typeName" column="type_name"/>
+        <result property="factoryId" column="drugs_factory_id"/>
+        <result property="approvals" column="approvals"/>
+        <result property="status" column="drugs_status"/>
+        <result property="goodsUnit" column="goods_unit"/>
+        <result property="buyingUnit" column="buying_unit"/>
+        <result property="convertUnit" column="convert_unit"/>
+        <result property="picUrl" column="pic_url"/>
+        <result property="factoryName" column="factory_name"/>
+        <collection property="specsEntityList" ofType="com.ebig.hdi.modules.drugs.entity.GoodsHospitalDrugsSpecsEntity">
+        	<id property="id" column="specs_id"/>
+        	<result property="specs" column="specs"/>
+        	<result property="guid" column="guid"/>
+        	<result property="status" column="specs_status"/>
+        </collection>
+    </resultMap>
+
+	<select id="selectHospitalDrugsById" resultMap="goodsHospitalDrugsMap">
+		SELECT 
+			d.id AS drugs_id,
+			d.hospital_id,
+			d.drugs_name,
+			d.common_name,
+			d.goods_nature,
+			d.type_id,
+			d.type_name,
+			d.factory_id AS drugs_factory_id,
+			d.approvals,
+			d.status AS drugs_status,
+			d.goods_unit,
+			d.buying_unit,
+			d.convert_unit,
+			d.pic_url,
+			f.factory_name,
+			h.hospital_name,
+			s.id AS specs_id,
+			s.specs,
+			s.guid,
+			s.status AS specs_status 
+		FROM hdi_goods_hospital_drugs d
+			LEFT JOIN hdi_org_factory_info f ON d.factory_id = f.id
+			LEFT JOIN hdi_org_hospital_info h ON d.hospital_id = h.id
+			LEFT JOIN hdi_goods_hospital_drugs_specs s ON d.id = s.drugs_id
+		WHERE d.id = #{id}
+	</select>
+
+	<select id="selectHospitalDrugsList" resultMap="goodsHospitalDrugsMap">
+		SELECT 
+			d.id AS drugs_id,
+			d.hospital_id,
+			d.drugs_name,
+			d.common_name,
+			d.goods_nature,
+			d.type_id,
+			d.type_name,
+			d.factory_id AS drugs_factory_id,
+			d.approvals,
+			d.status AS drugs_status,
+			d.goods_unit,
+			d.buying_unit,
+			d.convert_unit,
+			d.pic_url,
+			f.factory_name, 
+			h.hospital_name
+		FROM hdi_goods_hospital_drugs d
+			LEFT JOIN hdi_org_factory_info f ON d.factory_id = f.id
+			LEFT JOIN hdi_org_hospital_info h ON d.hospital_id = h.id
+		<where>
+			d.del_flag = 0
+			<if test="goodsNature != null">
+				AND d.goods_nature = #{goodsNature}
+			</if>
+			<if test="status != null">
+				AND d.status = #{status}
+			</if>
+			<if test="hospitalName != null and hospitalName != ''">
+				AND h.hospital_name like CONCAT('%', #{hospitalName}, '%')
+			</if>
+			<if test="typeName != null and typeName != ''">
+				AND d.type_name like CONCAT('%', #{typeName}, '%')
+			</if>
+			<if test="drugsName != null and drugsName != ''">
+				AND d.drugs_name like CONCAT('%', #{drugsName}, '%')
+			</if>
+			<if test="factoryName != null and factoryName != ''">
+				AND f.factory_name like CONCAT('%', #{factoryName}, '%')
+			</if>
+			<if test="sql_filter != null and sql_filter != ''">
+				AND ${sql_filter}
+			</if>
+		</where>
+		ORDER BY IFNULL(d.edit_time, d.create_time) DESC
+	</select>
+	
+	<select id="selectByHospitalIdAndDrugsName" resultType="com.ebig.hdi.modules.drugs.entity.GoodsHospitalDrugsEntity">
+		SELECT * FROM hdi_goods_hospital_drugs WHERE del_flag = 0 AND hospital_id = #{hospitalId} AND drugs_name = #{drugsName}
+	</select>
+	
+	<select id="selectByGoodsNameAndFactoryNameAndHospitalId" resultType="com.ebig.hdi.modules.drugs.entity.GoodsHospitalDrugsEntity">
+		SELECT 
+		  t1.* 
+		FROM
+		  hdi_goods_hospital_drugs t1 
+		  LEFT JOIN hdi_org_factory_info t2 
+		    ON t1.factory_id = t2.id 
+		    AND t2.del_flag = 0 
+		WHERE t1.del_flag = 0 
+		  AND t1.drugs_name = #{goodsName}
+		  AND t1.hospital_id = #{hospitalId}
+		  AND t2.factory_name = #{factoryName} 
+	</select>
+
+	
+	<!--HDI转换用 -->
+	<select id="selectBySourcesId" resultType="java.util.Map">
+		SELECT
+			ghc.id hgoodsid,
+			ghc.drugs_code hgoodsno,
+			ghc.goods_unit hgoodsunit,
+			hcs.id hgoodstypeid,
+			hcs.specs hgoodstype 
+		FROM
+			hdi_goods_hospital_drugs ghc,
+			hdi_goods_hospital_drugs_specs hcs 
+		WHERE
+			hcs.drugs_id = ghc.id
+			AND hcs.sources_specs_id = #{sourcesSpecsId}
+	</select>
+
+	<select id="selectHospitalInfoByHospitalId" resultType="map">
+		SELECT * FROM hdi_org_hospital_info WHERE id = #{hospitalId}
+	</select>
+	
+	<select id="selectNotMatch" resultType="map">
+		SELECT 
+		  t1.id AS drugsId,
+		  t1.drugs_name,
+		  t1.approvals,
+		  t1.hospital_id AS hospitalId,
+		  t1.goods_nature,
+		  t2.id AS specsId,
+		  t2.guid,
+		  t2.specs 
+		FROM
+		  (SELECT 
+		    id,
+		    approvals, 
+		    hospital_id,
+		    drugs_name,
+		    goods_nature
+		  FROM
+		    hdi_goods_hospital_drugs 
+		  WHERE del_flag = 0 
+		    AND is_match = 0 
+		  LIMIT #{limit}) t1 
+		  LEFT JOIN hdi_goods_hospital_drugs_specs t2 
+		    ON t1.id = t2.drugs_id 
+		WHERE t2.status = 1 
+	</select>
+
+	<select id="selectDrugMap" resultType="map">
+		SELECT approvals ,specs,guid,goods_nature,drugs_name FROM
+		hdi_goods_hospital_drugs  drugs
+		LEFT JOIN hdi_goods_hospital_drugs_specs specs
+		ON drugs.id = specs.drugs_id
+		where drugs.id =#{tgoodsId} and specs.id=#{tspecsId}
+	</select>
+</mapper>

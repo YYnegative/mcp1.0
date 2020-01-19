@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.drugs.dao.GoodsPlatformDrugsApprovalDao">
+
+    <resultMap type="com.ebig.hdi.modules.drugs.vo.GoodsPlatformDrugsEntityVo" id="goodsPlatformDrugsMap">
+        <result property="id" column="drugs_id"/>
+        <result property="goodsUnicode" column="goods_unicode"/>
+        <result property="drugsCode" column="drugs_code"/>
+        <result property="drugsName" column="drugs_name"/>
+        <result property="commonName" column="common_name"/>
+        <result property="goodsNature" column="goods_nature"/>
+        <result property="typeId" column="type_id"/>
+        <result property="typeName" column="type_name"/>
+        <result property="factoryId" column="drugs_factory_id"/>
+        <result property="approvals" column="approvals"/>
+        <result property="status" column="drugs_status"/>
+        <result property="goodsUnit" column="goods_unit"/>
+        <result property="storeWay" column="store_way"/>
+        <result property="picUrl" column="pic_url"/>
+        <result property="createId" column="create_id"/>
+        <result property="factoryName" column="factory_name"/>
+        <result property="checkStatus" column="check_status"/>
+        <result property="processId" column="process_id"/>
+        <collection property="specsEntityList" ofType="com.ebig.hdi.modules.drugs.entity.GoodsPlatformDrugsSpecsEntity">
+            <id property="id" column="specs_id"/>
+            <result property="specs" column="specs"/>
+            <result property="guid" column="guid"/>
+            <result property="status" column="specs_status"/>
+        </collection>
+    </resultMap>
+
+    <select id="selectPlatformDrugsById" resultMap="goodsPlatformDrugsMap">
+		SELECT 
+			d.id AS drugs_id,
+			d.goods_unicode,
+			d.drugs_code, 
+			d.drugs_name,
+			d.common_name,
+			d.goods_nature,
+			d.type_id,
+			d.factory_id AS drugs_factory_id,
+			d.approvals,
+			d.status AS drugs_status,
+			d.goods_unit,
+			d.store_way,
+			d.pic_url,
+			d.dept_id,
+			f.factory_name,
+			s.id AS specs_id,
+			s.specs,
+			s.guid,
+			s.status AS specs_status, 
+			c.cate_name AS type_name
+		FROM hdi_goods_platform_drugs_approval d
+			LEFT JOIN hdi_org_factory_info f ON d.factory_id = f.id
+			LEFT JOIN hdi_goods_platform_drugs_specs s ON d.id = s.drugs_id
+			LEFT JOIN hdi_unicode_drugs_cate c ON d.type_id = c.cate_id
+		WHERE d.id = #{id}
+	</select>
+
+    <select id="selectPlatformDrugsList" resultMap="goodsPlatformDrugsMap">
+        SELECT
+        d.id AS drugs_id,
+        d.goods_unicode,
+        d.drugs_name,
+        d.common_name,
+        d.goods_nature,
+        d.type_id,
+        d.factory_id AS drugs_factory_id,
+        d.approvals,
+        d.status AS drugs_status,
+        d.goods_unit,
+        d.store_way,
+        d.pic_url,
+        d.dept_id,
+        d.process_id,
+        d.check_status,
+        f.factory_name,
+        c.cate_name AS type_name
+        FROM hdi_goods_platform_drugs_approval d
+        LEFT JOIN hdi_org_factory_info f ON d.factory_id = f.id
+        LEFT JOIN hdi_unicode_drugs_cate c ON d.type_id = c.cate_id
+        <where>
+            d.del_flag = 0
+            <if test="goodsNature != null">
+                AND d.goods_nature = #{goodsNature}
+            </if>
+            <if test="typeId != null">
+                AND d.type_id IN
+                <foreach collection="typeId" item="item" separator="," open="(" close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="status != null">
+                AND d.status = #{status}
+            </if>
+            <if test="drugsName != null and drugsName != ''">
+                AND d.drugs_name like CONCAT('%', #{drugsName}, '%')
+            </if>
+            <if test="factoryName != null and factoryName != ''">
+                AND f.factory_name like CONCAT('%', #{factoryName}, '%')
+            </if>
+            <if test=" checkStatus!= null">
+                AND d.check_status = #{checkStatus}
+            </if>
+            <if test="sql_filter != null and sql_filter != ''">
+                AND ${sql_filter}
+            </if>
+
+        </where>
+        ORDER BY IFNULL(d.edit_time, d.create_time) DESC
+    </select>
+
+    <select id="selectByDrugsName" resultType="com.ebig.hdi.modules.drugs.entity.GoodsPlatformDrugsApprovalEntity">
+		SELECT * FROM hdi_goods_platform_drugs_approval WHERE del_flag = 0 AND drugs_name = #{drugsName}
+	</select>
+
+    <select id="selectByDrugsNameAndId" resultType="com.ebig.hdi.modules.drugs.entity.GoodsPlatformDrugsApprovalEntity">
+		SELECT * FROM hdi_goods_platform_drugs_approval WHERE del_flag = 0 AND drugs_name = #{drugsName} AND id = #{id}
+	</select>
+    <select id="selectMatch" resultType="map">
+        SELECT
+        t1.id AS drugsId,
+        t2.id AS specsId
+        FROM
+        hdi_goods_platform_drugs_approval t1
+        LEFT JOIN hdi_goods_platform_drugs_specs t2
+        ON t1.id = t2.drugs_id
+        WHERE t1.del_flag = 0 AND t1.status = 1
+        AND t2.status = 1
+        <choose>
+            <when test="guid != null and guid != ''">
+                AND (t2.guid = #{guid} OR (t1.approvals = #{approvals} AND t2.specs = #{specs}))
+            </when>
+            <otherwise>
+                AND (t1.approvals = #{approvals} AND t2.specs = #{specs})
+            </otherwise>
+        </choose>
+    </select>
+    <select id="selectByFactoryName" resultType="string">
+		SELECT id FROM hdi_org_factory_info WHERE del_flag = 0 AND factory_name = #{factoryName}
+	</select>
+
+    <select id="getList" resultType="map">
+        SELECT
+        gpd.id AS id,
+        gpd.type_id AS type_id,
+        gpd.drugs_name AS drugsName,
+        udc.cate_name AS cateName,
+        ofi.factory_name AS factoryName,
+        gpd.approvals As approvals,
+        CASE
+        WHEN gpds.STATUS = 1 THEN
+        gpds.specs
+        WHEN gpds.STATUS = 0 THEN
+        '规格停用'
+        END AS specs,
+        case when
+        gpd.goods_nature = '0' then '国产' when gpd.goods_nature = '1' then '进口' end As goodsNature,
+        case when
+        gpd.check_status = '0' then '待审批' when gpd.check_status = '1' then '审批通过' when
+        gpd.check_status = '2' then '审批不通过' end As checkStatus,
+        CASE when
+        gpd.`status` = '1' then '启用' when gpd.`status` = '0' then '停用' end AS status
+        FROM
+        hdi_goods_platform_drugs_approval gpd
+        LEFT JOIN hdi_unicode_drugs_cate udc ON gpd.type_id = udc.cate_id
+        LEFT JOIN hdi_org_factory_info ofi ON gpd.factory_id = ofi.id
+        LEFT JOIN hdi_goods_platform_drugs_specs gpds ON gpd.id = gpds.drugs_id
+        <where>
+            gpd.del_flag = 0
+            <if test="queryParams.drugsName!=null and queryParams.drugsName !=''">
+                AND gpd.drugs_name like CONCAT('%', #{queryParams.drugsName}, '%')
+            </if>
+            <if test="queryParams.goodsNature!=null">
+                AND gpd.goods_nature = #{queryParams.goodsNature}
+            </if>
+            <if test="queryParams.typeIds!=null">
+                AND gpd.type_id in
+                <foreach collection="queryParams.typeIds" item="item" separator="," open="(" close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="queryParams.status!=null">
+                AND gpd.status = #{queryParams.status}
+            </if>
+            <if test="queryParams.factoryName !=null and queryParams.factoryName !=''">
+                AND ofi.factory_name like CONCAT('%', #{queryParams.factoryName}, '%')
+            </if>
+            <if test="queryParams.checkStatus!=null">
+                AND gpd.check_status = #{queryParams.checkStatus}
+            </if>
+            <if test="sql_filter != null and sql_filter != ''">
+                AND ${sql_filter}
+            </if>
+        </where>
+
+    </select>
+
+    <select id="selectIfExist" resultType="integer">
+        select count(1) from hdi_goods_hospital_drugs
+        <where>id = #{id}
+        </where>
+    </select>
+
+    <select id="selectByFactoryNameExist" resultType="string">
+        select id from hdi_org_factory_info
+        <where>del_flag = 0 AND factory_name = #{factoryName}</where>
+    </select>
+
+    <select id="selectByDrugsNameAndApprovals" resultMap="goodsPlatformDrugsMap">
+        SELECT
+        d.id AS drugs_id,
+        d.goods_unicode,
+        d.drugs_code,
+        d.drugs_name,
+        d.common_name,
+        d.goods_nature,
+        d.type_id,
+        d.factory_id AS drugs_factory_id,
+        d.approvals,
+        d.status AS drugs_status,
+        d.goods_unit,
+        d.store_way,
+        d.pic_url,
+        d.dept_id,
+        d.create_id,
+        f.factory_name,
+        s.id AS specs_id,
+        s.specs,
+        s.guid,
+        s.status AS specs_status,
+        c.cate_name AS type_name
+        FROM hdi_goods_platform_drugs_approval d
+        LEFT JOIN hdi_org_factory_info f ON d.factory_id = f.id
+        LEFT JOIN hdi_goods_platform_drugs_specs s ON d.id = s.drugs_id
+        LEFT JOIN hdi_unicode_drugs_cate c ON d.type_id = c.cate_id
+        <where>d.del_flag = 0
+            AND d.drugs_name= #{drugsName}
+            AND d.approvals = #{approvals}
+        </where>
+    </select>
+
+    <select id="selectByApprovals" resultType="integer">
+        select count(*) from hdi_goods_platform_drugs_approval
+        <where>approvals = #{approvals}</where>
+    </select>
+
+    <select id="selectByApprovalsAndId" resultType="integer">
+        select count(*) from hdi_goods_platform_drugs_approval
+        <where>approvals = #{approvals} and id  != #{id}</where>
+    </select>
+
+    <select id="selectByGoodsNameOrApporvaols" resultType="integer">
+		SELECT DISTINCT
+	t.count
+FROM
+	(
+		SELECT
+			count(*) AS count
+		FROM
+			hdi_goods_platform_drugs_approval
+		WHERE
+			del_flag = 0
+		AND drugs_name = #{drugsName}
+		AND NOT approvals = #{approvals}
+		UNION
+			SELECT
+				count(*) AS count
+			FROM
+				hdi_goods_platform_drugs_approval
+			WHERE
+				del_flag = 0
+			AND NOT drugs_name = #{drugsName}
+			AND approvals = #{approvals}
+	) t
+<where>
+	t.count = 1
+</where>
+	</select>
+</mapper>

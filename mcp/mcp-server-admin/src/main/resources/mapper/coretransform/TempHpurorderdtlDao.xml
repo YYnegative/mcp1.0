@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.coretransform.dao.TempHpurorderdtlDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.coretransform.entity.TempHpurorderdtlEntity" id="tempHpurorderdtlMap">
+        <result property="hpurorderdtlid" column="hpurorderdtlid"/>
+        <result property="hpurorderid" column="hpurorderid"/>
+        <result property="uorganid" column="uorganid"/>
+        <result property="hgoodsid" column="hgoodsid"/>
+        <result property="sgoodsid" column="sgoodsid"/>
+        <result property="hgoodsno" column="hgoodsno"/>
+        <result property="sgoodsno" column="sgoodsno"/>
+        <result property="hgoodsname" column="hgoodsname"/>
+        <result property="sgoodsname" column="sgoodsname"/>
+        <result property="hgoodstype" column="hgoodstype"/>
+        <result property="sgoodstype" column="sgoodstype"/>
+        <result property="hgoodsunit" column="hgoodsunit"/>
+        <result property="sgoodsunit" column="sgoodsunit"/>
+        <result property="hpacksize" column="hpacksize"/>
+        <result property="spacksize" column="spacksize"/>
+        <result property="sourceid" column="sourceid"/>
+        <result property="sourcedtlid" column="sourcedtlid"/>
+        <result property="hunitprice" column="hunitprice"/>
+        <result property="sunitprice" column="sunitprice"/>
+        <result property="hgoodsqty" column="hgoodsqty"/>
+        <result property="sgoodsqty" column="sgoodsqty"/>
+        <result property="purmoney" column="purmoney"/>
+        <result property="purrate" column="purrate"/>
+        <result property="tpid" column="tpid"/>
+        <result property="credate" column="credate"/>
+        <result property="cremanid" column="cremanid"/>
+        <result property="cremanname" column="cremanname"/>
+        <result property="memo" column="memo"/>
+        <result property="hpodtlstatus" column="hpodtlstatus"/>
+        <result property="shipedqty" column="shipedqty"/>
+        <result property="receivedqty" column="receivedqty"/>
+        <result property="exportflag" column="exportflag"/>
+        <result property="udflag" column="udflag"/>
+    </resultMap>
+	
+	<!-- 查询所有的细单 -->
+	<select id="selectTempHpurorderdtl" resultType="com.ebig.hdi.modules.coretransform.entity.TempHpurorderdtlEntity">
+		SELECT
+			* 
+		FROM
+			temp_hdi_hpurorderdtl
+	</select>
+
+
+	<delete id="deleteTempHpurorderdtl">
+		DELETE 
+		FROM
+			temp_hdi_hpurorderdtl 
+		WHERE
+			hpurorderdtlid = #{hpurorderdtlid}
+    </delete>
+</mapper>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.core.dao.UnicodeGoodsShipApprovalDao">
+
+    <select id="selectNotMatch"
+            resultType="com.ebig.hdi.common.entity.UnicodeGoodsShipApprovalEntity">
+        SELECT
+        ship_id,torg_id,torg_type,tgoods_type,tgoods_id,pgoods_id,tspecs_id,pspecs_id,tapproval_id,papproval_id,del_flag
+        FROM
+        hdi_unicode_goods_ship_approval
+        WHERE ship_flag = 0
+        AND del_flag = 0
+        LIMIT #{limit}
+    </select>
+</mapper>

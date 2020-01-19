@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.core.dao.CoreStorehouseDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.core.entity.CoreStorehouseEntity" id="coreStorehouseMap">
+        <result property="storehouseid" column="storehouseid"/>
+        <result property="storehousename" column="storehousename"/>
+        <result property="storehouseno" column="storehouseno"/>
+        <result property="shaddress" column="shaddress"/>
+        <result property="orgdataid" column="orgdataid"/>
+        <result property="uorganid" column="uorganid"/>
+        <result property="horgId" column="horg_id"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="cremanid" column="cremanid"/>
+        <result property="cremanname" column="cremanname"/>
+        <result property="credate" column="credate"/>
+        <result property="editmanid" column="editmanid"/>
+        <result property="editmanname" column="editmanname"/>
+        <result property="editdate" column="editdate"/>
+        <result property="memo" column="memo"/>
+    </resultMap>
+	
+	<select id="queryAllByHospitalId" resultType="com.ebig.hdi.modules.core.entity.CoreStorehouseEntity">
+		select 
+			storehouseid,
+			storehousename,
+			orgdataid,
+			shaddress
+		from 
+			hdi_core_storehouse	
+		where 
+			horg_id = #{hospitalId}
+	</select>
+	
+	<!-- 根据库房标识查询送货地址 -->
+	<select id="selectSupplyAddr" resultType="com.ebig.hdi.modules.core.entity.CoreStorehouseEntity">
+		SELECT
+			* 
+		FROM
+			hdi_core_storehouse cs 
+		WHERE
+			cs.storehouseid = #{storehouseid}
+	</select>
+	
+	
+	
+	<!-- HDI转换用  查询是否存在此原始标识对应的库房 -->
+	<select id="selectByOrgdataid" resultType="com.ebig.hdi.modules.core.entity.CoreStorehouseEntity">
+		SELECT
+			* 
+		FROM
+			hdi_core_storehouse cs 
+		WHERE
+			cs.orgdataid = #{orgdataid}
+	</select>
+
+
+	<!-- HDI转换用  查询是否存在此原始标识对应的库房 -->
+	<select id="selectByOrgdataids" resultType="com.ebig.hdi.modules.core.entity.CoreStorehouseEntity">
+		SELECT
+		*
+		FROM
+		hdi_core_storehouse cs
+		WHERE
+		cs.orgdataid IN
+		<foreach collection="orgdataids" item="item" separator="," open="(" close=")">
+			#{item}
+		</foreach>
+	</select>
+
+	<select id="selectByStoreName" resultType="com.ebig.hdi.modules.core.entity.CoreStorehouseEntity">
+		SELECT
+			*
+		FROM
+			hdi_core_storehouse cs
+		WHERE
+			cs.storehousename = #{storehouseName}
+	</select>
+</mapper>

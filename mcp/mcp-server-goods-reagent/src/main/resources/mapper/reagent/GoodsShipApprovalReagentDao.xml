@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.reagent.dao.GoodsShipApprovalReagentDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.common.entity.UnicodeGoodsShipApprovalEntity"
+               id="unicodeGoodsShipMap">
+        <result property="shipId" column="ship_id"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="torgId" column="torg_id"/>
+        <result property="torgType" column="torg_type"/>
+        <result property="tgoodsType" column="tgoods_type"/>
+        <result property="tgoodsId" column="tgoods_id"/>
+        <result property="pgoodsId" column="pgoods_id"/>
+        <result property="tspecsId" column="tspecs_id"/>
+        <result property="pspecsId" column="pspecs_id"/>
+        <result property="tapprovalId" column="tapproval_id"/>
+        <result property="papprovalId" column="papproval_id"/>
+        <result property="shipFlag" column="ship_flag"/>
+        <result property="checkStatus" column="check_status"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="cremanid" column="cremanid"/>
+        <result property="cremanname" column="cremanname"/>
+        <result property="credate" column="credate"/>
+        <result property="editmanid" column="editmanid"/>
+        <result property="editmanname" column="editmanname"/>
+        <result property="editdate" column="editdate"/>
+        <result property="memo" column="memo"/>
+        <result property="hospitalName" column="hospital_name"/>
+        <result property="goodsName" column="goods_name"/>
+        <result property="factoryName" column="factory_name"/>
+        <result property="specs" column="specs"/>
+        <result property="approvals" column="approvals"/>
+        <result property="preagentName" column="preagent_name"/>
+        <result property="id" column="id"/>
+        <result property="goodsNature" column="goods_nature"/>
+        <result property="cateName" column="cate_name"/>
+        <result property="supplierName" column="supplier_name"/>
+        <result property="pspecs" column="pspecs"/>
+        <result property="onlyId" column="only_id"/>
+        <result property="processId" column="process_id"/>
+    </resultMap>
+
+    <!-- 查询平台商品分页数据  医院/供应商-->
+    <select id="selectPGoodsList"
+            resultType="com.ebig.hdi.common.entity.UnicodeGoodsShipApprovalEntity">
+        SELECT
+        t1.id AS id,
+        t1.reagent_name AS goods_name,
+        t1.goods_nature AS goods_nature,
+        t1.approvals AS approvals,
+        t2.id AS pspecsId,
+        t2.specs AS specs,
+        t3.factory_name AS factory_name
+        FROM
+        hdi_goods_platform_reagent t1
+        LEFT JOIN hdi_goods_platform_reagent_specs t2
+        ON t1.id = t2.reagen_id
+        LEFT JOIN hdi_org_factory_info t3
+        ON t1.factory_id = t3.id
+        <where>
+            t1.del_flag = 0
+            and t3.del_flag = 0
+            AND t1.status = 1
+            AND t2.status = 1
+            <if test="goodsName != null and goodsName != ''">
+                AND t1.reagent_name like CONCAT('%', #{goodsName}, '%')
+            </if>
+            <if test="pspecs != null and pspecs != ''">
+                AND t2.specs like CONCAT('%', #{pspecs}, '%')
+            </if>
+            <if test="approvals != null and approvals != ''">
+                AND t1.approvals = #{approvals}
+            </if>
+        </where>
+    </select>
+
+
+    <!-- 查询前台医院商品分页数据 -->
+    <select id="selectHospitaGoods"
+            resultType="com.ebig.hdi.common.entity.UnicodeGoodsShipApprovalEntity">
+        SELECT
+        ugs.*,
+        ohi.hospital_name,
+        ghc.reagent_name goods_name,
+        hcs.specs,
+        ghc.approvals,
+        ofi.factory_name,
+        gpc.reagent_name pgoods_name,
+        ghc.goods_nature
+        FROM
+        hdi_unicode_goods_ship_approval ugs
+        LEFT JOIN hdi_org_hospital_info ohi ON ugs.torg_id = ohi.id and ohi.del_flag=0
+        LEFT JOIN hdi_goods_hospital_reagent ghc ON ugs.tgoods_id = ghc.id and ghc.del_flag=0
+        LEFT JOIN hdi_goods_hospital_reagent_specs hcs ON ugs.tspecs_id = hcs.id and ugs.del_flag=0
+        LEFT JOIN hdi_org_factory_info ofi ON ghc.factory_id = ofi.id and ofi.del_flag=0
+        LEFT JOIN hdi_goods_platform_reagent gpc on ugs.pgoods_id = gpc.id and gpc.del_flag=0
+        <where>
+            ugs.torg_type = 0
+            AND ugs.tgoods_type = 2
+            <if test="deptIds != null and deptIds != ''">
+                AND ${deptIds}
+            </if>
+            <if test="shipFlag != null">
+                AND ugs.ship_flag = #{shipFlag}
+            </if>
+            <if test="checkStatus != null">
+                AND ugs.check_status = #{checkStatus}
+            </if>
+            <if test="hospitalName != null and hospitalName != ''">
+                AND ohi.hospital_name like CONCAT('%',#{hospitalName}, '%')
+            </if>
+            <if test="goodsName != null and goodsName != ''">
+                AND ghc.reagent_name like CONCAT('%', #{goodsName}, '%')
+            </if>
+            <if test="factoryName != null and factoryName != ''">
+                AND ofi.factory_name like CONCAT('%', #{factoryName}, '%')
+            </if>
+        </where>
+        ORDER BY IFNULL(ugs.editdate, ugs.credate) DESC
+    </select>
+
+    <!-- 查询前台供应商分页数据 -->
+    <select id="selectSupplierGoods"
+            resultType="com.ebig.hdi.common.entity.UnicodeGoodsShipApprovalEntity">
+        SELECT
+        ugs.*,
+        osi.supplier_name,
+        gsc.reagent_name goods_name,
+        scs.specs,
+        gsc.approvals,
+        ofi.factory_name,
+        gpc.reagent_name pgoods_name,
+        pcs.specs pspecs,
+        gsc.goods_nature
+        FROM
+        hdi_unicode_goods_ship_approval ugs
+        LEFT JOIN hdi_org_supplier_info osi ON ugs.torg_id = osi.id and osi.del_flag=0
+        LEFT JOIN hdi_goods_supplier_reagent gsc ON ugs.tgoods_id = gsc.id and gsc.del_flag=0
+        LEFT JOIN hdi_goods_supplier_reagent_specs scs ON ugs.tspecs_id = scs.id
+        LEFT JOIN hdi_org_factory_info ofi ON gsc.factory_id = ofi.id and ofi.del_flag=0
+        LEFT JOIN hdi_goods_platform_reagent gpc on ugs.pgoods_id = gpc.id and gpc.del_flag=0
+        LEFT JOIN hdi_goods_platform_reagent_specs pcs on pcs.id = ugs.pspecs_id
+        <where>
+            ugs.torg_type = 1
+            AND ugs.tgoods_type = 2
+            and ugs.del_flag=0
+            <if test="deptIds != null and deptIds != ''">
+                AND ${deptIds}
+            </if>
+            <if test="shipFlag != null">
+                AND ugs.ship_flag = #{shipFlag}
+            </if>
+            <if test="checkStatus != null">
+                AND ugs.check_status = #{checkStatus}
+            </if>
+            <if test="supplierName != null and supplierName != ''">
+                AND osi.supplier_name like CONCAT('%',#{supplierName}, '%')
+            </if>
+            <if test="goodsName != null and goodsName != ''">
+                AND gsc.reagent_name like CONCAT('%', #{goodsName}, '%')
+            </if>
+            <if test="factoryName != null and factoryName != ''">
+                AND ofi.factory_name like CONCAT('%', #{factoryName}, '%')
+            </if>
+        </where>
+        ORDER BY IFNULL(ugs.editdate, ugs.credate) DESC
+    </select>
+
+    <!-- 编辑保存修改平台商品规格标识 -->
+    <update id="updateHospitalPgoodsId">
+		UPDATE hdi_unicode_goods_ship_approval 
+		SET pgoods_id = #{pgoodsId},
+		pspecs_id = #{pspecsId},
+		papproval_id = #{papprovalId},
+		editmanid = #{editmanid},
+		editmanname = #{editmanname},
+		editdate = #{editdate},
+		ship_flag = 1 
+		WHERE
+			ship_id = #{shipId}
+	</update>
+
+
+    <!-- 编辑保存修改平台商品规格标识 -->
+    <update id="updateSupplierPgoodsId">
+		UPDATE hdi_unicode_goods_ship_approval 
+		SET pgoods_id = #{pgoodsId},
+		pspecs_id = #{pspecsId},
+		papproval_id = #{papprovalId},
+		editmanid = #{editmanid},
+		editmanname = #{editmanname},
+		editdate = #{editdate},
+		ship_flag = 1 
+		WHERE
+			ship_id = #{shipId}
+	</update>
+
+
+    <select id="listHospitalMatchGoods"
+            resultType="com.ebig.hdi.common.entity.UnicodeGoodsShipApprovalEntity">
+		SELECT 
+		  * 
+		FROM
+		  hdi_unicode_goods_ship_approval 
+		WHERE torg_type = 0 
+		  AND tgoods_type = 2 
+		  AND ship_flag = 1
+		  AND check_status in(0,1)
+		  AND del_flag = 0 
+		  AND torg_id = #{torgId} 
+		  AND pgoods_id = #{pgoodsId} 
+		  AND pspecs_id = #{pspecsId}
+	</select>
+
+    <select id="listSupplierMatchGoods"
+            resultType="com.ebig.hdi.common.entity.UnicodeGoodsShipApprovalEntity">
+		SELECT 
+		  * 
+		FROM
+		  hdi_unicode_goods_ship_approval 
+		WHERE torg_type = 1 
+		  AND tgoods_type = 2 
+		  AND ship_flag = 1
+		  AND check_status in(0,1)
+		  AND del_flag = 0 
+		  AND torg_id = #{torgId}
+		  AND pgoods_id = #{pgoodsId} 
+		  AND pspecs_id = #{pspecsId}
+	</select>
+</mapper>

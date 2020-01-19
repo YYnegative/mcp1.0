@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/mcp" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-common-code" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-common-code/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-common-code/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-common-core" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-common-core/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-common-core/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-document" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-server-activiti" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-server-activiti/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-server-activiti/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-server-admin" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-server-admin/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-server-admin/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-server-api" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-server-api/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-server-api/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-server-config" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-server-config/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-server-config/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-server-eureka" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-server-eureka/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-server-eureka/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-server-gateway" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-server-gateway/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-server-gateway/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-server-goods-consumables" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-server-goods-consumables/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-server-goods-consumables/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-server-goods-drugs" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-server-goods-drugs/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-server-goods-drugs/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-server-goods-reagent" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-server-goods-reagent/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-server-goods-reagent/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-server-license" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-server-license/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-server-license/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-server-report" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-server-report/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-server-report/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-server-surgery" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-server-surgery/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-server-surgery/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-server-system" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-server-system/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-server-system/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-tool-generator" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/mcp/mcp-tool-generator/src/main/java" charset="UTF-8" />
+  </component>
+</project>

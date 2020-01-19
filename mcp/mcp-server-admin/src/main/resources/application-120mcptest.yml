@@ -1,0 +1,78 @@
+# Tomcat
+server:
+  tomcat:
+    uri-encoding: UTF-8
+    max-threads: 1000
+    min-spare-threads: 30
+  port: 8004
+  connection-timeout: 5000ms
+  servlet:
+    context-path: /mcp-server-admin
+    
+spring:
+    datasource:
+        type: com.alibaba.druid.pool.DruidDataSource
+        druid:
+            driver-class-name: com.mysql.jdbc.Driver
+            url: jdbc:mysql://rm-wz93zg93v8pu4w6o8.mysql.rds.aliyuncs.com:3306/mcp-test?allowMultiQueries=true&useUnicode=true&characterEncoding=UTF-8&useSSL=false
+            username: hscm_admin
+            password: Hscm_admin
+            initial-size: 10
+            max-active: 100
+            min-idle: 10
+            max-wait: 60000
+            pool-prepared-statements: true
+            max-pool-prepared-statement-per-connection-size: 20
+            time-between-eviction-runs-millis: 60000
+            min-evictable-idle-time-millis: 300000
+            #Oracle需要打开注释
+            #validation-query: SELECT 1 FROM DUAL
+            test-while-idle: true
+            test-on-borrow: false
+            test-on-return: false
+            stat-view-servlet:
+                enabled: true
+                url-pattern: /druid/*
+                #login-username: admin
+                #login-password: admin
+            filter:
+                stat:
+                    log-slow-sql: true
+                    slow-sql-millis: 1000
+                    merge-sql: false
+                wall:
+                    config:
+                        multi-statement-allow: true
+
+fdfs:
+  soTimeout: 1500 #socket连接超时时长
+  connectTimeout: 600 #连接tracker服务器超时时长
+  resHost: 120.79.54.184
+  storagePort: 8888
+  thumbImage: #缩略图生成参数，可选
+    width: 150
+    height: 150
+  trackerList: #TrackerList参数,支持多个，我这里只有一个，如果有多个在下方加- x.x.x.x:port
+    - 120.79.54.184:22122
+
+dynamic:
+  datasource:
+    hdi:
+      driver-class-name: com.mysql.jdbc.Driver
+      url: jdbc:mysql://rm-wz93zg93v8pu4w6o8.mysql.rds.aliyuncs.com:3306/hdi-test?allowMultiQueries=true&useUnicode=true&characterEncoding=UTF-8&useSSL=false
+      username: hscm_admin
+      password: Hscm_admin
+      
+##多数据源的配置
+#dynamic:
+#  datasource:
+#    slave1:
+#      driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+#      url: jdbc:sqlserver://localhost:1433;DatabaseName=renren_security
+#      username: sa
+#      password: 123456
+#    slave2:
+#      driver-class-name: org.postgresql.Driver
+#      url: jdbc:postgresql://localhost:5432/renren_security
+#      username: renren
+#      password: 123456

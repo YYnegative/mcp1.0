@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.org.dao.OrgFactoryInfoDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.common.entity.OrgFactoryInfoEntity" id="orgFactoryInfoMap">
+        <result property="id" column="id"/>
+        <result property="factoryCode" column="factory_code"/>
+        <result property="factoryName" column="factory_name"/>
+        <result property="creditCode" column="credit_code"/>
+        <result property="countryCode" column="country_code"/>
+        <result property="provinceCode" column="province_code"/>
+        <result property="cityCode" column="city_code"/>
+        <result property="areaCode" column="area_code"/>
+        <result property="factoryAddress" column="factory_address"/>
+        <result property="status" column="status"/>
+        <result property="corporate" column="corporate"/>
+        <result property="phone" column="phone"/>
+        <result property="email" column="email"/>
+        <result property="fax" column="fax"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="createId" column="create_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="editId" column="edit_id"/>
+        <result property="editTime" column="edit_time"/>
+        <result property="delFlag" column="del_flag"/>
+    </resultMap>
+
+	<!-- 根据厂商名称查询信息 -->
+	<select id="selectByFactoryName" resultType="com.ebig.hdi.common.entity.OrgFactoryInfoEntity">
+		select * from hdi_org_factory_info where factory_name = #{factoryName} 
+	</select>
+	
+	<!-- 根据厂商信用代码查询信息 -->
+	<select id="selectByCreditCode" resultType="com.ebig.hdi.common.entity.OrgFactoryInfoEntity">
+		select * from hdi_org_factory_info where credit_code = #{creditCode} 
+	</select>
+
+    <!-- 根据厂商信用代码与厂商名称查询信息 -->
+    <select id="selectByCreditCodeOrFactoryName" resultType="com.ebig.hdi.common.entity.OrgFactoryInfoEntity">
+		select * from hdi_org_factory_info where   factory_name = #{factoryName}  or  credit_code = #{creditCode}
+	</select>
+
+</mapper>

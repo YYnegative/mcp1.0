@@ -1,0 +1,391 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.drugs.dao.GoodsSupplierDrugsDao">
+
+    <resultMap type="com.ebig.hdi.modules.drugs.vo.GoodsSupplierDrugsEntityVo" id="goodsSupplierDrugsMap">
+        <result property="id" column="drugs_id"/>
+        <result property="supplierId" column="supplier_id"/>
+        <result property="drugsName" column="drugs_name"/>
+        <result property="commonName" column="common_name"/>
+        <result property="goodsNature" column="goods_nature"/>
+        <result property="typeId" column="type_id"/>
+        <result property="typeName" column="type_name"/>
+        <result property="factoryId" column="drugs_factory_id"/>
+        <result property="approvals" column="approvals"/>
+        <result property="status" column="drugs_status"/>
+        <result property="goodsUnit" column="goods_unit"/>
+        <result property="supplyUnit" column="supply_unit"/>
+        <result property="convertUnit" column="convert_unit"/>
+        <result property="agentId" column="agent_id"/>
+        <result property="agentName" column="agent_name"/>
+        <result property="picUrl" column="pic_url"/>
+        <result property="factoryName" column="factory_name"/>
+        <result property="supplierName" column="supplier_name"/>
+        <result property="licenseNumber" column="license_number"/>
+        <result property="drugsCode" column="drugs_code"/>
+        <result property="storeWay" column="store_way"/>
+        <result property="sunshinePno" column="sunshine_pno"/>
+        <collection property="specsEntityList" ofType="com.ebig.hdi.modules.drugs.entity.GoodsSupplierDrugsSpecsEntity">
+            <id property="id" column="specs_id"/>
+            <result property="specs" column="specs"/>
+            <result property="guid" column="guid"/>
+            <result property="status" column="specs_status"/>
+        </collection>
+    </resultMap>
+
+    <select id="selectSupplierDrugsById" resultMap="goodsSupplierDrugsMap">
+		SELECT 
+		  d.id AS drugs_id,
+		  d.supplier_id,
+		  d.drugs_name,
+		  d.common_name,
+		  d.goods_nature,
+		  d.type_id,
+		  d.type_name,
+		  d.sunshine_pno,
+		  d.factory_id AS drugs_factory_id,
+		  d.approvals,
+		  d.status AS drugs_status,
+		  d.goods_unit,
+		  d.supply_unit,
+		  d.convert_unit,
+		  d.agent_id,
+		  d.pic_url,
+		  f.factory_name,
+		  a.agent_name,
+		  sp.supplier_name,
+		  s.id AS specs_id,
+		  s.specs,
+		  s.guid,
+		  s.status AS specs_status,
+		  d.drugs_code,
+		  d.store_way
+		FROM
+		  hdi_goods_supplier_drugs d 
+		  LEFT JOIN hdi_org_factory_info f 
+		    ON d.factory_id = f.id 
+		  LEFT JOIN hdi_org_agent_info a
+		    ON d.agent_id = a.id 
+		  LEFT JOIN hdi_org_supplier_info sp 
+		    ON d.supplier_id = sp.id 
+		  LEFT JOIN hdi_goods_supplier_drugs_specs s 
+		    ON d.id = s.drugs_id 
+		WHERE d.id = #{id} 
+	</select>
+
+    <select id="selectSupplierDrugsList" resultMap="goodsSupplierDrugsMap">
+        SELECT
+        d.id AS drugs_id,
+        d.supplier_id,
+        d.drugs_name,
+        d.common_name,
+        d.goods_nature,
+        d.type_id,
+        d.type_name,
+        d.factory_id AS drugs_factory_id,
+        d.approvals,
+        d.status AS drugs_status,
+        d.goods_unit,
+        d.supply_unit,
+        d.convert_unit,
+        d.agent_id,
+        d.pic_url,
+        d.sunshine_pno,
+        f.factory_name,
+        sp.supplier_name,
+        ( SELECT count( id ) FROM view_hdi_license_goods WHERE supplier_id = d.supplier_id AND goods_id = d.id AND
+        goods_type = 1 AND STATUS = 1 AND del_flag = 0 ) +
+        ( SELECT count( id ) FROM view_hdi_license_agent WHERE supplier_id = d.supplier_id AND agent_id = d.agent_id AND
+        STATUS = 1 AND del_flag = 0 ) +
+        ( SELECT count( id ) FROM view_hdi_license_factory WHERE supplier_id = d.supplier_id AND factory_id =
+        d.factory_id AND STATUS = 1 AND del_flag = 0 ) +
+        ( SELECT count( id ) FROM view_hdi_license_supplier WHERE supplier_id = d.supplier_id AND STATUS = 1 AND
+        del_flag = 0 ) AS license_number
+        FROM hdi_goods_supplier_drugs d
+        LEFT JOIN hdi_org_factory_info f ON d.factory_id = f.id
+        LEFT JOIN hdi_org_supplier_info sp ON d.supplier_id = sp.id
+        <where>
+            d.del_flag = 0
+            <if test="goodsNature != null">
+                AND d.goods_nature = #{goodsNature}
+            </if>
+            <if test="typeName != null and typeName != ''">
+                AND d.type_name like CONCAT('%', #{typeName}, '%')
+            </if>
+            <if test="status != null">
+                AND d.status = #{status}
+            </if>
+            <if test="drugsName != null and drugsName != ''">
+                AND d.drugs_name like CONCAT('%', #{drugsName}, '%')
+            </if>
+            <if test="factoryName != null and factoryName != ''">
+                AND f.factory_name like CONCAT('%', #{factoryName}, '%')
+            </if>
+            <if test="supplierName != null and supplierName != ''">
+                AND sp.supplier_name like CONCAT('%', #{supplierName}, '%')
+            </if>
+            <if test="sql_filter != null and sql_filter != ''">
+                AND ${sql_filter}
+            </if>
+        </where>
+        ORDER BY IFNULL(d.edit_time, d.create_time) DESC
+    </select>
+
+    <select id="selectBySupplierIdAndDrugsName" resultType="com.ebig.hdi.modules.drugs.entity.GoodsSupplierDrugsEntity">
+		SELECT * FROM hdi_goods_supplier_drugs WHERE del_flag = 0 AND supplier_id = #{supplierId} AND drugs_name = #{drugsName}
+	</select>
+
+
+    <select id="selectByGoodsNameAndFactoryNameAndSupplierId"
+            resultType="com.ebig.hdi.modules.drugs.entity.GoodsSupplierDrugsEntity">
+		SELECT 
+		  t1.* 
+		FROM
+		  hdi_goods_supplier_drugs t1 
+		  LEFT JOIN hdi_org_factory_info t2 
+		    ON t1.factory_id = t2.id 
+		    AND t2.del_flag = 0 
+		WHERE t1.del_flag = 0 
+		  AND t1.drugs_name = #{goodsName}
+		  AND t1.supplier_id = #{supplierId}
+		  AND t2.factory_name = #{factoryName}   
+	</select>
+
+
+    <!--HDI转换用 -->
+    <select id="selectBySourcesIds" resultType="java.util.Map">
+        SELECT
+        ghc.id sgoodsid,
+        ghc.drugs_code sgoodsno,
+        ghc.goods_unit sgoodsunit,
+        hcs.id sgoodstypeid,
+        hcs.specs sgoodstype,
+        hcs.sources_specs_id sourcesSpecsId
+        FROM
+        hdi_goods_supplier_drugs ghc,
+        hdi_goods_supplier_drugs_specs hcs
+        WHERE
+        hcs.drugs_id = ghc.id
+        AND hcs.sources_specs_id IN
+        <foreach collection="sourcesSpecsIds" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="selectSupplierInfoBySupplierId" resultType="map">
+		SELECT * FROM hdi_org_supplier_info WHERE id = #{supplierId}
+	</select>
+
+    <select id="selectNotMatch" resultType="map">
+		SELECT 
+		  t1.id AS drugsId,
+		  t1.drugs_name,
+		  t1.approvals,
+		  t1.supplier_id AS supplierId,
+		  t1.goods_nature,
+		  t2.id AS specsId,
+		  t2.guid,
+		  t2.specs 
+		FROM
+		  (SELECT 
+		    id,
+		    approvals,
+		    supplier_id,
+		    drugs_name,
+		    goods_nature
+		  FROM
+		    hdi_goods_supplier_drugs 
+		  WHERE del_flag = 0 
+		    AND is_match = 0 
+		  LIMIT #{limit}) t1 
+		  LEFT JOIN hdi_goods_supplier_drugs_specs t2 
+		    ON t1.id = t2.drugs_id 
+		WHERE t2.status = 1 
+	</select>
+
+    <select id="selectSupplierIdByName" resultType="Long">
+	select
+		id
+	from
+		hdi_org_supplier_info
+	where
+		supplier_name = #{supplierName}
+	and
+		del_flag = 0
+	</select>
+
+    <update id="updateSupplierGoodsSendNotUpload">
+		UPDATE 
+		  hdi_goods_supplier_send 
+		SET
+		  is_upload = 0 
+		WHERE supplier_id = #{supplierId} 
+		  AND goods_id = #{goodsId} 
+	</update>
+
+    <select id="selectByApprovals" resultType="integer">
+        select count(*) from hdi_goods_supplier_drugs
+        <where>
+        del_flag = 0 and approvals = #{approvals}
+        </where>
+    </select>
+
+    <select id="getList" resultType="map">
+        SELECT
+        sp.supplier_name AS supplierName,
+        gsd.drugs_name AS drugsName,
+        case when gsd.goods_nature = 0 then '国产'
+        when gsd.goods_nature = 1 then '进口' end
+        AS goodsNature,
+        gsd.type_name AS typeName,
+        f.factory_name AS factoryName,
+        gsd.approvals,
+        CASE
+        WHEN gsds. STATUS = 1 THEN
+        gsds.specs
+        WHEN gsds. STATUS = 0 THEN
+        '规格停用'
+        END AS specs,
+        CASE
+        WHEN gsd.`status` = 1 THEN
+        '启用'
+        WHEN gsd.`status` = 0 THEN
+        '停用'
+        END AS status,
+        (
+        SELECT
+        count(id)
+        FROM
+        view_hdi_license_goods
+        WHERE
+        supplier_id = gsd.supplier_id
+        AND goods_id = gsd.id
+        AND goods_type = 1
+        AND STATUS = 1
+        AND del_flag = 0
+        ) + (
+        SELECT
+        count(id)
+        FROM
+        view_hdi_license_agent
+        WHERE
+        supplier_id = gsd.supplier_id
+        AND agent_id = gsd.agent_id
+        AND STATUS = 1
+        AND del_flag = 0
+        ) + (
+        SELECT
+        count(id)
+        FROM
+        view_hdi_license_factory
+        WHERE
+        supplier_id = gsd.supplier_id
+        AND factory_id = gsd.factory_id
+        AND STATUS = 1
+        AND del_flag = 0
+        ) + (
+        SELECT
+        count(id)
+        FROM
+        view_hdi_license_supplier
+        WHERE
+        supplier_id = gsd.supplier_id
+        AND STATUS = 1
+        AND del_flag = 0
+        ) AS licenseNumber
+        FROM
+        hdi_goods_supplier_drugs gsd
+        LEFT JOIN hdi_org_factory_info f ON gsd.factory_id = f.id
+        LEFT JOIN hdi_org_supplier_info sp ON gsd.supplier_id = sp.id
+        LEFT JOIN hdi_goods_supplier_drugs_specs gsds ON gsd.id = gsds.drugs_id
+        <where>
+            gsd.del_flag = 0
+            <if test="queryParams.goodsNature != null">
+                AND gsd.goods_nature = #{queryParams.goodsNature}
+            </if>
+            <if test="queryParams.typeName != null and queryParams.typeName != ''">
+
+                AND gsd.type_name  like CONCAT('%', #{queryParams.typeName}, '%')
+            </if>
+            <if test="queryParams.status != null">
+                AND gsd.status = #{queryParams.status}
+            </if>
+            <if test="queryParams.drugsName != null and queryParams.drugsName != ''">
+                AND gsd.drugs_name like CONCAT('%', #{queryParams.drugsName}, '%')
+            </if>
+            <if test="queryParams.factoryName != null and queryParams.factoryName != ''">
+                AND f.factory_name like CONCAT('%', #{queryParams.factoryName}, '%')
+            </if>
+            <if test="queryParams.supplierName != null and queryParams.supplierName != ''">
+                AND sp.supplier_name like CONCAT('%', #{queryParams.supplierName}, '%')
+            </if>
+            <if test="sql_filter != null and sql_filter != ''">
+                AND ${sql_filter}
+            </if>
+        </where>
+        ORDER BY IFNULL(gsd.edit_time, gsd.create_time) DESC
+    </select>
+
+
+    <select id="selectByDrugsNameAndApprovals" resultMap="goodsSupplierDrugsMap">
+        SELECT
+        d.id AS drugs_id,
+        d.supplier_id,
+        d.drugs_name,
+        d.common_name,
+        d.goods_nature,
+        d.type_id,
+        d.type_name,
+        d.factory_id AS drugs_factory_id,
+        d.approvals,
+        d.status AS drugs_status,
+        d.goods_unit,
+        d.supply_unit,
+        d.convert_unit,
+        d.agent_id,
+        d.pic_url,
+        d.sunshine_pno,
+        f.factory_name,
+        sp.supplier_name,
+        ( SELECT count( id ) FROM view_hdi_license_goods WHERE supplier_id = d.supplier_id AND goods_id = d.id AND
+        goods_type = 1 AND STATUS = 1 AND del_flag = 0 ) +
+        ( SELECT count( id ) FROM view_hdi_license_agent WHERE supplier_id = d.supplier_id AND agent_id = d.agent_id AND
+        STATUS = 1 AND del_flag = 0 ) +
+        ( SELECT count( id ) FROM view_hdi_license_factory WHERE supplier_id = d.supplier_id AND factory_id =
+        d.factory_id AND STATUS = 1 AND del_flag = 0 ) +
+        ( SELECT count( id ) FROM view_hdi_license_supplier WHERE supplier_id = d.supplier_id AND STATUS = 1 AND
+        del_flag = 0 ) AS license_number
+        FROM hdi_goods_supplier_drugs d
+        LEFT JOIN hdi_org_factory_info f ON d.factory_id = f.id
+        LEFT JOIN hdi_org_supplier_info sp ON d.supplier_id = sp.id
+        <where>
+            d.del_flag = 0
+            and d.drugs_name = #{drugsName}
+            and d.approvals = #{approvals}
+        </where>
+    </select>
+
+    <select id="selectTheSameNameAndDifferentApprovlas" resultType="integer">
+        select count(*) from hdi_goods_supplier_drugs d
+        LEFT JOIN hdi_goods_supplier_drugs_specs gsds ON d.id = gsds.drugs_id
+        <where>
+            d.del_flag = 0 and d.drugs_name = #{drugsName} and not d.approvals = #{approvals} and gsds.specs != #{specs}
+        </where>
+    </select>
+
+    <select id="selectTheSameApprovalsAndDifferentName" resultType="integer">
+        select count(*) from hdi_goods_supplier_drugs
+        <where>
+            del_flag = 0 and drugs_name !=#{drugsName} and approvals = #{approvals}
+        </where>
+    </select>
+    <select id="selectDrugMap" resultType="map">
+        SELECT approvals ,specs,guid,drugs_name,goods_nature FROM
+        hdi_goods_supplier_drugs  drugs
+        LEFT JOIN hdi_goods_supplier_drugs_specs specs
+        ON drugs.id = specs.drugs_id
+        where drugs.id =#{tgoodsId} and specs.id=#{tspecsId}
+    </select>
+
+</mapper>

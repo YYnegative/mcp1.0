@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.core.dao.OrgFactoryInfoApprovalDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.common.entity.OrgFactoryInfoApprovalEntity" id="orgFactoryInfoApprovalMap">
+        <result property="id" column="id"/>
+        <result property="sourcesId" column="sources_id"/>
+        <result property="factoryCode" column="factory_code"/>
+        <result property="factoryName" column="factory_name"/>
+        <result property="creditCode" column="credit_code"/>
+        <result property="countryCode" column="country_code"/>
+        <result property="provinceCode" column="province_code"/>
+        <result property="cityCode" column="city_code"/>
+        <result property="areaCode" column="area_code"/>
+        <result property="factoryAddress" column="factory_address"/>
+        <result property="status" column="status"/>
+        <result property="corporate" column="corporate"/>
+        <result property="phone" column="phone"/>
+        <result property="email" column="email"/>
+        <result property="fax" column="fax"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="createId" column="create_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="editId" column="edit_id"/>
+        <result property="editTime" column="edit_time"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="dataSource" column="data_source"/>
+        <result property="checkStatus" column="check_status"/>
+        <result property="processId" column="process_id"/>
+    </resultMap>
+    <select id="selectByFactoryName" resultType="com.ebig.hdi.common.entity.OrgFactoryInfoApprovalEntity">
+
+       select * from hdi_org_factory_info_approval where factory_name = #{factoryName}
+
+    </select>
+    <select id="selectByCreditCode" resultMap="orgFactoryInfoApprovalMap">
+
+       select * from hdi_org_factory_info_approval where credit_code = #{creditCode}
+
+    </select>
+
+    <select id="getList" resultType="map">
+        SELECT
+        factory_code,factory_name,credit_code,
+        province_code,city_code,area_code,
+        CASE WHEN status ='1' THEN '启用' WHEN  status ='0' THEN '未启用' END AS status,
+        CASE WHEN check_status ='0' THEN '待审批' WHEN check_status ='1' THEN '审批通过' ELSE '审批不通过' END AS check_status
+        FROM
+        hdi_org_factory_info_approval
+        <where>
+            del_flag = 0
+            <if test="queryParam.countryCode!=null and queryParam.countryCode!=''">
+                AND country_code = #{queryParam.countryCode}
+            </if>
+            <if test="queryParam.provinceCode!=null and queryParam.provinceCode!=''">
+                AND province_code = #{queryParam.provinceCode}
+            </if>
+            <if test="queryParam.cityCode!=null and queryParam.cityCode!=''">
+                AND city_code = #{queryParam.cityCode}
+            </if>
+            <if test="queryParam.areaCode!=null and queryParam.areaCode!=''">
+                AND area_code = #{queryParam.areaCode}
+            </if>
+            <if test="queryParam.factoryName!=null and queryParam.factoryName!=''">
+                AND factory_name like CONCAT('%',#{queryParam.factoryName},'%')
+            </if>
+            <if test="queryParam.status!=null and queryParam.status!=''">
+                AND status = #{queryParam.status}
+            </if>
+            <if test="queryParam.checkStatus!=null and queryParam.checkStatus!=''">
+                AND check_status = #{queryParam.checkStatus}
+            </if>
+            ORDER BY create_time DESC,edit_time DESC
+        </where>
+    </select>
+    <select id="selectListByFactoryCode" resultType="com.ebig.hdi.common.entity.OrgFactoryInfoEntity">
+        SELECT * FROM hdi_org_factory_info WHERE factory_code=#{factoryCode}
+    </select>
+    <update id="updateFactoryInfoById">
+        UPDATE hdi_org_factory_info SET STATUS = #{status} WHERE id = #{id,jdbcType=BIGINT}
+    </update>
+    <select id="selectFactoryInfoById" resultType="com.ebig.hdi.common.entity.OrgFactoryInfoEntity">
+        SELECT * FROM hdi_org_factory_info WHERE id = #{id,jdbcType=BIGINT}
+    </select>
+
+</mapper>

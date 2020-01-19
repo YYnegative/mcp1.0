@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.coretransform.dao.TempSpdPodtlDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.coretransform.entity.TempSpdPodtlEntity" id="tempSpdPodtlMap">
+        <result property="podtlid" column="podtlid"/>
+        <result property="poid" column="poid"/>
+        <result property="batchid" column="batchid"/>
+        <result property="uorganid" column="uorganid"/>
+        <result property="sourceid" column="sourceid"/>
+        <result property="sourceno" column="sourceno"/>
+        <result property="sourcedtlid" column="sourcedtlid"/>
+        <result property="originid" column="originid"/>
+        <result property="originno" column="originno"/>
+        <result property="hgoodsno" column="hgoodsno"/>
+        <result property="hgoodsname" column="hgoodsname"/>
+        <result property="hunitprice" column="hunitprice"/>
+        <result property="hgoodsqty" column="hgoodsqty"/>
+        <result property="hrgqty" column="hrgqty"/>
+        <result property="plotid" column="plotid"/>
+        <result property="plotno" column="plotno"/>
+        <result property="pproddate" column="pproddate"/>
+        <result property="pvaliddate" column="pvaliddate"/>
+        <result property="pinvaliddate" column="pinvaliddate"/>
+        <result property="slotid" column="slotid"/>
+        <result property="slotno" column="slotno"/>
+        <result property="sproddate" column="sproddate"/>
+        <result property="svaliddate" column="svaliddate"/>
+        <result property="sinvaliddate" column="sinvaliddate"/>
+        <result property="invno" column="invno"/>
+        <result property="invfirstno" column="invfirstno"/>
+        <result property="invdate" column="invdate"/>
+        <result property="invmoney" column="invmoney"/>
+        <result property="tpid" column="tpid"/>
+        <result property="credate" column="credate"/>
+        <result property="memo" column="memo"/>
+        <result property="checkpotime" column="checkpotime"/>
+        <result property="checkpomanid" column="checkpomanid"/>
+        <result property="checkpomanname" column="checkpomanname"/>
+        <result property="qualitystatus" column="qualitystatus"/>
+        <result property="unitid" column="unitid"/>
+        <result property="unitcode" column="unitcode"/>
+        <result property="hgoodsid" column="hgoodsid"/>
+        <result property="hgoodsunitqty" column="hgoodsunitqty"/>
+        <result property="hrgunitqty" column="hrgunitqty"/>
+        <result property="invstatus" column="invstatus"/>
+        <result property="stageflag" column="stageflag"/>
+        <result property="expflag" column="expflag"/>
+        <result property="labelno" column="labelno"/>
+    </resultMap>
+
+	<!--  -->
+	<select id="getDeptId" resultType="java.util.Map">
+		SELECT
+			osi.dept_id deptId,
+			uss.hospital_id horgId,
+			su.user_id cremanid,
+			su.username cremanname
+		FROM
+			hdi_org_supplier_info osi,
+			hdi_unicode_supply_ship uss,
+			sys_user su
+		WHERE
+			uss.sources_supplier_id = osi.id
+			AND osi.create_id = su.user_id
+			AND uss.sources_supplier_id = #{supplyid}
+			AND uss.sources_hospital_id = #{uorganid}
+			and uss.del_flag=0
+			and osi.del_flag=0
+	</select>
+	
+	
+	<!-- 定时任务每次取100条验收单数据进行处理 -->
+	<select id="getTempSpdPodtlEntity" resultType="com.ebig.hdi.modules.coretransform.entity.TempSpdPodtlEntity">
+		SELECT
+			* 
+		FROM
+			spd_podtl
+		WHERE udflag=0
+		LIMIT #{limit}
+	</select>
+	
+	<!-- 根据原医院ID和原供应商ID获取平台医院、供应商匹对关系 -->
+	<select id="getHospitalSupplierShip" resultType="java.util.Map">
+		SELECT
+			u.ship_id,
+			u.supplier_hospital_ref_id,
+			u.hospital_id,
+			u.supplier_id,
+			u.sources_ship_id,
+			u.sources_hospital_id,
+			u.sources_hospital_name,
+			u.sources_hospital_credit_code,
+			u.sources_supplier_id,
+			u.sources_supplier_name,
+			u.sources_supplier_credit_code,
+			s.dept_id AS supplier_dept_id,
+			s.supplier_code,
+			s.supplier_name,
+			h.hospital_code,
+			h.hospital_name
+		FROM
+			hdi_unicode_supply_ship u,
+			hdi_org_supplier_info s,
+			hdi_org_hospital_info h
+		WHERE
+			u.sources_hospital_id=#{sourcesHospitalId}
+		and u.sources_supplier_id=#{sourcesSupplierId}
+		and u.ship_flag=1
+		and u.supplier_id=s.id
+		and u.hospital_id=h.id
+		and s.del_flag=0
+		and u.del_flag=0
+		and h.del_flag=0
+	</select>
+	
+	<!-- 根据原医院ID和原库房ID获取库房信息 -->
+	<select id="getStorehouse" resultType="java.util.Map">
+		select
+			storehouseid as store_house_id,
+			storehouseno as store_house_no,
+			storehousename as store_house_name,
+			shaddress as store_ddress,
+			orgdataid as sources_store_house_id,
+			uorganid as sources_hospital_id,
+			horg_id as hospital_id
+		from
+			hdi_core_storehouse
+		where
+			uorganid=#{uorganid}
+		and orgdataid=#{orgdataid}
+	</select>
+	
+	<!-- 根据验收细单ID获取供货单ID和供货细单ID -->
+	<select id="getSupplyMasterIdAndSupplyDetailId" resultType="java.util.Map">
+		select
+			l.supply_master_id,
+			l.supply_detail_id
+		from
+			spd_podtl p,
+			spd_rgdtl r,
+			hdi_core_label_detail l
+        where
+        	p.podtlid=#{podtlid}
+        and p.sourceid=r.rgid
+        and p.sourcedtlid=r.rgdtlid
+        and r.sourceid=l.labelid
+        and r.sourcedtlid=l.labeldtlid
+	</select>
+	
+	<!-- 根据原医院ID和原医院商品规格ID获取平台医院商品信息 -->
+	<select id="getHospitalGoodsSpecs" resultType="java.util.Map">
+		SELECT
+			*
+		FROM
+			view_hdi_goods_specs_hospital
+		WHERE
+			hospital_id = #{hospitalId}
+		    and sources_specs_id=#{hospitalSourcesSpecsId}
+	</select>
+
+	<!--  -->
+	<select id="getConsumablesGoods" resultType="java.util.Map">
+		SELECT
+			ghc.id goodsid,
+			ghc.goods_unit goodsunit,
+			hcs.id goodstypeid,
+			hcs.sources_specs_id ygoodstypeid
+		FROM
+			hdi_goods_hospital_consumables ghc,
+			hdi_goods_hospital_consumables_specs hcs 
+		WHERE
+			hcs.consumables_id = ghc.id
+			AND hcs.sources_specs_id = #{sourcesId}
+			and ghc.del_flag=0
+	</select>
+
+	<!--  -->
+	<select id="getDrugsGoods" resultType="java.util.Map">
+		SELECT
+			ghc.id goodsid,
+			ghc.goods_unit goodsunit,
+			hcs.id goodstypeid,
+			hcs.sources_specs_id ygoodstypeid
+		FROM
+			hdi_goods_hospital_drugs ghc,
+			hdi_goods_hospital_drugs_specs hcs 
+		WHERE
+			hcs.drugs_id = ghc.id
+			AND hcs.sources_specs_id = #{sourcesId}
+			and ghc.del_flag=0
+	</select>
+
+	<!--  -->
+	<select id="getReagentGoods" resultType="java.util.Map">
+		SELECT
+			ghc.id goodsid,
+			ghc.goods_unit goodsunit,
+			hcs.id goodstypeid,
+			hcs.sources_specs_id ygoodstypeid				
+		FROM
+			hdi_goods_hospital_reagent ghc,
+			hdi_goods_hospital_reagent_specs hcs
+		WHERE
+			hcs.reagen_id = ghc.id
+			AND hcs.sources_specs_id = #{sourcesId}
+			and ghc.del_flag=0
+	</select>
+
+	<!--  -->
+	<select id="getGoodsType" resultType="java.util.Map">
+		SELECT
+			pg.goodstype,
+			pg.mgoodsid
+		FROM
+			temp_pub_goods pg 
+		WHERE
+			pg.mgoodsid = #{mgoodsid}
+			AND pg.uorganid = #{uorganid}
+	</select>
+
+	<!--  -->
+	<select id="getIdAndName" resultType="java.util.Map">
+		SELECT
+			uss.hospital_id horgId,
+			uss.supplier_id supplierId,
+			ohi.dept_id deptId
+		FROM
+			hdi_unicode_supply_ship uss,
+			hdi_org_hospital_info ohi
+		WHERE
+			ohi.id = uss.hospital_id
+			AND uss.ship_flag = 1
+			AND	uss.sources_supplier_id = #{supplyid}
+			AND uss.sources_hospital_id = #{uorganid}
+			and uss.del_flag=0
+			and ohi.del_flag=0
+	</select>
+</mapper>

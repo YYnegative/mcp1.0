@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="mcp-server-goods-drugs" />
+        <module name="mcp-server-admin" />
+        <module name="mcp-tool-generator" />
+        <module name="mcp-server-eureka" />
+        <module name="mcp-server-config" />
+        <module name="mcp-server-api" />
+        <module name="mcp-server-gateway" />
+        <module name="mcp-server-report" />
+        <module name="mcp-server-activiti" />
+        <module name="mcp-server-surgery" />
+        <module name="mcp-server-license" />
+        <module name="mcp-common-core" />
+        <module name="mcp-server-goods-reagent" />
+        <module name="mcp-server-system" />
+        <module name="mcp-common-code" />
+        <module name="mcp-server-goods-consumables" />
+      </profile>
+    </annotationProcessing>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="mcp-common-code" options="" />
+      <module name="mcp-common-core" options="" />
+      <module name="mcp-server-activiti" options="" />
+      <module name="mcp-server-admin" options="" />
+      <module name="mcp-server-api" options="" />
+      <module name="mcp-server-config" options="" />
+      <module name="mcp-server-eureka" options="" />
+      <module name="mcp-server-gateway" options="" />
+      <module name="mcp-server-goods-consumables" options="" />
+      <module name="mcp-server-goods-drugs" options="" />
+      <module name="mcp-server-goods-reagent" options="" />
+      <module name="mcp-server-license" options="" />
+      <module name="mcp-server-report" options="" />
+      <module name="mcp-server-surgery" options="" />
+      <module name="mcp-server-system" options="" />
+      <module name="mcp-tool-generator" options="-parameters" />
+    </option>
+  </component>
+</project>

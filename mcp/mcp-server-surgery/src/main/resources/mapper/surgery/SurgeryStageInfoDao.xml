@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.surgery.dao.SurgeryStageInfoDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.surgery.entity.SurgeryStageInfoEntity" id="surgeryStageInfoMap">
+        <result property="id" column="id"/>
+        <result property="hospitalId" column="hospital_id"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="surgeryStageNo" column="surgery_stage_no"/>
+        <result property="surgeryId" column="surgery_id"/>
+        <result property="surgeryStageType" column="surgery_stage_type"/>
+        <result property="status" column="status"/>
+        <result property="createId" column="create_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="memo" column="memo"/>
+    </resultMap>
+	
+	<select id="listForPage" parameterType="com.ebig.hdi.modules.surgery.entity.vo.SurgeryStageInfoVO" resultType="com.ebig.hdi.modules.surgery.entity.vo.SurgeryStageInfoVO">
+		select 
+			t1.id,
+			t3.hospital_name,
+			t2.surgery_no,
+			t1.surgery_stage_no,
+			t2.surgery_title,
+			t2.custom_name,
+			t2.surgery_date,
+			t1.surgery_stage_type,
+			t1.status,
+			(select count(id) from mcp_surgery_stage_detail_info where surgery_stage_id = t1.id) as detailNumber
+		from mcp_surgery_stage_info t1
+		left join mcp_surgery_info t2 on t1.surgery_id = t2.id
+		left join hdi_org_hospital_info t3 on t1.hospital_id = t3.id
+		where 1=1
+		<if test="fileterDept != null and fileterDept != ''">
+			and ${fileterDept}
+		</if>
+		<if test="hospitalName != null and hospitalName != ''">
+			and t3.hospital_name like CONCAT('%',#{hospitalName},'%') 
+		</if>
+		<if test="surgeryNo != null and surgeryNo != ''">
+			and t2.surgery_no like CONCAT('%',#{surgeryNo},'%') 
+		</if>
+		<if test="surgeryStageNo != null and surgeryStageNo != ''">
+			and t1.surgery_stage_no like CONCAT('%',#{surgeryStageNo},'%') 
+		</if>
+		<if test="surgeryTitle != null and surgeryTitle != ''">
+			and t2.surgery_title like CONCAT('%',#{surgeryTitle},'%') 
+		</if>
+		<if test="customName != null and customName != ''">
+			and t2.custom_name like CONCAT('%',#{customName},'%') 
+		</if>
+		<if test="status != null">
+			and t1.status = #{status}
+		</if>
+		<if test="isDefaultOrder == 1">
+			order by t1.create_time desc
+		</if>
+	</select>
+	
+	<select id="selectSurgeryStageInfoById" resultType="com.ebig.hdi.modules.surgery.entity.vo.SurgeryStageInfoVO">
+		select 
+			t1.id,
+			t2.id as hospitalId,
+			t2.hospital_name,
+			t3.surgery_no,
+			t3.surgery_title,
+			t3.custom_name,
+			t3.surgery_date,
+			t1.surgery_stage_type,
+			t1.surgery_id,
+			t1.data_source
+		from 
+			mcp_surgery_stage_info t1
+		left join hdi_org_hospital_info t2 
+		on
+			t1.hospital_id = t2.id
+		left join mcp_surgery_info t3
+		on 
+			t1.surgery_id = t3.id
+		where
+			t1.id = #{id}
+	</select>
+
+</mapper>

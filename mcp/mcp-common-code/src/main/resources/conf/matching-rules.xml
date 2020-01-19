@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 例子：
+	 name 规则名
+	 type 类型：0 自动匹配 1手动匹配
+	 desttablename 目标entity名
+	 key 比对对象属性名
+	 destcolumn 目标字段
+	 similarity 相似度（必须在type为1的前提下进行，若不设定相似数量，则默认取该相似度之上所有数据）
+	 showqty 展示数量（若类型为0，则该项默认为1（不管设置的几），若类型为1，则默认从相似最高开始向下截取（和相似度有关））
+	  匹配顺序，从最上面开始，依次匹配，如果匹配数量大于1，则继续向下匹配，直到匹配数量等于1截止，并返回目标一条记录
+	  否则到最后匹配多个返回多条目标记录，匹配0个返回null-->
+<matching-rules>
+	<rules name="hospitalGoodsEquals" type="1">
+		<sql>
+		SELECT
+			gpc.dept_id deptId,
+			gpc.consumables_name consumablesName,
+			gpc.goods_nature goodsNature,
+			ofi.factory_name factoryName,
+			pca.approvals,
+			pcs.specs,
+			ucc.cate_name,
+			CONCAT( gpc.consumables_name, pcs.specs ) nameSpecs,
+			gpc.id 
+		FROM
+			hdi_goods_platform_consumables gpc
+			LEFT JOIN hdi_goods_platform_consumables_approvals pca ON gpc.id = pca.consumables_id 
+			LEFT JOIN hdi_goods_platform_consumables_specs pcs ON gpc.id = pcs.consumables_id
+			LEFT JOIN hdi_org_factory_info ofi ON gpc.factory_id = ofi.id
+			LEFT JOIN hdi_unicode_consumables_cate ucc ON gpc.type_id = ucc.cate_id 
+		WHERE
+			gpc.del_flag = ? 
+			AND pca.approvals = ? 
+			AND pcs.guid = ? 
+		</sql>
+		<params>{delFlag},{approvals},{guid}</params>
+		<rule>
+			<key>nameSpecs</key>
+			<destcolumn>nameSpecs</destcolumn>
+			<showqty>5</showqty>
+		</rule>
+	</rules>
+	<rules name="GoodsEqualsDrugs" type="1">
+		<sql>
+		SELECT
+			gpc.dept_id deptId,
+			gpc.drugs_name drugsName,
+			gpc.goods_nature goodsNature,
+			ofi.factory_name factoryName,
+			gpc.approvals,
+			pcs.specs,
+			ucc.cate_name,
+			CONCAT( gpc.drugs_name, pcs.specs ) nameSpecs,
+			gpc.id 
+		FROM
+			hdi_goods_platform_drugs gpc
+			LEFT JOIN hdi_goods_platform_drugs_specs pcs ON gpc.id = pcs.drugs_id
+			LEFT JOIN hdi_org_factory_info ofi ON gpc.factory_id = ofi.id
+			LEFT JOIN hdi_unicode_drugs_cate ucc ON gpc.type_id = ucc.cate_id 
+		WHERE
+			gpc.del_flag = ? 
+			AND gpc.approvals = ?
+			AND  pcs.guid = ?
+		</sql>
+		<params>{delFlag},{approvals},{guid}</params>
+		<rule>
+			<key>nameSpecs</key>
+			<destcolumn>nameSpecs</destcolumn>
+			<showqty>5</showqty>
+		</rule>
+	</rules>
+	<rules name="goodsEqualsReagent" type="1">
+		<sql>
+		SELECT
+			gpc.dept_id deptId,
+			gpc.reagent_name reagentName,
+			gpc.goods_nature goodsNature,
+			ofi.factory_name factoryName,
+			gpc.approvals,
+			pcs.specs,
+			ucc.cate_name,
+			CONCAT( gpc.reagent_name, pcs.specs ) nameSpecs,
+			gpc.id 
+		FROM
+			hdi_goods_platform_reagent gpc
+			LEFT JOIN hdi_goods_platform_reagent_specs pcs ON gpc.id = pcs.reagen_id
+			LEFT JOIN hdi_org_factory_info ofi ON gpc.factory_id = ofi.id
+			LEFT JOIN hdi_unicode_reagent_cate ucc ON gpc.type_id = ucc.cate_id 
+		WHERE
+			gpc.del_flag = ?
+			AND gpc.approvals = ? 
+			AND pcs.guid = ?
+		</sql>
+		<params>{delFlag},{approvals},{guid}</params>
+		<rule>
+			<key>nameSpecs</key>
+			<destcolumn>nameSpecs</destcolumn>
+			<showqty>5</showqty>
+		</rule>
+	</rules>
+	
+	<rules name="goodsSimilarity" type="1">
+		<sql>
+			SELECT
+			DISTINCT 
+				osi.*
+			FROM
+				hdi_org_supplier_info osi
+				LEFT JOIN hdi_unicode_supply_ship uss ON osi.credit_code = uss.supply_code
+			WHERE
+				osi.del_flag = 0
+				AND osi.credit_code = ?
+		</sql>
+		<params>{supplyCode}</params>
+		<rule>
+			<key>supplyName</key>
+			<destcolumn>supplier_name</destcolumn>
+			<showqty>5</showqty>
+		</rule>
+	</rules>
+	
+	
+	<rules name="hospitalDrugs" type="0" ensort="true">
+		<sql>
+		SELECT
+			hcs.guid,
+			ghc.approvals,
+			hcs.specs,
+			ghc.id tGoodsId,
+			hcs.id tGoodsSpecsId 
+		FROM
+			hdi_goods_platform_drugs ghc,
+			hdi_goods_platform_drugs_specs hcs 
+		WHERE
+			ghc.del_flag = ? 
+			AND ghc.id = hcs.drugs_id
+		</sql>
+		<params>{delFlag}</params>
+		<rule>
+			<key>guid</key>
+			<destcolumn>guid</destcolumn>
+		</rule>
+		<rule>
+			<key>approvals</key>
+			<destcolumn>approvals</destcolumn> 
+		</rule>
+		<rule>
+			<key>specs</key>
+			<destcolumn>specs</destcolumn>
+		</rule>
+	</rules>
+	
+	<rules name="hospitalReagent" type="0" ensort="true">
+		<sql>
+		SELECT
+			hcs.guid,
+			ghc.approvals,
+			hcs.specs,
+			ghc.id goodsId,
+			hcs.id goodsSpecsId 
+		FROM
+			hdi_goods_platform_reagent ghc,
+			hdi_goods_platform_reagent_specs hcs
+		WHERE
+			ghc.del_flag = ?
+			AND ghc.id = hcs.reagen_id 
+		</sql>
+		<params>{delFlag}</params>
+		<rule>
+			<key>guid</key>
+			<destcolumn>guid</destcolumn>
+		</rule>
+		<rule>
+			<key>approvals</key>
+			<destcolumn>approvals</destcolumn> 
+		</rule>
+		<rule>
+			<key>specs</key>
+			<destcolumn>specs</destcolumn>
+		</rule>
+	</rules>
+	
+	
+	<rules name="hospitalConsumables" type="0" ensort="true">
+		<sql>
+		SELECT
+			hcs. guid,
+			hca.approvals,
+			hcs.specs,
+			ghc.id goodsId,
+			hcs.id goodsSpecsId,
+			hca.id goodsApprovalsId
+		FROM
+			hdi_goods_platform_consumables ghc,
+			hdi_goods_platform_consumables_specs hcs,
+			hdi_goods_platform_consumables_approvals hca
+		WHERE
+			ghc.del_flag = ? 
+			AND ghc.id = hcs.consumables_id
+			AND ghc.id = hca.consumables_id	
+		</sql>
+		<params>{delFlag}</params>
+		<rule>
+			<key>guid</key>
+			<destcolumn>guid</destcolumn>
+		</rule>
+		<rule>
+			<key>approvals</key>
+			<destcolumn>approvals</destcolumn> 
+		</rule>
+		<rule>
+			<key>specs</key>
+			<destcolumn>specs</destcolumn>
+		</rule>
+	</rules>
+
+
+	<rules name="supplierPlatformMatchTask" type="0" ensort="true">
+		<sql>
+		SELECT
+			osi.id porgId,
+			osi.supplier_name,
+			osi.credit_code
+		FROM
+			hdi_org_supplier_info osi 
+		WHERE
+			osi.del_flag = ?
+		</sql>
+		<params>{delFlag}</params>
+		<rule>
+			<key>creditCode</key>
+			<destcolumn>credit_code</destcolumn>
+		</rule>
+		<rule>
+			<key>supplierName</key>
+			<destcolumn>supplier_name</destcolumn> 
+		</rule>
+	</rules>
+</matching-rules>

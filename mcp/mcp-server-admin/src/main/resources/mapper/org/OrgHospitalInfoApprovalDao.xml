@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.org.dao.OrgHospitalInfoApprovalDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.common.entity.OrgHospitalInfoApprovalEntity" id="orgHospitalInfoApprovalMap">
+        <result property="id" column="id"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="hospitalCode" column="hospital_code"/>
+        <result property="hospitalGrade" column="hospital_grade"/>
+        <result property="hospitalName" column="hospital_name"/>
+        <result property="creditCode" column="credit_code"/>
+        <result property="provinceCode" column="province_code"/>
+        <result property="cityCode" column="city_code"/>
+        <result property="areaCode" column="area_code"/>
+        <result property="status" column="status"/>
+        <result property="hospitalAddress" column="hospital_address"/>
+        <result property="corporate" column="corporate"/>
+        <result property="phone" column="phone"/>
+        <result property="email" column="email"/>
+        <result property="isGroup" column="is_group"/>
+        <result property="childNumber" column="child_number"/>
+        <result property="fax" column="fax"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="createId" column="create_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="editId" column="edit_id"/>
+        <result property="editTime" column="edit_time"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="dataSource" column="data_source"/>
+        <result property="checkStatus" column="check_status"/>
+    </resultMap>
+
+    <select id="selectByHospitalName" resultMap="orgHospitalInfoApprovalMap">
+    select * from hdi_org_hospital_info_approval where hospital_name = #{hospitalName}
+    </select>
+
+
+    <!-- 查询导出医院信息 -->
+    <select id="getList" resultType="map">
+        SELECT
+        hospital_code AS hospitalCode,hospital_name AS hospitalName ,hospital_grade AS hospitalGrade,province_code AS provinceCode,city_code AS cityCode,area_code AS areaCode,
+        check_status AS checkStatus,CASE  when status ='1' THEN '启用' WHEN  status ='0' THEN '未启用' END AS status
+        FROM
+        hdi_org_hospital_info_approval
+        <where>
+            del_flag = 0
+            <if test="queryParam.hospitalGrade!=null and queryParam.hospitalGrade!=''">
+                AND hospital_grade = #{queryParam.hospitalGrade}
+            </if>
+            <if test="queryParam.provinceCode!=null and queryParam.provinceCode!=''">
+                AND province_code = #{queryParam.provinceCode}
+            </if>
+            <if test="queryParam.cityCode!=null and queryParam.cityCode!=''">
+                AND city_code = #{queryParam.cityCode}
+            </if>
+            <if test="queryParam.areaCode!=null and queryParam.areaCode!=''">
+                AND area_code = #{queryParam.areaCode}
+            </if>
+            <if test="queryParam.checkStatus!=null and queryParam.checkStatus!=''">
+                AND check_status = #{queryParam.checkStatus}
+            </if>
+            <if test="queryParam.hospitalName!=null and queryParam.hospitalName!=''">
+                AND hospital_name like CONCAT('%',#{queryParam.hospitalName},'%')
+            </if>
+            ORDER BY create_time DESC,edit_time DESC
+        </where>
+    </select>
+
+    <select id="selectByCreditCode" resultMap="orgHospitalInfoApprovalMap">
+    select * from hdi_org_hospital_info_approval where credit_code = #{creditCode}
+    </select>
+
+    <select id="selectIfExist" resultType="integer">
+        select count(1) from hdi_org_hospital_info where id = #{id}
+    </select>
+</mapper>

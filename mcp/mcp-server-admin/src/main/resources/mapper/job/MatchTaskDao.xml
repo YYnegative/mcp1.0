@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.job.dao.MatchTaskDao">
+		<resultMap
+		type="com.ebig.hdi.modules.job.entity.MatchTaskEntity" id="matchTaskEntityMap">
+	    <result property="deptId" column="dept_id"/>
+		<result property="createId" column="create_id"/>
+		<result property="guid" column="guid" />
+		<result property="approvals" column="approvals" />
+		<result property="specs" column="specs" />
+		<result property="torgId" column="torgId" />
+		<result property="goodsId" column="goodsId" />
+		<result property="goodsSpecsId" column="goodsSpecsId" />
+		<result property="goodsApprovalsId" column="goodsApprovalsId" />
+	</resultMap>
+	
+	<!--定时任务 医院耗材和平台耗材匹对 用 -->
+	<select id="selectConsumables" resultType="com.ebig.hdi.modules.job.entity.MatchTaskEntity">
+		SELECT
+			hcs. guid,
+			hca.approvals,
+			hcs.specs,
+			ghc.hospital_id torgId,
+			ghc.id goodsId,
+			hcs.id goodsSpecsId,
+			hca.id goodsApprovalsId,
+			ghc.create_id,
+			ghc.dept_id
+		FROM
+			hdi_goods_hospital_consumables ghc,
+			hdi_goods_hospital_consumables_specs hcs,
+			hdi_goods_hospital_consumables_approvals hca
+		WHERE
+			ghc.del_flag = 0 
+			AND ghc.is_match = 0
+			AND ghc.id = hcs.consumables_id
+			AND ghc.id = hca.consumables_id
+	</select>
+	
+	<!--定时任务 医院药品和平台药品匹对 用 -->
+	<select id="selectDrugs" resultType="com.ebig.hdi.modules.job.entity.MatchTaskEntity">
+		SELECT
+			hcs.guid,
+			ghc.approvals goodsApprovals,
+			hcs.specs,
+			ghc.hospital_id torgId,
+			ghc.id goodsId,
+			hcs.id goodsSpecsId,
+			ghc.create_id,
+			ghc.dept_id 
+		FROM
+			hdi_goods_hospital_drugs ghc,
+			hdi_goods_hospital_drugs_specs hcs 
+		WHERE
+			ghc.del_flag = 0 
+			AND ghc.is_match = 0 
+			AND ghc.id = hcs.drugs_id 
+	</select>
+	
+
+	<!--定时任务 医院试剂和平台试剂匹对 用 -->
+	<select id="selectReagent" resultType="com.ebig.hdi.modules.job.entity.MatchTaskEntity">
+		SELECT
+			hcs. guid,
+			ghc.approvals,
+			hcs.specs,
+			ghc.hospital_id torgId,
+			ghc.id goodsId,
+			hcs.id goodsSpecsId,
+			ghc.create_id,
+			ghc.dept_id
+		FROM
+			hdi_goods_hospital_reagent ghc,
+			hdi_goods_hospital_reagent_specs hcs
+		WHERE
+			ghc.del_flag = 0 
+			AND ghc.is_match = 0
+			AND ghc.id = hcs.reagen_id
+	</select>	
+	
+	
+	<!--定时任务 供应商耗材和平台耗材匹对 用 -->
+	<select id="selectSupplierConsumables" resultType="com.ebig.hdi.modules.job.entity.MatchTaskEntity">
+		SELECT
+			hcs. guid,
+			hca.approvals,
+			hcs.specs,
+			ghc.supplier_id torgId,
+			ghc.id goodsId,
+			hcs.id goodsSpecsId,
+			hca.id goodsApprovalsId,
+			ghc.create_id,
+			ghc.dept_id
+		FROM
+			hdi_goods_supplier_consumables ghc,
+			hdi_goods_supplier_consumables_specs hcs,
+			hdi_goods_supplier_consumables_approvals hca
+		WHERE
+			ghc.del_flag = 0 
+			AND ghc.is_match = 0
+			AND ghc.id = hcs.consumables_id
+			AND ghc.id = hca.consumables_id
+	</select>
+	
+	<!--定时任务 供应商药品和平台药品匹对 用 -->
+	<select id="selectSupplierDrugs" resultType="com.ebig.hdi.modules.job.entity.MatchTaskEntity">
+		SELECT
+			hcs. guid,
+			ghc.approvals goodsApprovals,
+			hcs.specs,
+			ghc.supplier_id torgId,
+			ghc.id goodsId,
+			hcs.id goodsSpecsId,
+			ghc.create_id,
+			ghc.dept_id
+		FROM
+			hdi_goods_supplier_drugs ghc,
+			hdi_goods_supplier_drugs_specs hcs
+		WHERE
+			ghc.del_flag = 0 
+			AND ghc.is_match = 0
+			AND ghc.id = hcs.drugs_id
+			LIMIT 1000
+	</select>
+	
+	<!--定时任务 供应商试剂和平台试剂匹对 用 -->
+	<select id="selectSupplierReagent" resultType="com.ebig.hdi.modules.job.entity.MatchTaskEntity">
+		SELECT
+			hcs. guid,
+			ghc.approvals,
+			hcs.specs,
+			ghc.supplier_id torgId,
+			ghc.id goodsId,
+			hcs.id goodsSpecsId,
+			ghc.create_id,
+			ghc.dept_id
+		FROM
+			hdi_goods_supplier_reagent ghc,
+			hdi_goods_supplier_reagent_specs hcs
+		WHERE
+			ghc.del_flag = 0 
+			AND ghc.is_match = 0
+			AND ghc.id = hcs.reagen_id
+	</select>
+	
+	
+	<!--供应商匹对定时任务  查询ref表有无匹对数据 -->
+	<select id="getRef" resultType="java.util.Map">
+		SELECT
+			* 
+		FROM
+			hdi_org_supplier_hospital_ref shr 
+		WHERE
+			shr.supplier_id = #{supplierId}
+			AND shr.hospital_id = #{hospitalId}
+	</select>
+	
+	<!-- 匹配平台药品 先按全球唯一码匹配，如果没配上再按批准文号匹配，否则按规格名称匹配 -->
+	<select id="matchingPlatformDrugs" resultType="map">
+		SELECT 
+		  hcs.guid,
+		  ghc.approvals,
+		  hcs.specs,
+		  ghc.id tGoodsId,
+		  hcs.id tGoodsSpecsId 
+		FROM
+		  hdi_goods_platform_drugs ghc,
+		  hdi_goods_platform_drugs_specs hcs 
+		WHERE ghc.del_flag = 0 
+		  AND ghc.id = hcs.drugs_id 
+		  AND (
+		    hcs.guid = #{guid}
+		    OR ghc.approvals = #{approvals}
+		    OR hcs.specs = #{specs}
+		  ) 
+	</select>
+</mapper>

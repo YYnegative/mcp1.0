@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.job.dao.TempSpdStorehouseDao">
+
+	<select id="selectStorehouseList" resultType="map">
+		SELECT 
+		  storehousename AS storehousename,
+		  storehouseno AS storehouseno,
+		  shaddress AS shaddress,
+		  storehouseid AS storehouseid,
+		  uorganid AS uorganid,
+		  credate AS credate,
+		  editdate AS editdate,
+		  memo AS memo 
+		FROM
+		  spd_storehouse
+		WHERE udflag = 0 
+		  <choose>
+				<when test="beginTime != null and endTime != null">
+					AND (credate BETWEEN #{beginTime,jdbcType=TIMESTAMP} AND #{endTime,jdbcType=TIMESTAMP}) OR (editdate BETWEEN #{beginTime,jdbcType=TIMESTAMP} AND #{endTime,jdbcType=TIMESTAMP})
+				</when>
+				<when test="beginTime != null and endTime == null">
+					AND credate &gt; #{beginTime,jdbcType=TIMESTAMP} OR editdate &gt; #{beginTime,jdbcType=TIMESTAMP}
+				</when>
+				<when test="beginTime == null and endTime != null">
+					AND credate &lt; #{endTime,jdbcType=TIMESTAMP} OR editdate &lt; #{endTime,jdbcType=TIMESTAMP}
+				</when>
+			</choose>
+	</select> 
+	
+</mapper>

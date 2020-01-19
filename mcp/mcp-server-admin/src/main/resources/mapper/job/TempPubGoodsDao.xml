@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.job.dao.TempPubGoodsDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.job.entity.TempPubGoodsEntity" id="tempPubGoodsMap">
+        <result property="mgoodsid" column="mgoodsid"/>
+        <result property="uorganid" column="uorganid"/>
+        <result property="goodsno" column="goodsno"/>
+        <result property="goodsname" column="goodsname"/>
+        <result property="goodspy" column="goodspy"/>
+        <result property="commonname" column="commonname"/>
+        <result property="commonpy" column="commonpy"/>
+        <result property="enname" column="enname"/>
+        <result property="goodstype" column="goodstype"/>
+        <result property="goodsshortname" column="goodsshortname"/>
+        <result property="usestatus" column="usestatus"/>
+        <result property="factorydoc" column="factorydoc"/>
+        <result property="factoryname" column="factoryname"/>
+        <result property="prodarea" column="prodarea"/>
+        <result property="barcode" column="barcode"/>
+        <result property="goodsinvname" column="goodsinvname"/>
+        <result property="packsize" column="packsize"/>
+        <result property="goodsunit" column="goodsunit"/>
+        <result property="approvedocno" column="approvedocno"/>
+        <result property="approvedocdate" column="approvedocdate"/>
+        <result property="approvedocenddate" column="approvedocenddate"/>
+        <result property="registerdocno" column="registerdocno"/>
+        <result property="registerdocdate" column="registerdocdate"/>
+        <result property="registerdocenddate" column="registerdocenddate"/>
+        <result property="goodsprop" column="goodsprop"/>
+        <result property="storagecondition" column="storagecondition"/>
+        <result property="validperiod" column="validperiod"/>
+        <result property="timeunit" column="timeunit"/>
+        <result property="basictype" column="basictype"/>
+        <result property="purchasetype" column="purchasetype"/>
+        <result property="basegoodsattr" column="basegoodsattr"/>
+        <result property="reportflag" column="reportflag"/>
+        <result property="recipeflag" column="recipeflag"/>
+        <result property="insur" column="insur"/>
+        <result property="classtype" column="classtype"/>
+        <result property="effictype" column="effictype"/>
+        <result property="gmpcertno" column="gmpcertno"/>
+        <result property="gmpcertdate" column="gmpcertdate"/>
+        <result property="gmpcertdeadline" column="gmpcertdeadline"/>
+        <result property="mixtype" column="mixtype"/>
+        <result property="specdrugflag" column="specdrugflag"/>
+        <result property="inputmanid" column="inputmanid"/>
+        <result property="inputmanname" column="inputmanname"/>
+        <result property="inputdate" column="inputdate"/>
+        <result property="editmanid" column="editmanid"/>
+        <result property="editmanname" column="editmanname"/>
+        <result property="editdate" column="editdate"/>
+        <result property="memo" column="memo"/>
+        <result property="goodsinfo" column="goodsinfo"/>
+        <result property="udf1" column="udf1"/>
+        <result property="udf2" column="udf2"/>
+        <result property="udf4" column="udf4"/>
+        <result property="udf3" column="udf3"/>
+        <result property="udf5" column="udf5"/>
+        <result property="ugoodsid" column="ugoodsid"/>
+        <result property="rationmrtr" column="rationmrtr"/>
+        <result property="ratiodnmtr" column="ratiodnmtr"/>
+        <result property="orgdataid" column="orgdataid"/>
+        <result property="datasource" column="datasource"/>
+        <result property="vwarndays" column="vwarndays"/>
+        <result property="defsupplyid" column="defsupplyid"/>
+        <result property="purtax" column="purtax"/>
+        <result property="storetemp" column="storetemp"/>
+        <result property="photo" column="photo"/>
+        <result property="bidprice" column="bidprice"/>
+        <result property="countgroup" column="countgroup"/>
+        <result property="firstcampgoods" column="firstCampGoods"/>
+        <result property="pay" column="pay"/>
+        <result property="singleflag" column="singleflag"/>
+        <result property="prolicenseno" column="prolicenseno"/>
+        <result property="prolicensenovalid" column="prolicensenovalid"/>
+        <result property="udflag" column="udflag"/>
+    </resultMap>
+	
+	<select id="queryAllGoodsByType" resultType="com.ebig.hdi.modules.job.entity.TempPubGoodsEntity">
+		<choose>
+			<when test="companytype == 3">
+				SELECT 
+				  t1.*,
+				  t2.supplier_id AS supplierId,
+				  t3.id AS supplierId,
+				  t3.dept_id AS deptId 
+				FROM
+				  pub_goods t1 
+				  INNER JOIN hdi_unicode_supply_ship t2 
+				    ON t1.uorganid = t2.sources_supplier_id 
+				  LEFT JOIN hdi_org_supplier_info t3 
+				    ON t2.supplier_id = t3.id 
+				WHERE t1.udflag = 0 
+				  AND t2.ship_flag = 1 
+				  AND t2.del_flag = 0 
+				  AND t3.del_flag = 0 
+				LIMIT 1000 
+			</when>
+			<when test="companytype == 2">
+				SELECT 
+				  t1.*,
+				  t2.hospital_id AS hospitalId,
+				  t3.dept_id AS deptId 
+				FROM
+				  pub_goods t1 
+				  INNER JOIN hdi_unicode_supply_ship t2 
+				    ON t1.uorganid = t2.sources_hospital_id 
+				  LEFT JOIN hdi_org_hospital_info t3 
+				    ON t2.hospital_id = t3.id 
+				WHERE t1.udflag = 0 
+				  AND t2.ship_flag = 1 
+				  AND t2.del_flag = 0 
+				  AND t3.del_flag = 0 
+				LIMIT 1000 
+			</when> 
+		</choose>
+		
+	</select>
+	
+	<select id="selectAllSupplierConsumables" resultType="com.ebig.hdi.modules.job.entity.TempPubGoodsEntity">
+		SELECT
+			distinct ship.sources_supplier_id as uorganid,
+			consumables.id as goodsId,
+			specs.sources_specs_id as mgoodsid,
+			consumables.consumables_code as goodsno,
+			consumables.consumables_name as goodsname,
+			consumables.common_name as commonname,
+			specs.specs as goodstype,
+			factory.factory_name as factoryname,
+			consumables.goods_unit as goodsunit,
+			consumables.pic_url as photo,
+				( 
+					SELECT 
+						a.approvals 
+				FROM ( 
+								SELECT 
+										approvals,consumables_id,substring_index( substring_index( approvals, '字',- 1 ), '第', 1 ) AS approvals_year 
+								FROM hdi_goods_supplier_consumables_approvals 
+							) a 
+				WHERE a.consumables_id = consumables.id
+				ORDER BY
+						a.approvals_year DESC 
+				LIMIT 1
+			) as approvedocno
+		FROM
+			hdi_goods_supplier_consumables_specs specs
+			LEFT JOIN hdi_goods_supplier_consumables consumables ON specs.consumables_id = consumables.id
+			LEFT JOIN hdi_unicode_supply_ship ship on ship.supplier_id = consumables.supplier_id and ship.del_flag = 0
+			LEFT JOIN hdi_org_factory_info factory on factory.id = consumables.factory_id and factory.del_flag = 0
+		where consumables.del_flag = 0
+		and consumables.is_upload = 0
+		ORDER BY goodsId
+		limit 300
+	</select>
+	
+	<select id="selectAllSupplierDrugs" resultType="com.ebig.hdi.modules.job.entity.TempPubGoodsEntity">
+		SELECT
+			distinct ship.sources_supplier_id as uorganid,
+			drugs.id as goodsId,
+			specs.sources_specs_id as mgoodsid,
+			drugs.drugs_code as goodsno,
+			drugs.drugs_name as goodsname,
+			drugs.common_name as commonname,
+			specs.specs as goodstype,
+			factory.factory_name as factoryname,
+			drugs.goods_unit as goodsunit,
+			drugs.pic_url as photo,
+			drugs.approvals as approvedocno
+		FROM
+			hdi_goods_supplier_drugs_specs specs
+			LEFT JOIN hdi_goods_supplier_drugs drugs ON specs.drugs_id = drugs.id
+			LEFT JOIN hdi_unicode_supply_ship ship on ship.supplier_id = drugs.supplier_id and ship.del_flag = 0
+			LEFT JOIN hdi_org_factory_info factory on factory.id = drugs.factory_id and factory.del_flag = 0
+		where drugs.del_flag = 0
+		and drugs.is_upload = 0
+		limit 300
+	</select>
+	
+	<select id="selectAllSupplierReagent" resultType="com.ebig.hdi.modules.job.entity.TempPubGoodsEntity">
+		SELECT
+			distinct ship.sources_supplier_id as uorganid,
+			reagent.id as goodsId,
+			specs.sources_specs_id as mgoodsid,
+			reagent.reagent_code as goodsno,
+			reagent.reagent_name as goodsname,
+			reagent.common_name as commonname,
+			specs.specs as goodstype,
+			factory.factory_name as factoryname,
+			reagent.goods_unit as goodsunit,
+			reagent.pic_url as photo,
+			reagent.approvals as approvedocno
+		FROM
+			hdi_goods_supplier_reagent_specs specs
+			LEFT JOIN hdi_goods_supplier_reagent reagent ON specs.reagen_id = reagent.id
+			LEFT JOIN hdi_unicode_supply_ship ship on ship.supplier_id = reagent.supplier_id and ship.del_flag = 0
+			LEFT JOIN hdi_org_factory_info factory on factory.id = reagent.factory_id and factory.del_flag = 0
+		where reagent.del_flag = 0
+		and reagent.is_upload = 0
+		limit 300
+	</select>
+
+</mapper>

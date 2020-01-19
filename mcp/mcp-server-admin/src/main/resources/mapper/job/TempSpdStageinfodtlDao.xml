@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.job.dao.TempSpdStageinfodtlDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.job.entity.TempSpdStageinfodtlEntity" id="tempSpdStageinfodtlMap">
+        <result property="stageinfodtlid" column="stageinfodtlid"/>
+        <result property="stageinfoid" column="stageinfoid"/>
+        <result property="goodsid" column="goodsid"/>
+        <result property="unitid" column="unitid"/>
+        <result property="batchid" column="batchid"/>
+        <result property="plotid" column="plotid"/>
+        <result property="plotno" column="plotno"/>
+        <result property="pproddate" column="pproddate"/>
+        <result property="pvalidto" column="pvalidto"/>
+        <result property="slotid" column="slotid"/>
+        <result property="slotno" column="slotno"/>
+        <result property="sproddate" column="sproddate"/>
+        <result property="svalidto" column="svalidto"/>
+        <result property="batchprice" column="batchprice"/>
+        <result property="deliveryqty" column="deliveryqty"/>
+        <result property="acceptqty" column="acceptqty"/>
+        <result property="factoryno" column="factoryno"/>
+        <result property="datasource" column="datasource"/>
+        <result property="stageinfodtlstatus" column="stageinfodtlstatus"/>
+        <result property="udflag" column="udflag"/>
+    </resultMap>
+
+
+</mapper>

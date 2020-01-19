@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.license.dao.LicenseGoodsInfoDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.license.entity.LicenseGoodsInfoEntity" id="licenseGoodsInfoMap">
+        <result property="id" column="id"/>
+        <result property="supplierId" column="supplier_id"/>
+        <result property="goodsId" column="goods_id"/>
+        <result property="goodsType" column="goods_type"/>
+        <result property="classifyId" column="classify_id"/>
+        <result property="name" column="name"/>
+        <result property="number" column="number"/>
+        <result property="beginTime" column="begin_time"/>
+        <result property="endTime" column="end_time"/>
+        <result property="picUrl" column="pic_url"/>
+        <result property="status" column="status"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="createId" column="create_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="editId" column="edit_id"/>
+        <result property="editTime" column="edit_time"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="newLicenseId" column="new_license_id"/>
+    </resultMap>
+	
+	<select id="listForPage" parameterType="com.ebig.hdi.modules.license.entity.vo.LicenseGoodsInfoVO" resultType="com.ebig.hdi.modules.license.entity.vo.LicenseGoodsInfoVO">
+		select * from view_hdi_license_goods 
+		where del_flag = 0 and status = 1 
+		<if test="fileterDept != null and fileterDept != ''">
+			and ${fileterDept}
+		</if>
+		<if test="factoryName != null and factoryName != ''">
+			and factory_name like CONCAT('%',#{factoryName},'%')
+		</if>
+		<if test="goodsName != null and goodsName != ''">
+			and goods_name like CONCAT('%',#{goodsName},'%')
+		</if>
+		<if test="classifyId != null">
+			and classify_id = #{classifyId}
+		</if>
+		<if test="nameOrNumber != null and nameOrNumber != ''">
+			and (name like CONCAT('%',#{nameOrNumber},'%') or number like CONCAT('%',#{nameOrNumber},'%'))
+		</if>
+		<if test="beginTimeStr != null and beginTimeStr != ''">
+			and end_time &gt;= #{beginTimeStr,jdbcType=DATE}
+		</if>
+		<if test="endTimeStr != null and endTimeStr != ''">
+			and end_time &lt;= #{endTimeStr,jdbcType=DATE}
+		</if>
+		<if test="licenseStatus != null">
+			and license_status = #{licenseStatus}
+		</if>
+		<if test="isDefaultOrder == 1">
+			order by IFNULL(edit_time,create_time) desc
+		</if>
+	</select>
+	
+	<select id="selectLicenseById" resultType="com.ebig.hdi.modules.license.entity.vo.LicenseGoodsInfoVO">
+		select * from view_hdi_license_goods 
+		where del_flag = 0 and status = 1 and id = #{id}
+	</select>
+	
+	<select id="selectByNewLicenseId" resultType="com.ebig.hdi.modules.license.entity.vo.LicenseGoodsInfoVO">
+		select * from view_hdi_license_goods 
+		where del_flag = 0 and status = 1 and new_license_id = #{id}
+	</select>
+	
+	<select id="allGoods" resultType="java.util.HashMap">
+		select * from view_hdi_goods_supplier
+		where supplier_id = #{supplierId} and del_flag = 0 and status = 1
+	</select>
+	
+	<select id="selectBySupplierIdAndTime" resultType="com.ebig.hdi.modules.license.entity.LicenseGoodsInfoEntity">
+		select
+			*
+		from 
+			hdi_license_goods_info
+		where
+			supplier_id = #{supplierId}
+		and
+			del_flag = 0
+		and
+			ifnull(edit_time,create_time) between #{scheduleJob.begin_time} and #{scheduleJob.end_time}
+		ORDER BY edit_time desc,create_time desc
+	</select>
+</mapper>

@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.core.dao.CoreLabelMasterDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.core.entity.CoreLabelMasterEntity" id="coreLabelMasterMap">
+        <result property="labelid" column="labelid"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="labelno" column="labelno"/>
+        <result property="horgId" column="horg_id"/>
+        <result property="storehouseid" column="storehouseid"/>
+        <result property="labelstatus" column="labelstatus"/>
+        <result property="sourceid" column="sourceid"/>
+        <result property="cremanid" column="cremanid"/>
+        <result property="cremanname" column="cremanname"/>
+        <result property="credate" column="credate"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="supplyStartingTime" column="supplyStartingTime"/>
+        <result property="supplyEndTime" column="supplyEndTime"/>
+        <result property="hospitalName" column="hospital_name"/>
+        <result property="supplyno" column="supplyno"/>
+        <result property="supplyTime" column="supply_time"/>
+        <result property="storehousename" column="storehousename"/>
+    </resultMap>
+
+	<!-- 根据deptId查询标签主单信息 -->
+	<select id="selectByDeptId" resultType="com.ebig.hdi.modules.core.entity.CoreLabelMasterEntity">
+		SELECT
+			clm.*,
+			ohi.hospital_name,
+			csm.supplyno,
+			csm.supply_time,
+			cs.storehousename
+		FROM
+			hdi_core_label_master clm,
+			hdi_core_supply_master csm,
+			hdi_org_hospital_info ohi,
+			hdi_core_storehouse cs
+		<where>
+			clm.sourceid = csm.supply_master_id 
+			AND clm.storehouseid = cs.storehouseid
+			AND clm.horg_id = ohi.id 
+			AND clm.del_flag = 0
+			and csm.del_flag=0
+			and ohi.del_flag=0
+		<if test="deptIds != null and deptIds != ''">
+			AND ${deptIds}
+		</if>	
+			ORDER BY clm.credate DESC
+		</where> 
+	</select>
+	
+	
+	<!-- 根据deptId查询标签主单信息 -->
+	<select id="selectByBedingungen" resultType="com.ebig.hdi.modules.core.entity.CoreLabelMasterEntity">
+		SELECT
+			clm.*,
+			ohi.hospital_name,
+			csm.supplyno,
+			csm.supply_time,
+			cs.storehousename,
+			csm.supply_type
+		FROM
+			hdi_core_label_master clm,
+			hdi_core_supply_master csm,
+			hdi_org_hospital_info ohi,
+			hdi_core_storehouse cs
+		<where>
+			clm.sourceid = csm.supply_master_id 
+			AND clm.storehouseid = cs.storehouseid
+			AND clm.horg_id = ohi.id  
+			AND clm.del_flag = 0
+			and csm.del_flag=0
+			and ohi.del_flag=0
+		<if test="deptIds != null and deptIds != ''">
+			AND ${deptIds}
+		</if>				
+		<if test="labelstatus != null">
+			AND clm.labelstatus = #{labelstatus}
+		</if>
+		<if test="hospitalName != null and hospitalName != ''">
+			AND ohi.hospital_name like CONCAT('%',#{hospitalName}, '%')
+		</if>
+		<if test="supplyno != null and supplyno != ''">
+			AND csm.supplyno like CONCAT('%',#{supplyno}, '%')
+		</if>
+		<if test="storehousename != null and storehousename != ''">
+			AND cs.storehousename like CONCAT('%',#{storehousename}, '%')
+		</if>
+		<if test="supplyStartingTime != null and supplyStartingTime != ''">
+			<![CDATA[ AND csm.supply_time > #{supplyStartingTime} ]]>
+		</if>
+		<if test="supplyEndTime != null and supplyEndTime != ''">
+			<![CDATA[ AND csm.supply_time < #{supplyEndTime} ]]>
+		</if>
+			ORDER BY clm.credate DESC
+		</where> 	
+	</select>
+	
+	
+	<!-- HDI转换用  根据labelno  查询是否存在此标签 -->
+	<select id="selectByLabelno" resultType="com.ebig.hdi.modules.core.entity.CoreLabelMasterEntity">
+		SELECT
+			* 
+		FROM
+			hdi_core_label_master clm 
+		WHERE
+			clm.labelno = #{labelno}
+
+	</select>
+	
+	
+	<!-- 提交医院   查询所有的相关的标签-->
+	<select id="getCoreLabelMasterEntity" resultType="com.ebig.hdi.modules.core.entity.CoreLabelMasterEntity">
+		SELECT
+			clm.*
+		FROM
+			hdi_core_label_master clm
+		WHERE
+			clm.del_flag = 0
+			AND clm.sourceid = #{sourceid}
+	</select>
+	
+	<select id="selectByLabelids" resultType="com.ebig.hdi.modules.core.entity.CoreLabelMasterEntity">
+	    select
+		l.*,s.supplier_code,s.supplier_name,h.hospital_code,h.hospital_name,m.supply_time
+	    from hdi_core_label_master l
+			left join hdi_core_supply_master m on l.sourceid=m.supply_master_id
+			left join hdi_org_supplier_info s on l.supplier_id=s.id
+			left join hdi_org_hospital_info h on l.horg_id=h.id
+		where l.labelid in 
+		<foreach collection="labelids" item="item" index="index" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+	
+	<select id="selectLabelSubmittedById" resultType="com.ebig.hdi.modules.core.entity.CoreLabelMasterEntity">
+		SELECT 
+		  * 
+		FROM
+		  hdi_core_label_master 
+		WHERE labelid = #{labelid} 
+		  AND sourceid IN 
+		  (SELECT 
+		    supply_master_id 
+		  FROM
+		    hdi_core_supply_master 
+		  WHERE supply_status IN (1, 2, 3))
+		  and del_flag=0
+	</select>
+	
+	<update id="updateLabelStatus">
+		UPDATE 
+		  hdi_core_label_master 
+		SET
+		  labelstatus = 1 
+		WHERE labelid IN
+		<foreach collection="labelids" item="labelid" index="index" open="(" separator="," close=")">
+			#{labelid}
+		</foreach>
+	</update>
+</mapper>

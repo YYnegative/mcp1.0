@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.reagent.dao.GoodsHospitalReagentDao">
+
+    <resultMap type="com.ebig.hdi.modules.reagent.vo.GoodsHospitalReagentVO"
+               id="goodsHospitalReagentMap">
+        <result property="id" column="reagent_id"/>
+        <result property="hospitalId" column="hospital_id"/>
+        <result property="hospitalName" column="hospital_name"/>
+        <result property="reagentName" column="reagent_name"/>
+        <result property="commonName" column="common_name"/>
+        <result property="goodsNature" column="goods_nature"/>
+        <result property="typeId" column="type_id"/>
+        <result property="typeName" column="type_name"/>
+        <result property="factoryId" column="factory_id"/>
+        <result property="approvals" column="approvals"/>
+        <result property="status" column="reagent_status"/>
+        <result property="goodsUnit" column="goods_unit"/>
+        <result property="buyingUnit" column="buying_unit"/>
+        <result property="convertUnit" column="convert_unit"/>
+        <result property="picUrl" column="pic_url"/>
+        <result property="factoryName" column="factory_name"/>
+        <collection property="specsEntityList"
+                    ofType="com.ebig.hdi.modules.reagent.entity.GoodsHospitalReagentSpecsEntity">
+            <id property="id" column="specs_id"/>
+            <result property="specs" column="specs"/>
+            <result property="guid" column="guid"/>
+            <result property="status" column="specs_status"/>
+        </collection>
+    </resultMap>
+
+    <select id="listForPage" parameterType="com.ebig.hdi.modules.reagent.vo.GoodsHospitalReagentVO"
+            resultType="com.ebig.hdi.modules.reagent.vo.GoodsHospitalReagentVO">
+        select t1.*,t2.factory_name as factoryName,t3.hospital_name as hospitalName
+        from hdi_goods_hospital_reagent t1
+        left join hdi_org_factory_info t2 on t1.factory_id = t2.id
+        left join hdi_org_hospital_info t3 on t1.hospital_id = t3.id
+        where t1.del_flag = 0
+        and t2.del_flag=0
+        and t3.del_flag=0
+        <if test="goodsNature != null">
+            and t1.goods_nature = #{goodsNature}
+        </if>
+        <if test="status != null">
+            and t1.status = #{status}
+        </if>
+        <if test="hospitalName != null and hospitalName != ''">
+            and t3.hospital_name like CONCAT('%',#{hospitalName},'%')
+        </if>
+        <if test="reagentName != null and reagentName != ''">
+            and t1.reagent_name like CONCAT('%',#{reagentName},'%')
+        </if>
+        <if test="typeName != null and typeName != ''">
+            and t1.type_name like CONCAT('%',#{typeName},'%')
+        </if>
+        <if test="factoryName != null and factoryName != ''">
+            and t2.factory_name like CONCAT('%',#{factoryName},'%')
+        </if>
+        <if test="fileterDept != null and fileterDept != ''">
+            and ${fileterDept}
+        </if>
+        ORDER BY IFNULL(t1.edit_time, t1.create_time) DESC
+    </select>
+
+    <select id="selectReagentById" resultMap="goodsHospitalReagentMap">
+		SELECT 
+		  t1.id AS reagent_id,
+		  t1.hospital_id,
+		  t1.reagent_name,
+		  t1.common_name,
+		  t1.goods_nature,
+		  t1.type_id,
+		  t1.type_name,
+		  t1.factory_id AS factory_id,
+		  t1.approvals,
+		  t1.status AS reagent_status,
+		  t1.goods_unit,
+		  t1.buying_unit,
+		  t1.convert_unit,
+		  t1.pic_url,
+		  t2.factory_name,
+		  t3.hospital_name,
+		  t4.id AS specs_id,
+		  t4.specs,
+		  t4.guid,
+		  t4.status AS specs_status 
+		FROM
+		  hdi_goods_hospital_reagent t1 
+		  LEFT JOIN hdi_org_factory_info t2 
+		    ON t1.factory_id = t2.id 
+		  LEFT JOIN hdi_org_hospital_info t3 
+		    ON t1.hospital_id = t3.id 
+		  LEFT JOIN hdi_goods_hospital_reagent_specs t4 
+		    ON t1.id = t4.reagen_id 
+		WHERE t1.id = #{id}
+			and t1.del_flag = 0
+			and t2.del_flag=0
+			and t3.del_flag=0
+	</select>
+
+
+    <select id="selectByGoodsNameAndFactoryNameAndHospitalId"
+            resultType="com.ebig.hdi.modules.reagent.entity.GoodsHospitalReagentEntity">
+		SELECT 
+		  t1.* 
+		FROM
+		  hdi_goods_hospital_reagent t1 
+		  LEFT JOIN hdi_org_factory_info t2 
+		    ON t1.factory_id = t2.id 
+		    AND t2.del_flag = 0 
+		WHERE t1.del_flag = 0 
+		  AND t1.reagent_name = #{goodsName}
+		  AND t1.hospital_id = #{hospitalId}
+		  AND t2.factory_name = #{factoryName} 
+	</select>
+
+
+    <!--HDI转换用 -->
+    <select id="selectBySourcesId" resultType="java.util.Map">
+		SELECT
+			ghc.id hgoodsid,
+			ghc.reagent_code hgoodsno,
+			ghc.goods_unit hgoodsunit,
+			hcs.id hgoodstypeid,
+			hcs.specs hgoodstype
+		FROM
+			hdi_goods_hospital_reagent ghc,
+			hdi_goods_hospital_reagent_specs hcs
+		WHERE
+			hcs.reagen_id = ghc.id
+			and ghc.del_flag=0
+			AND hcs.sources_specs_id = #{sourcesSpecsId}
+	</select>
+
+    <select id="selectHospitalInfoByHospitalId" resultType="map">
+		SELECT * FROM hdi_org_hospital_info WHERE id = #{hospitalId} and del_flag=0
+	</select>
+
+    <select id="selectNotMatch" resultType="map">
+		SELECT 
+		  t1.id AS reagentId,
+		  t1.reagent_name,
+		  t1.approvals,
+		  t1.goods_nature,
+		  t1.hospital_id AS hospitalId, 
+		  t2.id AS specsId,
+		  t2.guid,
+		  t2.specs 
+		FROM
+		  (SELECT 
+		    id,
+		    approvals, 
+		    hospital_id,
+		    reagent_name,
+		    goods_nature
+		  FROM
+		    hdi_goods_hospital_reagent 
+		  WHERE del_flag = 0 
+		    AND is_match = 0 
+		  LIMIT #{limit}) t1 
+		  LEFT JOIN hdi_goods_hospital_reagent_specs t2 
+		    ON t1.id = t2.reagen_id 
+		WHERE t2.status = 1 
+	</select>
+    <select id="selectReagentMap" resultType="map">
+			SELECT approvals ,specs,guid,reagent_name,goods_nature FROM
+			hdi_goods_hospital_reagent  reagent
+			LEFT JOIN hdi_goods_hospital_reagent_specs specs
+			ON reagent.id = specs.reagen_id
+			where reagent.id =#{tgoodsId} and specs.id=#{tspecsId}
+	</select>
+</mapper>

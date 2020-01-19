@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.goods.dao.GoodsSupplierSendDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.goods.entity.GoodsSupplierSendEntity" id="goodsSupplierSendMap">
+        <result property="id" column="id"/>
+        <result property="supplierId" column="supplier_id"/>
+        <result property="hospitalId" column="hospital_id"/>
+        <result property="goodsType" column="goods_type"/>
+        <result property="goodsId" column="goods_id"/>
+        <result property="goodsSpecsId" column="goods_specs_id"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="createId" column="create_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="isUpload" column="is_upload"/>
+    </resultMap>
+	<!--可下发目录-->
+	<select id="selectSendableList" resultType="com.ebig.hdi.modules.goods.vo.GoodsSupplierSendEntityVo">
+		SELECT
+		h.supplier_id,
+		#{hospitalId} as hospital_id,
+		h.goods_type,
+		h.supplier_goods_id as goods_id,
+		h.supplier_goods_specs_id as goods_specs_id,
+		h.supplier_dept_id as dept_id,
+		h.supplier_goods_name as goods_name,
+		h.supplier_goods_specs_name as specs,
+		h.supplier_factory_name as factory_name,
+		h.platform_goods_id,
+		h.platform_goods_code,
+		h.platform_goods_specs_code,
+		h.platform_goods_specs_id
+		FROM
+		view_mcp_platform_supplier_goods_specs_match h
+		WHERE 
+		  h.supplier_goods_status = 1
+		  AND h.supplier_goods_del_flag = 0
+		  AND h.supplier_dept_id = #{deptId}
+		  AND NOT EXISTS 
+		  (SELECT 
+		    f.* 
+		  FROM
+		    (SELECT 
+		      g.* 
+		    FROM
+				view_mcp_platform_supplier_goods_specs_match g,
+				hdi_goods_supplier_send s
+			WHERE 
+				g.supplier_dept_id = #{deptId}
+				AND s.hospital_id = #{hospitalId}
+				AND g.goods_type = s.goods_type
+				AND g.supplier_goods_id = s.goods_id
+				AND g.supplier_goods_specs_id = s.goods_specs_id) f
+			WHERE h.goods_type = f.goods_type
+				AND h.supplier_goods_id = f.supplier_goods_id
+				AND h.supplier_goods_specs_id = f.supplier_goods_specs_id)
+			<if test="goodsName != null and goodsName != ''">
+			    AND h.supplier_goods_name like CONCAT('%',#{goodsName},'%')
+			</if>
+			<if test="factoryName != null and factoryName != ''">
+			    AND h.supplier_factory_name like CONCAT('%',#{factoryName},'%')
+			</if>
+			<!--<if test="sql_filter != null and sql_filter != ''">-->
+				<!--AND ${sql_filter}-->
+			<!--</if>-->
+	</select>
+	<!--已下发目录-->
+	<select id="selectSentList" resultType="com.ebig.hdi.modules.goods.vo.GoodsSupplierSendEntityVo">
+		SELECT 
+		  t2.hospital_name,
+		  t3.supplier_goods_id as goods_id,
+		  t3.supplier_goods_name as goods_name,
+		  t3.supplier_goods_type_name as type_name,
+		  t3.supplier_goods_specs_name as specs,
+		  t3.supplier_factory_id as factory_id,
+		  t3.supplier_factory_name as factory_name,
+		  t3.supplier_id,
+		  t3.agent_id,
+		  t3.approvals,
+		  (SELECT 
+		    COUNT(id) 
+		  FROM
+		    view_hdi_license_goods 
+		  WHERE supplier_id = t3.supplier_id 
+		    AND goods_id = t3.supplier_goods_id
+			AND goods_type = t3.goods_type
+		    AND STATUS = 1 
+		    AND del_flag = 0) + 
+		  (SELECT 
+		    COUNT(id) 
+		  FROM
+		    view_hdi_license_agent 
+		  WHERE supplier_id = t3.supplier_id 
+		    AND agent_id = t3.agent_id 
+		    AND STATUS = 1 
+		    AND del_flag = 0) + 
+		  (SELECT 
+		    COUNT(id) 
+		  FROM
+		    view_hdi_license_factory 
+		  WHERE supplier_id = t3.supplier_id 
+		    AND factory_id = t3.supplier_factory_id
+		    AND STATUS = 1 
+		    AND del_flag = 0) + 
+		  (SELECT 
+		    COUNT(id) 
+		  FROM
+		    view_hdi_license_supplier 
+		  WHERE supplier_id = t3.supplier_id 
+		    AND STATUS = 1 
+		    AND del_flag = 0) AS license_number
+
+		FROM
+		  hdi_goods_supplier_send t1 
+		  LEFT JOIN hdi_org_hospital_info t2 
+		    ON t1.hospital_id = t2.id 
+		  LEFT JOIN view_mcp_platform_supplier_goods_specs_match t3
+		    ON (
+				t1.goods_id = t3.supplier_goods_id
+				AND t1.goods_specs_id = t3.supplier_goods_specs_id
+				AND t1.goods_type = t3.goods_type
+		    ) 
+		where 1=1
+			<if test="goodsName != null and goodsName != ''">
+				AND supplier_goods_name like CONCAT('%',#{goodsName},'%')
+			</if>
+			<if test="hospitalName != null and hospitalName != ''">
+				AND hospital_name like CONCAT('%',#{hospitalName},'%')
+			</if>
+			<if test="factoryName != null and factoryName != ''">
+				AND supplier_factory_name like CONCAT('%',#{factoryName},'%')
+			</if>
+			<if test="sql_filter != null and sql_filter != ''">
+				AND ${sql_filter}
+			</if>
+
+		    ORDER BY t1.create_time DESC
+	</select>
+	
+	<select id="selectNotUpload" resultType="com.ebig.hdi.modules.job.entity.TempPubGoodsEntity">
+		SELECT
+		  t1.id AS sendId,
+		  t2.supplier_sources_id AS uorganid,
+		  t2.goods_id AS goodsId,
+		  t2.sources_specs_id AS mgoodsid,
+		  t2.specs_code AS goodsno,
+		  t2.goods_name AS goodsname,
+		  t2.common_name AS commonname,
+		  t2.specs AS goodstype,
+		  t2.factory_name AS factoryname,
+		  t2.goods_unit AS goodsunit,
+		  t2.pic_url AS photo,
+		  t2.approvals AS approvedocno,
+		  t2.store_way AS storeWay,
+          t3.sources_hospital_id AS memo,
+		  CASE
+		    WHEN t2.goods_type = 1
+		    THEN 3
+		    WHEN t2.goods_type = 2
+		    THEN 4
+		    WHEN t2.goods_type = 3
+		    THEN 2
+		  END AS goodscategorytype
+		FROM
+		  hdi_goods_supplier_send t1
+		  LEFT JOIN view_hdi_goods_specs_supplier t2
+		    ON (
+		      t1.goods_id = t2.goods_id
+		      AND t1.goods_specs_id = t2.goods_specs_id
+		      AND t1.goods_type = t2.goods_type
+		    )
+          LEFT JOIN hdi_unicode_supply_ship t3
+          ON (
+             t1.supplier_id=t3.supplier_id
+             AND t1.hospital_id =t3.hospital_id
+             )
+          WHERE t1.is_upload=0
+		LIMIT #{limit}
+	</select>
+	<!--获取未下发的目录-->
+	<select id="selectNotUploadNew" resultType="com.ebig.hdi.modules.job.entity.TempPubSupplyGoodsEntity">
+		SELECT
+		  t1.id AS sendId,
+		  t2.supplier_sources_id AS supplyid,
+		  t2.sources_specs_id AS mgoodsid,
+		  t2.specs_code AS goodsno,
+		  t2.goods_name AS goodsname,
+		  t2.common_name AS goodsshortname,
+		  t2.specs AS goodstype,
+		  t2.factory_name AS factoryname,
+		  t2.goods_unit AS goodsunit,
+		  t2.approvals AS registerdocno,
+		  t2.store_way AS goodsprop,
+          t2.convert_unit as unitcover,
+          t2.sunshine_pno AS sunshinePno
+      	  t1.platform_goods_specs_code as platformno,
+      	  t3.sources_hospital_id AS uorganid,
+      	  1 as pay,
+		  1 as usestatus,
+		  0 as receiptflag,
+		  NOW() as transdate,
+		  CASE
+		    WHEN t2.goods_type = 1
+		    THEN 3
+		    WHEN t2.goods_type = 2
+		    THEN 4
+		    WHEN t2.goods_type = 3
+		    THEN 2
+		  END AS goodscategorytype
+		FROM
+		  hdi_goods_supplier_send t1
+		  LEFT JOIN view_hdi_goods_specs_supplier t2
+		    ON (
+		      t1.goods_id = t2.goods_id
+		      AND t1.goods_specs_id = t2.goods_specs_id
+		      AND t1.goods_type = t2.goods_type
+		    )
+          LEFT JOIN hdi_unicode_supply_ship t3
+          ON (
+             t1.supplier_id=t3.supplier_id
+             AND t1.hospital_id =t3.hospital_id
+             )
+          WHERE t1.is_upload=0
+		LIMIT #{limit}
+	</select>
+
+</mapper>

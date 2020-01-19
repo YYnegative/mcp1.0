@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper
+        namespace="com.ebig.hdi.modules.consumables.dao.GoodsHospitalConsumablesDao">
+
+    <resultMap
+            type="com.ebig.hdi.modules.consumables.vo.GoodsHospitalConsumablesEntityVo"
+            id="goodsHospitalConsumablesMap">
+        <result property="id" column="consumables_id"/>
+        <result property="hospitalId" column="hospital_id"/>
+        <result property="hospitalName" column="hospital_name"/>
+        <result property="consumablesName" column="consumables_name"/>
+        <result property="commonName" column="common_name"/>
+        <result property="goodsNature" column="goods_nature"/>
+        <result property="typeId" column="type_id"/>
+        <result property="typeName" column="type_name"/>
+        <result property="factoryId" column="consumables_factory_id"/>
+        <result property="status" column="consumables_status"/>
+        <result property="goodsUnit" column="goods_unit"/>
+        <result property="buyingUnit" column="buying_unit"/>
+        <result property="convertUnit" column="convert_unit"/>
+        <result property="picUrl" column="pic_url"/>
+        <result property="factoryName" column="factory_name"/>
+        <collection property="specsEntityList"
+                    ofType="com.ebig.hdi.modules.consumables.entity.GoodsHospitalConsumablesSpecsEntity">
+            <id property="id" column="specs_id"/>
+            <result property="specs" column="specs"/>
+            <result property="guid" column="guid"/>
+            <result property="status" column="specs_status"/>
+        </collection>
+        <collection property="approvalsEntityList"
+                    ofType="com.ebig.hdi.modules.consumables.entity.GoodsHospitalConsumablesApprovalsEntity">
+            <id property="id" column="approvals_id"/>
+            <result property="approvals" column="approvals"/>
+            <result property="status" column="approvals_status"/>
+        </collection>
+    </resultMap>
+
+    <select id="selectByHospitalIdAndConsumablesName"
+            resultType="com.ebig.hdi.modules.consumables.entity.GoodsHospitalConsumablesEntity">
+		SELECT * FROM hdi_goods_hospital_consumables WHERE
+		del_flag = 0 AND hospital_id = #{hospitalId} AND consumables_name = #{consumablesName}
+	</select>
+
+    <select id="selectHospitalConsumablesList" resultMap="goodsHospitalConsumablesMap">
+        SELECT
+        c.id AS consumables_id,
+        c.hospital_id,
+        c.consumables_name,
+        c.common_name,
+        c.goods_nature,
+        c.type_id,
+        c.type_name,
+        c.factory_id AS consumables_factory_id,
+        c.status AS consumables_status,
+        c.goods_unit,
+        c.buying_unit,
+        c.convert_unit,
+        c.pic_url,
+        f.factory_name,
+        h.hospital_name
+        FROM hdi_goods_hospital_consumables c
+        LEFT JOIN hdi_org_factory_info f ON c.factory_id = f.id
+        LEFT JOIN hdi_org_hospital_info h ON c.hospital_id = h.id
+        <where>
+            c.del_flag = 0
+            <if test="goodsNature != null">
+                AND c.goods_nature = #{goodsNature}
+            </if>
+            <if test="status != null">
+                AND c.status = #{status}
+            </if>
+            <if test="hospitalName != null and hospitalName != ''">
+                AND h.hospital_name like CONCAT('%',#{hospitalName},'%')
+            </if>
+            <if test="typeName != null and typeName != ''">
+                AND c.type_name like CONCAT('%',#{typeName},'%')
+            </if>
+            <if test="consumablesName != null and consumablesName != ''">
+                AND c.consumables_name like CONCAT('%',
+                #{consumablesName}, '%')
+            </if>
+            <if test="factoryName != null and factoryName != ''">
+                AND f.factory_name like CONCAT('%', #{factoryName}, '%')
+            </if>
+            <if test="sql_filter != null and sql_filter != ''">
+                AND ${sql_filter}
+            </if>
+        </where>
+        ORDER BY IFNULL(c.edit_time, c.create_time) DESC
+    </select>
+
+    <select id="selectHospitalConsumablesById" resultMap="goodsHospitalConsumablesMap">
+		SELECT
+		c.id AS consumables_id,
+		c.hospital_id,
+		c.consumables_name,
+		c.common_name,
+		c.goods_nature,
+		c.type_id,
+		c.type_name,
+		c.factory_id AS consumables_factory_id,
+		c.status AS consumables_status,
+		c.goods_unit,
+		c.buying_unit,
+		c.convert_unit,
+		c.pic_url,
+		f.factory_name,
+		h.hospital_name,
+		s.id AS specs_id,
+		s.specs,
+		s.guid,
+		s.status AS specs_status,
+		a.id AS approvals_id,
+		a.approvals,
+		a.status AS approvals_status
+		FROM hdi_goods_hospital_consumables c
+		LEFT JOIN hdi_org_factory_info f ON c.factory_id = f.id
+		LEFT JOIN hdi_org_hospital_info h ON c.hospital_id = h.id
+		LEFT JOIN hdi_goods_hospital_consumables_specs s ON c.id = s.consumables_id
+		LEFT JOIN hdi_goods_hospital_consumables_approvals a ON c.id = a.consumables_id
+		WHERE
+		c.id = #{id} 
+	</select>
+
+
+    <select id="selectByGoodsNameAndFactoryNameAndHospitalId"
+            resultType="com.ebig.hdi.modules.consumables.entity.GoodsHospitalConsumablesEntity">
+		SELECT 
+		  t1.* 
+		FROM
+		  hdi_goods_hospital_consumables t1 
+		  LEFT JOIN hdi_org_factory_info t2 
+		    ON t1.factory_id = t2.id 
+		    AND t2.del_flag = 0 
+		WHERE t1.del_flag = 0 
+		  AND t1.consumables_name = #{goodsName}
+		  AND t1.hospital_id = #{hospitalId}
+		  AND t2.factory_name = #{factoryName} 
+	</select>
+
+
+    <!--HDI转换用 -->
+    <select id="selectBySourcesId" resultType="java.util.Map">
+		SELECT
+			ghc.id hgoodsid,
+			ghc.consumables_code hgoodsno,
+			ghc.goods_unit hgoodsunit,
+			hcs.id hgoodstypeid,
+			hcs.specs hgoodstype 
+		FROM
+			hdi_goods_hospital_consumables ghc,
+			hdi_goods_hospital_consumables_specs hcs 
+		WHERE
+			hcs.consumables_id = ghc.id
+			AND hcs.sources_specs_id = #{sourcesSpecsId}
+	</select>
+
+    <select id="selectHospitalInfoByHospitalId" resultType="map">
+		SELECT * FROM hdi_org_hospital_info WHERE id = #{hospitalId}
+	</select>
+
+    <select id="selectNotMatch" resultType="map">
+	  	  SELECT
+        f.id AS consumablesId,
+        f.consumables_name AS consumablesName,
+        f.goods_nature,
+        f.hospital_id AS hospitalId,
+        f.specs_id AS specsId,
+        f.specs,
+        f.guid,
+        f.approvals_id AS approvalsId,
+        g.approvals
+        FROM
+        (SELECT
+        c.id,
+        c.hospital_id,
+        c.consumables_name,
+        c.goods_nature,
+        s.id AS specs_id,
+        s.specs,
+        s.guid,
+        (SELECT
+          a.id AS approvals_id
+        FROM
+          (SELECT
+            id,
+            consumables_id,
+            approvals,
+            CASE
+              WHEN approvals REGEXP '食药监械'
+              THEN SUBSTRING_INDEX(
+                SUBSTRING_INDEX(approvals, '字', - 1),
+                '第',
+                1
+              )
+              WHEN approvals REGEXP '械注'
+              THEN SUBSTRING(approvals, 5, 4)
+              WHEN approvals REGEXP '械备'
+              THEN SUBSTRING(approvals, 5, 4)
+              ELSE '0'
+            END AS approvals_year
+          FROM
+            hdi_goods_hospital_consumables_approvals
+          WHERE STATUS = 1) a
+        WHERE a.consumables_id = c.id
+        ORDER BY a.approvals_year DESC
+        LIMIT 1) AS approvals_id
+        FROM
+        (SELECT
+          id,
+          hospital_id,
+          consumables_name,
+          goods_nature
+        FROM
+          hdi_goods_hospital_consumables
+        WHERE del_flag = 0
+          AND is_match = 0
+        LIMIT #{limit}) c
+           LEFT JOIN hdi_goods_hospital_consumables_specs s
+            ON c.id = s.consumables_id
+        WHERE s.status = 1) f
+        LEFT JOIN hdi_goods_hospital_consumables_approvals g
+          ON f.approvals_id = g.id
+	</select>
+    <select id="selectConsumablesMap" resultType="map">
+		SELECT approvals,specs,guid,goods_nature,consumables_name FROM
+          hdi_goods_hospital_consumables co
+          LEFT JOIN hdi_goods_hospital_consumables_specs s
+          ON co.id = s.consumables_id
+          LEFT JOIN hdi_goods_hospital_consumables_approvals a
+          ON co.id = a.consumables_id
+		  where co.id =#{tgoodsId} and s.id=#{tspecsId} and a.id =#{tapprovalId}
+	</select>
+
+</mapper>

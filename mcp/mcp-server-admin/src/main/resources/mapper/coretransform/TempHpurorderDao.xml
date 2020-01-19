@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.coretransform.dao.TempHpurorderDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.coretransform.entity.TempHpurorderEntity" id="tempHpurorderMap">
+        <result property="hpurorderid" column="hpurorderid"/>
+        <result property="storehouseid" column="storehouseid"/>
+        <result property="uorganid" column="uorganid"/>
+        <result property="purplanno" column="purplanno"/>
+        <result property="horganid" column="horganid"/>
+        <result property="horganno" column="horganno"/>
+        <result property="horganname" column="horganname"/>
+        <result property="purorderstatus" column="purorderstatus"/>
+        <result property="sourceid" column="sourceid"/>
+        <result property="totalmoney" column="totalmoney"/>
+        <result property="purplanmode" column="purplanmode"/>
+        <result property="addressid" column="addressid"/>
+        <result property="credate" column="credate"/>
+        <result property="cremanid" column="cremanid"/>
+        <result property="cremanname" column="cremanname"/>
+        <result property="memo" column="memo"/>
+        <result property="exportflag" column="exportflag"/>
+        <result property="anticipate" column="anticipate"/>
+        <result property="supplyconfirmdate" column="supplyconfirmdate"/>
+        <result property="stageflag" column="stageflag"/>
+        <result property="udflag" column="udflag"/>
+    </resultMap>
+
+
+	<!-- 查询对应主单 -->
+	<select id="selectTempHpurorder" resultType="com.ebig.hdi.modules.coretransform.entity.TempHpurorderEntity">
+		SELECT
+			* 
+		FROM
+			temp_hdi_hpurorder thh 
+		WHERE
+			thh.hpurorderid = #{hpurorderid}
+	</select>
+	
+	
+	<select id="getDeptIdAndHorgIdAndSupplierId" resultType="java.util.Map">
+		SELECT
+			uss.hospital_id horgId,
+			uss.supplier_id supplierId,
+			osi.dept_id deptId
+		FROM
+			hdi_unicode_supply_ship uss,
+			hdi_org_supplier_info osi
+		WHERE
+			osi.id = uss.supplier_id
+			AND	uss.sources_supplier_id = #{uorganid}
+			AND uss.sources_hospital_id = #{horganid}
+			and uss.del_flag=0
+			and osi.del_flag=0
+	</select>
+	
+	
+	<delete id="deleteTempHpurorder">
+		DELETE 
+		FROM
+			temp_hdi_hpurorder 
+		WHERE
+			hpurorderid =  #{hpurorderid}
+    </delete>
+    
+    <select id="selectHospitalConsumablesBySourcesSpecsId" resultType="java.util.Map">
+		SELECT
+			ghc.id,
+			ghc.consumables_name consumablesName,
+			ghc.consumables_code consumablesCode, 
+			hcs.id specsId,
+			hcs.specs
+		FROM
+			hdi_goods_hospital_consumables ghc,
+			hdi_goods_hospital_consumables_specs hcs 
+		WHERE
+			hcs.consumables_id = ghc.id
+			AND hcs.sources_specs_id = #{sourcesSpecsId}
+			and ghc.del_flag=0
+	</select>
+	
+	<select id="selectHospitalDrugsBySourcesSpecsId" resultType="java.util.Map">
+		SELECT
+			ghc.id,
+			ghc.drugs_name drugsName,
+			ghc.drugs_code drugsCode, 
+			hcs.id specsId,
+			hcs.specs 
+		FROM
+			hdi_goods_hospital_drugs ghc,
+			hdi_goods_hospital_drugs_specs hcs 
+		WHERE
+			hcs.drugs_id = ghc.id
+			AND hcs.sources_specs_id = #{sourcesSpecsId}
+			and ghc.del_flag=0
+	</select>
+	
+	<select id="selectHospitalReagentBySourcesSpecsId" resultType="java.util.Map">
+		SELECT
+			ghc.id,
+			ghc.reagent_name reagentName,
+			ghc.reagent_code reagentCode, 
+			hcs.id specsId,
+			hcs.specs 
+		FROM
+			hdi_goods_hospital_reagent ghc,
+			hdi_goods_hospital_reagent_specs hcs 
+		WHERE
+			hcs.reagen_id = ghc.id
+			AND hcs.sources_specs_id = #{sourcesSpecsId}
+			and ghc.del_flag=0
+	</select>
+	
+</mapper>

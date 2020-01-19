@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.coretransform.dao.SpdPurbackDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.coretransform.entity.SpdPurbackEntity" id="spdPurbackMap">
+        <result property="purbackid" column="purbackid"/>
+        <result property="purbackno" column="purbackno"/>
+        <result property="supplyid" column="supplyid"/>
+        <result property="supplyno" column="supplyno"/>
+        <result property="supplyname" column="supplyname"/>
+        <result property="storehouseid" column="storehouseid"/>
+        <result property="workflowstatus" column="workflowstatus"/>
+        <result property="purbackstatus" column="purbackstatus"/>
+        <result property="cremanid" column="cremanid"/>
+        <result property="cremanname" column="cremanname"/>
+        <result property="credate" column="credate"/>
+        <result property="editmanid" column="editmanid"/>
+        <result property="editmanname" column="editmanname"/>
+        <result property="editdate" column="editdate"/>
+        <result property="auditmanid" column="auditmanid"/>
+        <result property="auditmanname" column="auditmanname"/>
+        <result property="auditdate" column="auditdate"/>
+        <result property="revokerid" column="revokerid"/>
+        <result property="revoker" column="revoker"/>
+        <result property="revoketime" column="revoketime"/>
+        <result property="memo" column="memo"/>
+        <result property="uorganid" column="uorganid"/>
+        <result property="pinstanceid" column="pinstanceid"/>
+        <result property="sourceid" column="sourceid"/>
+        <result property="sourceno" column="sourceno"/>
+        <result property="printflag" column="printflag"/>
+        <result property="printtime" column="printtime"/>
+        <result property="printmanid" column="printmanid"/>
+        <result property="printmanname" column="printmanname"/>
+        <result property="revokemanid" column="revokemanid"/>
+        <result property="revokemanname" column="revokemanname"/>
+        <result property="gensalback" column="gensalback"/>
+        <result property="printtimes" column="printtimes"/>
+        <result property="orgdataid" column="orgdataid"/>
+        <result property="purbacktype" column="purbacktype"/>
+        <result property="udflag" column="udflag"/>
+    </resultMap>
+
+    <delete id="BatchDelPurBack" parameterType="java.util.Set">
+        delete from spd_purback where purbackid in
+        <foreach collection="set" item="val" open="(" close=")" separator=",">
+            #{val}
+        </foreach>
+    </delete>
+
+</mapper>

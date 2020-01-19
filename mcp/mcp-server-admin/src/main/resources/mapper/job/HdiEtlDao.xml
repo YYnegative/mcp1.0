@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.job.dao.HdiEtlDao">
+	<!-- 查询Etl配置信息 -->
+	<select id="findEtlConfig" resultType="com.ebig.hdi.modules.job.entity.HdiEtlEntity">
+		SELECT
+			id,
+			name,
+			table_name as tableName,
+			begin_time as beginTime,
+			config_sql as configSql,
+			priority,
+			ts_delay as tsDelay,
+			udflag,
+			uid
+		FROM
+			etl_config
+		WHERE
+			udflag = #{udflag}
+	</select>
+	<update id="updateTime">
+		UPDATE etl_config SET begin_time = #{beginTime} WHERE id = #{id}
+	</update>
+	<update id="lockConfigById">
+		UPDATE etl_config SET begin_time=begin_time WHERE id = #{id}
+	</update>
+</mapper>

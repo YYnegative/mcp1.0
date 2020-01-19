@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.core.dao.CorePurchaseReportDao">
+
+    <!-- 根据供应商id统计当前年每月的采购金额-->
+    <select id="getMonthDataBySupplieId" resultType="com.ebig.hdi.modules.core.entity.CorePurchaseMonthReportEntity">
+        SELECT
+        SUM(t.price) totalPrice,t.recordDate
+        FROM
+        (SELECT
+        d.hqty * d.hunitprice AS price,
+        DATE_FORMAT(m.credate, '%Y-%m') recordDate
+        FROM
+        hdi_core_purchase_detail d,
+        hdi_core_purchase_master m
+        <where>
+            m.purchase_master_id = d.purchase_master_id
+            AND m.credate > DATE_ADD(NOW(),INTERVAL -12 MONTH)
+            AND m.del_flag = 0
+            AND d.hqty IS NOT NULL
+            AND d.hunitprice IS NOT NULL
+            <if test="supplieId != null and supplieId != ''">
+                AND m.supplier_id = #{supplieId}
+            </if>
+        </where>
+        ) t
+        GROUP BY recordDate
+    </select>
+    <!-- 根据供应商id统计当前月的采购金额-->
+    <select id="getListByMap" resultType="com.ebig.hdi.modules.core.entity.CorePurchaseReportEntity">
+        SELECT
+        d.`hqty` * d.`hunitprice` AS totalPrice,
+        CONCAT(
+        ma.hospital_goods_specs_id,
+        ma.hospital_goods_id,
+        ma.hospital_id,
+        ma.goods_type
+        ) mark,
+        supplier_goods_name as supplierGoodsName
+        FROM
+        `hdi_core_purchase_detail` d,
+        `hdi_core_purchase_master` m,
+        `view_hdi_goods_specs_match` ma
+        <where>
+            m.`purchase_master_id` = d.`purchase_master_id`
+            AND m.`supplier_id` = ma.`supplier_id`
+            AND m.del_flag = 0
+            AND d.hqty IS NOT NULL
+            AND d.hunitprice IS NOT NULL
+            <if test="supplieId != null and supplieId != ''">
+                AND m.supplier_id = #{supplieId}
+            </if>
+            <if test="startDate != null">
+                AND m.credate &gt;= #{startDate}
+            </if>
+            <if test="endDate != null">
+                AND m.credate &lt;= #{endDate}
+            </if>
+        </where>
+    </select>
+</mapper>

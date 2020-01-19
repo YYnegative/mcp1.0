@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.consumables.dao.GoodsShipApprovalConsumablesDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.common.entity.UnicodeGoodsShipApprovalEntity"
+               id="unicodeGoodsShipMap">
+        <result property="shipId" column="ship_id"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="torgId" column="torg_id"/>
+        <result property="torgType" column="torg_type"/>
+        <result property="tgoodsType" column="tgoods_type"/>
+        <result property="tgoodsId" column="tgoods_id"/>
+        <result property="pgoodsId" column="pgoods_id"/>
+        <result property="tspecsId" column="tspecs_id"/>
+        <result property="pspecsId" column="pspecs_id"/>
+        <result property="tapprovalId" column="tapproval_id"/>
+        <result property="papprovalId" column="papproval_id"/>
+        <result property="shipFlag" column="ship_flag"/>
+        <result property="checkStatus" column="check_status"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="cremanid" column="cremanid"/>
+        <result property="cremanname" column="cremanname"/>
+        <result property="credate" column="credate"/>
+        <result property="editmanid" column="editmanid"/>
+        <result property="editmanname" column="editmanname"/>
+        <result property="editdate" column="editdate"/>
+        <result property="memo" column="memo"/>
+        <result property="hospitalName" column="hospital_name"/>
+        <result property="goodsName" column="goods_name"/>
+        <result property="factoryName" column="factory_name"/>
+        <result property="specs" column="specs"/>
+        <result property="approvals" column="approvals"/>
+        <result property="pconsumablesName" column="pconsumables_name"/>
+        <result property="id" column="id"/>
+        <result property="goodsNature" column="goods_nature"/>
+        <result property="cateName" column="cate_name"/>
+        <result property="supplierName" column="supplier_name"/>
+        <result property="pspecs" column="pspecs"/>
+        <result property="onlyId" column="only_id"/>
+        <result property="processId" column="process_id"/>
+    </resultMap>
+
+    <!-- 查询前台医院商品分页数据 -->
+    <select id="selectHospitaGoods"
+            resultType="com.ebig.hdi.common.entity.UnicodeGoodsShipApprovalEntity">
+        SELECT
+        ugs.*,
+        ohi.hospital_name,
+        ghc.consumables_name goods_name,
+        hcs.specs,
+        hca.approvals,
+        ofi.factory_name,
+        gpc.consumables_name pgoods_name,
+        ghc.goods_nature
+        FROM
+        hdi_unicode_goods_ship_approval ugs
+        LEFT JOIN hdi_org_hospital_info ohi ON ugs.torg_id = ohi.id
+        LEFT JOIN hdi_goods_hospital_consumables ghc ON ugs.tgoods_id = ghc.id
+        LEFT JOIN hdi_goods_hospital_consumables_specs hcs ON ugs.tspecs_id = hcs.id
+        LEFT JOIN hdi_goods_hospital_consumables_approvals hca ON ugs.tapproval_id = hca.id
+        LEFT JOIN hdi_org_factory_info ofi ON ghc.factory_id = ofi.id
+        LEFT JOIN hdi_goods_platform_consumables gpc on ugs.pgoods_id = gpc.id
+        <where>
+            ugs.torg_type = 0 and
+            ugs.tgoods_type = 3
+            <if test="deptIds != null and deptIds != ''">
+                AND ${deptIds}
+            </if>
+            <if test="shipFlag != null">
+                AND ugs.ship_flag = #{shipFlag}
+            </if>
+            <if test="checkStatus != null">
+                AND ugs.check_status = #{checkStatus}
+            </if>
+            <if test="hospitalName != null and hospitalName != ''">
+                AND ohi.hospital_name like CONCAT('%',#{hospitalName}, '%')
+            </if>
+            <if test="goodsName != null and goodsName != ''">
+                AND ghc.consumables_name like CONCAT('%', #{goodsName}, '%')
+            </if>
+            <if test="factoryName != null and factoryName != ''">
+                AND ofi.factory_name like CONCAT('%', #{factoryName}, '%')
+            </if>
+        </where>
+        ORDER BY IFNULL(ugs.editdate, ugs.credate) DESC
+    </select>
+
+    <!-- 查询前台供应商分页数据 -->
+    <select id="selectSupplierGoods"
+            resultType="com.ebig.hdi.common.entity.UnicodeGoodsShipApprovalEntity">
+        SELECT
+        ugs.*,
+        osi.supplier_name,
+        gsc.consumables_name goods_name,
+        scs.specs,
+        sca.approvals,
+        ofi.factory_name,
+        gpc.consumables_name pgoods_name,
+        pcs.specs pspecs,
+        gsc.goods_nature
+        FROM
+        hdi_unicode_goods_ship_approval ugs
+        LEFT JOIN hdi_org_supplier_info osi ON ugs.torg_id = osi.id
+        LEFT JOIN hdi_goods_supplier_consumables gsc ON ugs.tgoods_id = gsc.id
+        LEFT JOIN hdi_goods_supplier_consumables_specs scs ON ugs.tspecs_id = scs.id
+        LEFT JOIN hdi_goods_supplier_consumables_approvals sca ON ugs.tapproval_id = sca.id
+        LEFT JOIN hdi_org_factory_info ofi ON gsc.factory_id = ofi.id
+        LEFT JOIN hdi_goods_platform_consumables gpc on ugs.pgoods_id = gpc.id
+        LEFT JOIN hdi_goods_platform_consumables_specs pcs on pcs.id = ugs.pspecs_id
+        <where>
+            ugs.torg_type = 1
+            AND ugs.tgoods_type = 3
+            <if test="deptIds != null and deptIds != ''">
+                AND ${deptIds}
+            </if>
+            <if test="shipFlag != null">
+                AND ugs.ship_flag = #{shipFlag}
+            </if>
+            <if test="checkStatus != null">
+                AND ugs.check_status = #{checkStatus}
+            </if>
+            <if test="supplierName != null and supplierName != ''">
+                AND osi.supplier_name like CONCAT('%',#{supplierName}, '%')
+            </if>
+            <if test="goodsName != null and goodsName != ''">
+                AND gsc.consumables_name like CONCAT('%', #{goodsName}, '%')
+            </if>
+            <if test="factoryName != null and factoryName != ''">
+                AND ofi.factory_name like CONCAT('%', #{factoryName}, '%')
+            </if>
+        </where>
+        ORDER BY IFNULL(ugs.editdate, ugs.credate) DESC
+    </select>
+
+    <!-- 查询平台商品分页数据  医院/供应商-->
+    <select id="selectPGoodsList"
+            resultType="com.ebig.hdi.common.entity.UnicodeGoodsShipApprovalEntity">
+        SELECT
+        f.id AS id,
+        f.consumables_name AS goods_name,
+        f.goods_nature AS goods_nature,
+        h.factory_name,
+        f.specs_id AS pspecsId,
+        f.specs AS specs,
+        f.approvals_id AS papprovalId,
+        g.approvals AS approvals
+        FROM
+        (SELECT
+        c.id,
+        c.consumables_name,
+        c.goods_nature,
+        c.factory_id,
+        s.id AS specs_id,
+        s.specs,
+        (SELECT
+        a.id AS approvals_id
+        FROM
+        (SELECT
+        id,
+        consumables_id,
+        approvals,
+        CASE
+        WHEN approvals REGEXP '食药监械'
+        THEN SUBSTRING_INDEX(SUBSTRING_INDEX(approvals, '字', - 1),'第', 1)
+        WHEN approvals REGEXP '械注'
+        THEN SUBSTRING(approvals, 5, 4)
+        ELSE '0'
+        END AS approvals_year
+        FROM
+        hdi_goods_platform_consumables_approvals
+        WHERE status = 1) a
+        WHERE a.consumables_id = c.id
+        ORDER BY a.approvals_year DESC
+        LIMIT 1) AS approvals_id
+        FROM
+        (SELECT
+        id,
+        consumables_name,
+        goods_nature,
+        factory_id
+        FROM
+        hdi_goods_platform_consumables
+        WHERE del_flag = 0 AND status = 1) c
+        LEFT JOIN hdi_goods_platform_consumables_specs s
+        ON c.id = s.consumables_id
+        WHERE s.status = 1) f
+        LEFT JOIN hdi_goods_platform_consumables_approvals g
+        ON f.approvals_id = g.id
+        LEFT JOIN hdi_org_factory_info h
+        ON f.factory_id = h.id
+        <where>
+            <if test="goodsName != null and goodsName != ''">
+                AND f.consumables_name like CONCAT('%', #{goodsName}, '%')
+            </if>
+            <if test="pspecs != null and pspecs != ''">
+                AND f.specs like CONCAT('%', #{pspecs}, '%')
+            </if>
+            <if test="approvals != null and approvals != ''">
+                AND g.approvals = #{approvals}
+            </if>
+        </where>
+    </select>
+
+
+    <!-- 编辑保存修改平台商品规格标识 -->
+    <update id="updateHospitalPgoodsId">
+		UPDATE hdi_unicode_goods_ship_approval 
+		SET pgoods_id = #{pgoodsId},
+		pspecs_id = #{pspecsId},
+		papproval_id = #{papprovalId},
+		editmanid = #{editmanid},
+		editmanname = #{editmanname},
+		editdate = #{editdate},
+		ship_flag = 1 
+		WHERE
+			ship_id = #{shipId}
+	</update>
+
+
+    <!-- 编辑保存修改平台商品规格标识 -->
+    <update id="updateSupplierPgoodsId">
+		UPDATE hdi_unicode_goods_ship_approval 
+		SET pgoods_id = #{pgoodsId},
+		pspecs_id = #{pspecsId},
+		papproval_id = #{papprovalId},
+		editmanid = #{editmanid},
+		editmanname = #{editmanname},
+		editdate = #{editdate},
+		ship_flag = 1 
+		WHERE
+			ship_id = #{shipId}
+	</update>
+
+    <select id="selectListByColumn"
+            resultType="com.ebig.hdi.common.entity.UnicodeGoodsShipApprovalEntity">
+	        SELECT *
+	        FROM hdi_unicode_goods_ship_approval 
+	        WHERE torg_type = #{torgType} AND tgoods_type = #{tgoodsType} AND tgoods_id = #{tgoodsId} AND tspecs_id = #{tspecsId}
+	</select>
+
+    <select id="listHospitalMatchGoods"
+            resultType="com.ebig.hdi.common.entity.UnicodeGoodsShipApprovalEntity">
+		SELECT 
+		  * 
+		FROM
+		  hdi_unicode_goods_ship_approval 
+		WHERE torg_type = 0 
+		  AND tgoods_type = 3 
+		  AND ship_flag = 1
+		  AND check_status in(0,1)
+		  AND del_flag = 0 
+		  AND torg_id = #{torgId} 
+		  AND pgoods_id = #{pgoodsId} 
+		  AND pspecs_id = #{pspecsId}
+		  AND papproval_id = #{papprovalId}
+	</select>
+
+    <select id="listSupplierMatchGoods"
+            resultType="com.ebig.hdi.common.entity.UnicodeGoodsShipApprovalEntity">
+		SELECT 
+		  * 
+		FROM
+		  hdi_unicode_goods_ship_approval 
+		WHERE torg_type = 1 
+		  AND tgoods_type = 3 
+		  AND ship_flag = 1
+		  AND check_status in(0,1)
+		  AND del_flag = 0 
+		  AND torg_id = #{torgId}
+		  AND pgoods_id = #{pgoodsId} 
+		  AND pspecs_id = #{pspecsId}
+		  AND papproval_id = #{papprovalId}
+	</select>
+</mapper>

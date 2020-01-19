@@ -1,0 +1,7 @@
+spring:
+  # 环境 dev|120mcptest|prod
+  profiles:
+    active: '@package.environment@'
+
+
+

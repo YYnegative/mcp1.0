@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.core.dao.CoreSupplyDetailDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.core.entity.CoreSupplyDetailEntity" id="coreSupplyDetailMap">
+        <result property="supplyDetailId" column="supply_detail_id"/>
+        <result property="supplyMasterId" column="supply_master_id"/>
+        <result property="sourceid" column="sourceid"/>
+        <result property="sourcedtlid" column="sourcedtlid"/>
+        <result property="purplanid" column="purplanid"/>
+        <result property="purplandtlid" column="purplandtlid"/>        
+        <result property="goodsid" column="goodsid"/>
+        <result property="goodsclass" column="goodsclass"/>
+        <result property="goodsno" column="goodsno"/>
+        <result property="goodstypeid" column="goodstypeid"/>
+        <result property="goodstype" column="goodstype"/>
+        <result property="goodsunit" column="goodsunit"/>
+        <result property="supplyQty" column="supply_qty"/>
+        <result property="supplyUnitprice" column="supply_unitprice"/>
+        <result property="lotid" column="lotid"/>
+        <result property="cremanid" column="cremanid"/>
+        <result property="cremanname" column="cremanname"/>
+        <result property="credate" column="credate"/>
+        <result property="memo" column="memo"/>
+        <result property="orgdataid" column="orgdataid"/>
+        <result property="orgdatadtlid" column="orgdatadtlid"/>
+        <result property="factoryName" column="factory_name"/>
+        <result property="goodsname" column="goods_name"/>
+        <result property="lotno" column="lotno"/>
+        <result property="proddate" column="proddate"/>
+        <result property="invadate" column="invadate"/>
+    </resultMap>
+
+	<!-- 根据supplyMasterId查询采购细单信息 -->
+	<select id="selectBysupplyMasterId" resultType="com.ebig.hdi.modules.core.entity.CoreSupplyDetailEntity">
+		SELECT
+		csd.*
+		FROM
+		hdi_core_supply_detail csd
+
+		<where>
+			<if test="supplyMasterId != null and supplyMasterId != ''">
+				 csd.supply_master_id = #{supplyMasterId}
+			</if>
+		</where>
+
+	</select>
+
+	<!-- 根据supplyMasterId查询采购细单信息  打印批次码是的细单列表 -->
+	<select id="queryDetailBatchCode" resultType="com.ebig.hdi.modules.core.entity.CoreSupplyDetailEntity">
+		SELECT
+			csd.*
+		FROM
+			hdi_core_supply_detail csd
+		<where>
+
+		<if test="supplyMasterId != null and supplyMasterId != ''">
+			AND csd.supply_master_id = #{supplyMasterId}
+		</if>
+		<if test="goodsName != null and goodsName != ''">
+			AND csd.goods_name like CONCAT('%',#{goodsName}, '%')
+		</if>
+		</where>
+	</select>
+	
+	
+	<!-- 根据supplyMasterId查询采购细单信息 -->
+	<select id="selectSupplyDetail" resultType="com.ebig.hdi.modules.core.entity.CoreSupplyDetailEntity">
+		SELECT 
+		  csd.*,
+		  cl.lotno,
+		  cl.proddate,
+		  cl.invadate,
+		  (
+		    csd.supply_qty - 
+		    (SELECT 
+		      IFNULL(SUM(cld.label_qty), 0) 
+		    FROM
+		      hdi_core_label_detail cld 
+		    WHERE cld.supply_master_id = csd.supply_master_id 
+		      AND cld.supply_detail_id = csd.supply_detail_id 
+		      AND cld.labelid IN 
+		      (SELECT 
+		        labelid 
+		      FROM
+		        hdi_core_label_master 
+		      WHERE del_flag = 0))
+		  ) unpackagedNumber 
+		FROM
+			hdi_core_supply_detail csd
+			LEFT JOIN hdi_goods_supplier_consumables gsc on csd.goodsid = gsc.id
+			LEFT JOIN hdi_org_factory_info ofi on ofi.id = gsc.factory_id
+			LEFT JOIN hdi_core_lot cl on csd.lotid = cl.lotid
+		<where>
+			<if test="supplyMasterId != null and supplyMasterId != ''">
+				csd.supply_master_id = #{supplyMasterId}
+			</if>
+		</where>
+	</select>
+
+	<!-- 根据条件查询批号表的数据是否存在 -->
+	<select id="selectLot" resultType="java.util.Map">
+		SELECT
+			* 
+		FROM
+			hdi_core_lot cl
+		<where>
+			cl.del_flag=0
+		<if test="goodsid != null and goodsid != ''">
+			and cl.goodsid = #{goodsid}
+		</if>
+		<if test="goodsclass != null and goodsclass != ''">
+			AND cl.goodsclass = #{goodsclass}
+		</if>
+		<if test="goodstypeid != null and goodstypeid != ''">
+			AND cl.goodstypeid = #{goodstypeid}
+		</if>		
+		<if test="lotno != null and lotno != ''">
+			AND cl.lotno like CONCAT('%',#{lotno}, '%')
+		</if>
+		</where> 
+		
+	</select>
+
+	<!-- 根据条件查询批号表的数据是否存在 -->
+	<select id="selectBySupplyMasterId" resultType="com.ebig.hdi.modules.core.entity.CoreSupplyDetailEntity">
+		SELECT
+			* 
+		FROM
+			hdi_core_supply_detail csd 
+		WHERE
+			csd.supply_master_id = #{supplyMasterId}
+	</select>
+	
+	<select id="selectByDetailids" resultType="com.ebig.hdi.modules.core.entity.CoreSupplyDetailEntity">
+		SELECT
+			csd.goodsname,
+			csd.supply_detail_id,
+			csd.supply_master_id,
+			csd.goodsno,
+			csd.goodstype,
+			csd.goodsclass,
+			csd.goodsid,
+			csd.goodstypeid,
+			csd.goodsunit,
+			csd.image_url,
+			csd.lotno,
+			csd.proddate,
+			csd.invadate,
+			csd.batch_code,
+			csd.factory_name
+		FROM
+			hdi_core_supply_detail csd
+		WHERE
+			1=1
+			AND csd.supply_detail_id = #{supplyDetailId}
+	</select>
+
+	<select id="getSupplyNumberByPurchaseMasterId" resultType="int">
+		SELECT 
+		  IFNULL(SUM(t1.supply_qty), 0) 
+		FROM
+		  hdi_core_supply_detail t1 
+		  LEFT JOIN hdi_core_supply_master t2 
+		    ON t1.supply_master_id = t2.supply_master_id 
+		WHERE t1.purchase_master_id = #{purchaseMasterId}  
+		  AND t2.del_flag = 0 
+	</select>
+	
+	<select id="getSupplyNumberBySupplyMasterId" resultType="int">
+		SELECT 
+		  IFNULL(SUM(t1.supply_qty), 0) 
+		FROM
+		  hdi_core_supply_detail t1 
+		  LEFT JOIN hdi_core_supply_master t2 
+		    ON t1.supply_master_id = t2.supply_master_id 
+		WHERE t1.supply_master_id = #{supplyMasterId}  
+		  AND t2.del_flag = 0  
+	</select>
+	
+	<select id="getDetailLeaveAcceptQty" resultType="int">
+		SELECT 
+		  (
+		    supply_qty - 
+		    (SELECT 
+		      IFNULL(SUM(t1.accept_qty), 0) 
+		    FROM
+		      hdi_core_accept_detail t1 
+		      LEFT JOIN hdi_core_accept_master t2 
+		        ON t1.accept_master_id = t2.accept_master_id 
+		    WHERE t1.sourcedtlid = #{supplyDetailId} 
+		      AND t2.del_flag = 0)
+		  ) AS leave_accept_qty 
+		FROM
+		  hdi_core_supply_detail 
+		WHERE supply_detail_id = #{supplyDetailId}
+	</select>
+	
+	<select id="getHospitalGoodsSpecsCode" resultType="string">
+		SELECT 
+		  hospital_goods_specs_code 
+		FROM
+		  view_hdi_goods_specs_match 
+		WHERE goods_type = #{goodsclass}
+		  AND supplier_goods_id = #{goodsid}
+		  AND supplier_id = #{supplierId}
+		  AND supplier_goods_specs_id = #{goodstypeid}
+		  AND hospital_id = #{horgId}
+	</select>
+	
+	<select id="getSupplierGoodsSpecsCode" resultType="string">
+		SELECT 
+		  specs_code 
+		FROM
+		  view_hdi_goods_specs_supplier 
+		WHERE goods_type = #{goodsclass}
+		  AND goods_id = #{goodsid}
+		  AND goods_specs_id = #{goodstypeid}
+	</select>
+
+	<select id="getList" resultType="com.ebig.hdi.modules.core.entity.CoreSupplyDetailEntity">
+	SELECT
+		d.supply_detail_id,
+		d.supply_master_id,
+		d.goodsunit,
+		d.goodsclass,
+		d.goodsid,
+		d.goodsno,
+		d.goodsname,
+		d.goodstypeid,
+		d.goodstypeno,
+		d.goodstype,
+		d.goodsunit,
+		d.supply_qty,
+		d.lotid,
+		d.lotno
+	FROM
+	hdi_core_supply_detail d,
+	hdi_core_supply_master m
+	<where>
+		m.supply_master_id = d.supply_master_id
+		and m.del_flag = 0
+		AND m.supply_status &lt;&gt;  '0'
+		<if test="goodsType != null and goodsType != ''">
+			AND d.goodstype = #{goodsType}
+		</if>
+		<if test="supplyno != null and supplyno != ''">
+			AND m.supplyno = #{supplyno}
+		</if>
+		<if test="goodsname != null and goodsname != ''">
+			AND d.goodsname = #{goodsname}
+		</if>
+		<if test="lotno != null and lotno != ''">
+			AND d.lotno = #{lotno}
+		</if>
+
+	</where>
+	</select>
+	<select id="selectConvert" resultType="java.lang.String">
+		SELECT convert_unit FROM view_hdi_goods_specs_supplier WHERE goods_type=#{goodsClass} AND goods_id=#{goodsId}
+	</select>
+</mapper>

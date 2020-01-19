@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.sys.dao.SysRoleDeptDao">
+	
+	<select id="queryDeptIdList" resultType="long">
+		select dept_id from sys_role_dept where role_id in
+		<foreach item="roleId" collection="array" open="(" separator="," close=")">
+			#{roleId}
+		</foreach>
+	</select>
+	
+	<select id="queryRoleIdList" resultType="long">
+		select role_id from sys_role_dept where dept_id = #{deptId}
+	</select>
+
+	<delete id="deleteBatch">
+		delete from sys_role_dept where role_id in
+		<foreach item="roleId" collection="array" open="(" separator="," close=")">
+			#{roleId}
+		</foreach>
+	</delete>
+	
+	<select id="selectByRoleIdAndDeptId" resultType="com.ebig.hdi.modules.sys.entity.SysRoleDeptEntity">
+		select * from sys_role_dept where role_id = #{roleId} and dept_id = #{deptId}
+	</select>
+	
+	<delete id="deleteByRoleIdAndDeptId">
+		delete from sys_role_dept where role_id = #{roleId} and dept_id = #{deptId}
+	</delete>
+	
+</mapper>

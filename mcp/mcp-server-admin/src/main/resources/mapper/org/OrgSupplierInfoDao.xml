@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.org.dao.OrgSupplierInfoDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.org.entity.OrgSupplierInfoEntity" id="orgSupplierInfoMap">
+        <result property="id" column="id"/>
+        <result property="supplierCode" column="supplier_code"/>
+        <result property="supplierName" column="supplier_name"/>
+        <result property="creditCode" column="credit_code"/>
+        <result property="provinceCode" column="province_code"/>
+        <result property="cityCode" column="city_code"/>
+        <result property="areaCode" column="area_code"/>
+        <result property="supplierAddress" column="supplier_address"/>
+        <result property="status" column="status"/>
+        <result property="supplierNature" column="supplier_nature"/>
+        <result property="corporate" column="corporate"/>
+        <result property="phone" column="phone"/>
+        <result property="email" column="email"/>
+        <result property="fax" column="fax"/>
+        <result property="isGroup" column="is_group"/>
+        <result property="childNumber" column="child_number"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="createId" column="create_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="editId" column="edit_id"/>
+        <result property="editTime" column="edit_time"/>
+    </resultMap>
+	
+	<select id="listForPage" parameterType="com.ebig.hdi.modules.org.entity.OrgSupplierInfoEntity" resultType="com.ebig.hdi.modules.org.entity.OrgSupplierInfoEntity">
+		select t1.*,
+			case when 
+				t2.supplier_name IS NULL 
+			then
+				'root'
+			else t2.supplier_name 
+			end
+			as parentName
+		from
+			hdi_org_supplier_info t1
+		left join
+			hdi_org_supplier_info t2
+		on 
+			t1.parent_id = t2.id
+		and t2.del_flag = 0
+		where t1.del_flag = 0
+		<if test="fileterDept != null and fileterDept != ''">
+			and ${fileterDept}
+		</if>
+		<if test='status !=null'>
+		    and t1.status = #{status}
+		</if>
+		<if test="supplierName != null and supplierName != ''">
+			and t1.supplier_name like CONCAT('%',#{supplierName},'%')
+		</if>
+		<if test="provinceCode != null and provinceCode != ''">
+			and t1.province_code = #{provinceCode}
+		</if>
+		<if test="cityCode != null and cityCode != ''">
+			and t1.city_code = #{cityCode}
+		</if>
+		<if test="areaCode != null and areaCode != ''">
+			and t1.area_code = #{areaCode}
+		</if>
+		<if test="isDefaultOrder == 1">
+			order by IFNULL(t1.edit_time, t1.create_time) desc
+		</if>
+	</select>
+	
+	<!-- 根据供应商名称查询信息 -->
+	<select id="selectBySupplierName" resultType="com.ebig.hdi.modules.org.entity.OrgSupplierInfoEntity">
+		select * from hdi_org_supplier_info where supplier_name = #{supplierName} and del_flag = 0
+	</select>
+	
+	<!-- 根据供应商信用代码查询信息 -->
+	<select id="selectByCreditCode" resultType="com.ebig.hdi.modules.org.entity.OrgSupplierInfoEntity">
+		select * from hdi_org_supplier_info where credit_code = #{creditCode} and del_flag = 0
+	</select>
+	
+	<!-- 根据供应商的父id查询所有的供应商 -->
+	<select id="selectByParentIdAndStatus" resultType="com.ebig.hdi.modules.org.entity.OrgSupplierInfoEntity">
+		select * from hdi_org_supplier_info where parent_id = #{parentId} and del_flag = 0
+		<if test='status !=null'>
+		    and status = #{status}
+		</if>
+	</select>
+	
+	<!-- 根据dept权限查询父供应商 -->
+	<select id="selectParent" resultType="com.ebig.hdi.modules.org.entity.OrgSupplierInfoEntity">
+		select * from hdi_org_supplier_info 
+		where parent_id = 0  and del_flag = 0 and is_group != 0 
+		<if test="value != null and value.trim() != ''">
+			and ${value}
+		</if>
+		order by create_time desc
+	</select>
+	
+	<!-- 根据用户ID查询供应商ID -->
+	<select id="selectIdByUserId" resultType="long">
+		select supplier.id from hdi_org_supplier_info supplier left join sys_user user on supplier.dept_id = user.dept_id where user.user_id = #{userId} and supplier.del_flag = 0
+	</select>
+	
+	<select id="selectSourceSupplierId" resultType="java.lang.String">
+		select
+			sources_ship_id
+		from 
+			hdi_unicode_supply_ship
+		where 
+			del_flag = 0
+		and
+			hospital_id = #{hospitalId}
+		and 
+			supplier_id = #{supplierId}
+	</select>
+	
+	<select id="selectSubIdsById" resultType="long">
+		SELECT id FROM hdi_org_supplier_info WHERE del_flag = 0 and parent_id = #{id}
+	</select>
+
+	<!-- 根据deptId获取到供应商id -->
+	<select id="selectByDeptId" resultType="com.ebig.hdi.modules.org.entity.OrgSupplierInfoEntity">
+		SELECT
+		osi.id id,osi.supplier_code AS supplierCode,osi.supplier_name AS supplierName
+		FROM
+		hdi_org_supplier_info osi
+		WHERE
+		osi.dept_id = #{deptId}
+	</select>
+</mapper>

@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.core.dao.PublicComboDataDao">
+
+	<select id="queryHospitalData"
+		resultType="com.ebig.hdi.modules.org.entity.OrgHospitalInfoEntity">
+		SELECT
+		hos.*
+		FROM
+		hdi_org_supplier_info supplier,
+		hdi_unicode_supply_ship ship,
+		hdi_org_hospital_info hos
+		<where>
+            supplier.id = ship.supplier_id
+            AND ship.hospital_id = hos.id
+            and supplier.del_flag=0
+            and ship.del_flag=0
+            and hos.del_flag=0
+			<if test="deptId != null and deptId != ''">
+				AND supplier.dept_id = #{deptId}
+			</if>
+			<if test="value != null and value != ''">
+				AND hos.hospital_name like CONCAT('%', #{value}, '%')
+			</if>
+		</where>
+	</select>
+
+    <select id="queryLotData" resultType="com.ebig.hdi.modules.core.entity.CoreLotEntity">
+        SELECT
+        lot.*
+        FROM
+        hdi_core_lot lot
+        <where>
+            lot.lotstatus = 1 AND lot.del_flag = 0
+            <if test="value != null and value != ''">
+                AND lot.lotno like CONCAT('%', #{value}, '%')
+            </if>
+            <if test="goodsclass != null">
+                AND lot.goodsclass = #{goodsclass}
+            </if>
+            <if test="goodsid != null">
+                AND lot.goodsid = #{goodsid}
+            </if>
+            <if test="goodstypeid != null">
+                AND lot.goodstypeid = #{goodstypeid}
+            </if>
+            <if test="deptId != null">
+                AND lot.dept_id = #{deptId}
+            </if>
+        </where>
+    </select>
+    <select id="queryStorehouseData"
+            resultType="com.ebig.hdi.modules.core.entity.CoreStorehouseEntity">
+        SELECT
+        *
+        FROM
+        hdi_core_storehouse storehouse
+        <where>
+            <if test="value != null and value != ''">
+                AND storehouse.storehousename LIKE CONCAT('%', #{value}, '%')
+            </if>
+            <if test="horgId != null and horgId != ''">
+                AND storehouse.horg_id = #{horgId}
+            </if>
+            <if test="deptId != null and deptId != ''">
+                AND storehouse.dept_id = #{deptId}
+            </if>
+        </where>
+    </select>
+    <select id="queryHospitalGoodsData" resultType="java.util.Map">
+        <choose>
+            <!-- 传入商品ID查询规格 ，否则查询商品信息 -->
+            <when test="goodsid != null and goodsid != ''">
+                SELECT
+                hospital.goods_specs_id AS hgoodstypeid,
+                hospital.specs AS hgoodstype,
+                hospital.specs_code AS goodsTypecode
+                FROM
+                view_hdi_goods_specs_hospital hospital
+                <where>
+                    hospital.hospital_id = #{horgId}
+                    AND hospital.goods_id = #{goodsid}
+                    <if test="goodsclass != null and goodsclass != ''">
+                        AND hospital.goods_type = #{goodsclass}
+                    </if>
+                    <if test="value != null and value != ''">
+                        AND hospital.specs LIKE CONCAT('%',#{value},'%')
+                    </if>
+                </where>
+            </when>
+            <otherwise>
+                SELECT DISTINCT
+                hospital.goods_id AS hgoodsid,
+                hospital.goods_type AS goodsclass,
+                hospital.goods_code AS goodsCode,
+                hospital.goods_name AS hgoodsName,
+                hospital.goods_unit AS hgoodsunit,
+                hospital.hospital_id AS horgId,
+                hospital.factory_id AS factoryId,
+                hospital.factory_code AS factoryCode,
+                hospital.factory_name AS factoryName
+                FROM
+                view_hdi_goods_specs_hospital hospital
+                <where>
+                    hospital.hospital_id = #{horgId}
+                    <if test="value != null and value != ''">
+                        AND hospital.goods_name LIKE CONCAT('%',#{value},'%')
+                    </if>
+                </where>
+            </otherwise>
+        </choose>
+    </select>
+    <select id="querySupplierGoodsData" resultType="java.util.Map">
+        <choose>
+            <!-- 传入商品ID查询规格 ，否则查询商品信息 -->
+            <when test="goodsid != null and goodsid != ''">
+                SELECT
+                m.supplier_goods_specs_id AS goodsTypeid,
+                m.supplier_goods_specs_code AS goodsTypecode,
+                m.supplier_goods_specs_name AS goodsType
+                FROM
+                view_hdi_goods_specs_match m
+                <where>
+                    m.supplier_dept_id = #{deptId}
+                    AND m.supplier_goods_id = #{goodsid}
+                    <if test="horgId != null and horgId != ''">
+                        AND m.hospital_id = #{horgId}
+                    </if>
+                    <if test="goodsclass != null and goodsclass != ''">
+                        AND m.goods_type = #{goodsclass}
+                    </if>
+                    <if test="value != null and value != ''">
+                        AND m.supplier_goods_specs_name LIKE CONCAT('%',#{value},'%')
+                    </if>
+                </where>
+            </when>
+            <otherwise>
+                SELECT DISTINCT
+                m.supplier_goods_id AS goodsid,
+                m.goods_type AS goodsclass,
+                m.supplier_goods_code AS goodsCode,
+                m.supplier_goods_name AS goodsName,
+                m.supplier_goods_unit AS goodsUnit,
+                m.supplier_factory_id AS factoryId,
+                m.supplier_factory_code AS factoryCode,
+                m.supplier_factory_name AS factoryName
+                FROM
+                view_hdi_goods_specs_match m
+                <where>
+                    m.supplier_dept_id = #{deptId}
+                    <if test="horgId != null and horgId != ''">
+                        AND m.hospital_id = #{horgId}
+                    </if>
+                    <if test="value != null and value != ''">
+                        AND m.supplier_goods_name LIKE CONCAT('%',#{value},'%')
+                    </if>
+                </where>
+            </otherwise>
+        </choose>
+    </select>
+    <select id="querySupplierGoodsInfo" resultType="java.util.Map">
+        SELECT DISTINCT
+        m.supplier_goods_id AS goodsid,
+        m.goods_type AS goodsclass,
+        m.supplier_goods_code AS goodsCode,
+        m.supplier_goods_name AS goodsName,
+        m.supplier_goods_unit AS goodsUnit,
+        m.supplier_factory_id AS factoryId,
+        m.supplier_factory_code AS factoryCode,
+        m.supplier_factory_name AS factoryName,
+        m.supplier_goods_specs_id AS goodstypeid,
+        m.supplier_goods_specs_code AS goodstypeno,
+        m.supplier_goods_specs_name AS goodstype,
+        m.supplier_id AS supplierId
+        FROM
+        view_hdi_goods_specs_match m
+        <where>
+            m.supplier_dept_id = #{deptId}
+            <if test="goodstypeno != null and goodstypeno != ''">
+                AND m.supplier_goods_specs_code = #{goodstypeno}
+            </if>
+        </where>
+    </select>
+</mapper>

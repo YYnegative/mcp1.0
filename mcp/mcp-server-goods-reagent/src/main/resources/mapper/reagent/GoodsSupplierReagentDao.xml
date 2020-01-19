@@ -1,0 +1,323 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.reagent.dao.GoodsSupplierReagentDao">
+
+    <resultMap type="com.ebig.hdi.modules.reagent.vo.GoodsSupplierReagentVO" id="goodsSupplierReagentMap">
+        <result property="id" column="reagent_id"/>
+        <result property="supplierId" column="supplier_id"/>
+        <result property="reagentName" column="reagent_name"/>
+        <result property="commonName" column="common_name"/>
+        <result property="goodsNature" column="goods_nature"/>
+        <result property="typeId" column="type_id"/>
+        <result property="typeName" column="type_name"/>
+        <result property="factoryId" column="reagent_factory_id"/>
+        <result property="approvals" column="approvals"/>
+        <result property="status" column="reagent_status"/>
+        <result property="goodsUnit" column="goods_unit"/>
+        <result property="supplyUnit" column="supply_unit"/>
+        <result property="convertUnit" column="convert_unit"/>
+        <result property="agentId" column="agent_id"/>
+        <result property="picUrl" column="pic_url"/>
+        <result property="factoryName" column="factory_name"/>
+        <result property="supplierName" column="supplier_name"/>
+        <result property="agentName" column="agent_name"/>
+        <result property="licenseNumber" column="license_number"/>
+		<result property="reagentCode" column="reagent_code"/>
+		<result property="storeWay" column="store_way"/>
+		<result property="sunshinePno" column="sunshine_pno"/>
+        <collection property="specsEntityList" ofType="com.ebig.hdi.modules.reagent.entity.GoodsSupplierReagentSpecsEntity">
+        	<id property="id" column="specs_id"/>
+        	<result property="specs" column="specs"/>
+        	<result property="guid" column="guid"/>
+        	<result property="status" column="specs_status"/>
+        </collection>
+    </resultMap>
+	
+	<select id="listForPage" parameterType="com.ebig.hdi.modules.reagent.vo.GoodsSupplierReagentVO" resultType="com.ebig.hdi.modules.reagent.vo.GoodsSupplierReagentVO">
+
+		select t1.*,t2.factory_name as factoryName,t3.supplier_name as supplierName ,
+			( SELECT count( id ) FROM view_hdi_license_goods WHERE supplier_id = t1.supplier_id AND goods_id = t1.id AND goods_type = 2 AND STATUS = 1 AND del_flag = 0 ) +
+			( SELECT count( id ) FROM view_hdi_license_agent WHERE supplier_id = t1.supplier_id AND agent_id = t1.agent_id AND STATUS = 1 AND del_flag = 0 ) +
+			( SELECT count( id ) FROM view_hdi_license_factory WHERE supplier_id = t1.supplier_id AND factory_id = t1.factory_id AND STATUS = 1 AND del_flag = 0 ) +
+			( SELECT count( id ) FROM view_hdi_license_supplier WHERE supplier_id = t1.supplier_id AND STATUS = 1 AND del_flag = 0 ) as licenseNumber
+		from hdi_goods_supplier_reagent t1 
+		left join hdi_org_factory_info t2 on t1.factory_id = t2.id
+		left join hdi_org_supplier_info t3 on t1.supplier_id = t3.id
+		where t1.del_flag = 0 
+			and t2.del_flag = 0
+			and t3.del_flag = 0
+		<if test="fileterDept != null and fileterDept != ''">
+			and ${fileterDept}
+		</if>
+		<if test="supplierName != null and supplierName != ''">
+			and t3.supplier_name like CONCAT('%',#{supplierName},'%')
+		</if>
+		<if test="reagentName != null and reagentName != ''">
+			and t1.reagent_name like CONCAT('%',#{reagentName},'%')
+		</if>
+		<if test="goodsNature != null">
+			and t1.goods_nature = #{goodsNature}
+		</if>
+		<if test="typeName != null and typeName != ''">
+			and t1.type_name like CONCAT('%',#{typeName},'%')
+		</if>
+		<if test="status != null">
+			and t1.status = #{status}
+		</if>
+		<if test="factoryName != null and factoryName != ''">
+			and t2.factory_name like CONCAT('%',#{factoryName},'%')
+		</if>
+		ORDER BY IFNULL(t1.edit_time, t1.create_time) DESC
+	</select>
+	
+	<select id="selectReagentById" resultMap="goodsSupplierReagentMap">
+		SELECT 
+		  t1.id AS reagent_id,
+		  t1.supplier_id,
+		  t1.reagent_name,
+		  t1.common_name,
+		  t1.goods_nature,
+		  t1.type_id,
+		  t1.type_name,
+		  t1.factory_id AS reagent_factory_id,
+		  t1.approvals,
+		  t1.status AS reagent_status,
+		  t1.goods_unit,
+		  t1.supply_unit,
+		  t1.convert_unit,
+		  t1.agent_id,
+		  t1.pic_url,
+		  t1.sunshine_pno,
+		  t2.factory_name,
+		  t3.supplier_name,
+		  (select t5.agent_name from hdi_org_agent_info t5 where t5.id = t1.agent_id) agent_name,
+		  t4.id AS specs_id,
+		  t4.specs,
+		  t4.guid,
+		  t4.status AS specs_status,
+		  t1.reagent_code,
+		  t1.store_way
+		FROM
+		  hdi_goods_supplier_reagent t1 
+		  LEFT JOIN hdi_org_factory_info t2 
+		    ON t1.factory_id = t2.id 
+		  LEFT JOIN hdi_org_supplier_info t3 
+		    ON t1.supplier_id = t3.id
+		  LEFT JOIN hdi_goods_supplier_reagent_specs t4 
+		    ON t1.id = t4.reagen_id 
+		WHERE t1.id = #{id}
+		 	and t1.del_flag = 0
+			and t2.del_flag = 0
+			and t3.del_flag = 0
+	</select>
+
+	<select id="selectByGoodsNameAndFactoryNameAndSupplierId" resultType="com.ebig.hdi.modules.reagent.entity.GoodsSupplierReagentEntity">
+		SELECT 
+		  t1.* 
+		FROM
+		  hdi_goods_supplier_reagent t1 
+		  LEFT JOIN hdi_org_factory_info t2 
+		    ON t1.factory_id = t2.id 
+		    AND t2.del_flag = 0 
+		WHERE t1.del_flag = 0 
+		  AND t1.reagent_name = #{goodsName}
+		  AND t1.supplier_id = #{supplierId}
+		  AND t2.factory_name = #{factoryName} 
+	</select>
+	
+	
+	<!--HDI转换用 -->
+	<select id="selectBySourcesIds" resultType="java.util.Map">
+		SELECT
+			ghc.id sgoodsid,
+			ghc.reagent_code sgoodsno,
+			ghc.goods_unit sgoodsunit,
+			hcs.id sgoodstypeid,
+			hcs.specs sgoodstype,
+			hcs.sources_specs_id sourcesSpecsId
+		FROM
+			hdi_goods_supplier_reagent ghc,
+			hdi_goods_supplier_reagent_specs hcs 
+		WHERE
+			hcs.reagen_id = ghc.id
+			and ghc.del_flag=0
+			AND hcs.sources_specs_id IN
+			<foreach collection="sourcesSpecsIds" item="item" separator="," open="(" close=")">
+				#{item}
+			</foreach>
+	</select> 
+	
+	<select id="selectSupplierInfoBySupplierId" resultType="map">
+		SELECT * FROM hdi_org_supplier_info WHERE id = #{supplierId} and del_flag=0
+	</select>
+	
+	<select id="selectNotMatch" resultType="map">
+		SELECT 
+		  t1.id AS reagentId,
+		  t1.reagent_name,
+		  t1.approvals,
+		  t1.goods_nature,
+		  t1.supplier_id AS supplierId, 
+		  t2.id AS specsId,
+		  t2.guid,
+		  t2.specs 
+		FROM
+		  (SELECT 
+		    id,
+		    approvals, 
+		    supplier_id,
+		    reagent_name,
+		    goods_nature
+		  FROM
+		    hdi_goods_supplier_reagent 
+		  WHERE del_flag = 0 
+		    AND is_match = 0 
+		  LIMIT #{limit}) t1 
+		  LEFT JOIN hdi_goods_supplier_reagent_specs t2 
+		    ON t1.id = t2.reagen_id 
+		WHERE t2.status = 1 
+	</select>
+	
+	<select id="selectSupplierIdByName" resultType="long">
+		SELECT
+			id
+		FROM
+			hdi_org_supplier_info
+		WHERE
+			supplier_name = #{name}
+			and del_flag=0
+	</select>
+	
+	<update id="updateSupplierGoodsSendNotUpload">
+		UPDATE 
+		  hdi_goods_supplier_send 
+		SET
+		  is_upload = 0 
+		WHERE supplier_id = #{supplierId} 
+		  AND goods_id = #{goodsId} 
+	</update>
+
+	<select id="getList" resultType="map">
+		SELECT
+		t1.*, CASE
+		WHEN t1.goods_nature = '0' THEN
+		'国产'
+		WHEN t1.goods_nature = '1' THEN
+		'进口'
+		END AS goodsNature,
+		CASE
+		WHEN t1.`status` = '1' THEN
+		'启用'
+		WHEN t1.`status` = '0' THEN
+		'停用'
+		END AS status1,
+		t2.factory_name AS factoryName,
+		t3.supplier_name AS supplierName,
+		(
+		SELECT
+		count(id)
+		FROM
+		view_hdi_license_goods
+		WHERE
+		supplier_id = t1.supplier_id
+		AND goods_id = t1.id
+		AND goods_type = 2
+		AND STATUS = 1
+		AND del_flag = 0
+		) + (
+		SELECT
+		count(id)
+		FROM
+		view_hdi_license_agent
+		WHERE
+		supplier_id = t1.supplier_id
+		AND agent_id = t1.agent_id
+		AND STATUS = 1
+		AND del_flag = 0
+		) + (
+		SELECT
+		count(id)
+		FROM
+		view_hdi_license_factory
+		WHERE
+		supplier_id = t1.supplier_id
+		AND factory_id = t1.factory_id
+		AND STATUS = 1
+		AND del_flag = 0
+		) + (
+		SELECT
+		count(id)
+		FROM
+		view_hdi_license_supplier
+		WHERE
+		supplier_id = t1.supplier_id
+		AND STATUS = 1
+		AND del_flag = 0
+		) AS licenseNumber,
+		CASE
+		WHEN t4. STATUS = 1 THEN
+		t4.specs
+		WHEN t4. STATUS = 0 THEN
+		'规格停用'
+		END AS specs
+		FROM
+		hdi_goods_supplier_reagent t1
+		LEFT JOIN hdi_org_factory_info t2 ON t1.factory_id = t2.id
+		LEFT JOIN hdi_org_supplier_info t3 ON t1.supplier_id = t3.id
+		LEFT JOIN hdi_goods_supplier_reagent_specs t4 ON t4.reagen_id = t1.id
+		WHERE
+		t1.del_flag = 0
+		AND t2.del_flag = 0
+		AND t3.del_flag = 0
+		<if test="queryParams.supplierName != null and queryParams.supplierName != ''">
+			and t3.supplier_name like CONCAT('%',#{queryParams.supplierName},'%')
+		</if>
+		<if test="queryParams.reagentName != null and queryParams.reagentName != ''">
+			and t1.reagent_name like CONCAT('%',#{queryParams.reagentName},'%')
+		</if>
+		<if test="queryParams.goodsNature != null">
+			and t1.goods_nature = #{queryParams.goodsNature}
+		</if>
+		<if test="queryParams.typeName != null and queryParams.typeName != ''">
+			and t1.type_name like CONCAT('%',#{queryParams.typeName},'%')
+		</if>
+		<if test="queryParams.status != null">
+			and t1.status = #{queryParams.status}
+		</if>
+		<if test="queryParams.factoryName != null and queryParams.factoryName != ''">
+			and t2.factory_name like CONCAT('%',#{queryParams.factoryName},'%')
+		</if>
+
+		<if test="sql_filter != null and sql_filter != ''">
+			and ${sql_filter}
+		</if>
+		ORDER BY IFNULL(t1.edit_time, t1.create_time) DESC
+	</select>
+
+	<select id="selectApprovals" resultType="java.lang.Integer">
+		SELECT count(*) FROM hdi_goods_supplier_reagent where del_flag = 0  and approvals = #{approvals}
+		<if test="id != null">
+			and not id = #{id}
+		</if>
+
+	</select>
+	<select id="selectReagentNameAndApprovals" resultType="java.lang.Integer">
+		SELECT count(*) FROM hdi_goods_supplier_reagent where del_flag = 0  and approvals = #{approvals} and not reagent_name = #{reagentName}
+	</select>
+    <select id="selectfactory" resultType="java.lang.Integer">
+		SELECT count(*) from hdi_org_factory_info where del_flag = 0  and factory_name = #{factoryName}
+		<if test="factoryId != null">
+			and not id = #{factoryId}
+		</if>
+
+	</select>
+
+	<select id="selectReagentMap" resultType="map">
+		SELECT approvals ,specs,guid FROM
+		hdi_goods_supplier_reagent  reagent
+		LEFT JOIN hdi_goods_supplier_reagent_specs specs
+		ON reagent.id = specs.reagen_id
+		where reagent.id =#{tgoodsId} and specs.id=#{tspecsId}
+	</select>
+</mapper>

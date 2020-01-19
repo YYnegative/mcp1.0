@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.reagent.dao.UnicodeGoodsShipHistReagentDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.reagent.entity.UnicodeGoodsShipHistReagentEntity"
+               id="unicodeGoodsShipHistMap">
+        <result property="shiphistId" column="shiphist_id"/>
+        <result property="shipId" column="ship_id"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="torgId" column="torg_id"/>
+        <result property="torgType" column="torg_type"/>
+        <result property="tgoodsType" column="tgoods_type"/>
+        <result property="tgoodsId" column="tgoods_id"/>
+        <result property="pgoodsId" column="pgoods_id"/>
+        <result property="tspecsId" column="tspecs_id"/>
+        <result property="pspecsId" column="pspecs_id"/>
+        <result property="tapprovalId" column="tapproval_id"/>
+        <result property="papprovalId" column="papproval_id"/>
+        <result property="shipFlag" column="ship_flag"/>
+        <result property="checkStatus" column="check_status"/>
+        <result property="operType" column="oper_type"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="cremanid" column="cremanid"/>
+        <result property="cremanname" column="cremanname"/>
+        <result property="credate" column="credate"/>
+        <result property="editmanid" column="editmanid"/>
+        <result property="editmanname" column="editmanname"/>
+        <result property="editdate" column="editdate"/>
+        <result property="memo" column="memo"/>
+        <result property="hospitalName" column="hospital_name"/>
+        <result property="goodsName" column="goods_name"/>
+        <result property="factoryName" column="factory_name"/>
+        <result property="specs" column="specs"/>
+        <result property="approvals" column="approvals"/>
+        <result property="preagentName" column="preagent_name"/>
+        <result property="id" column="id"/>
+        <result property="goodsNature" column="goods_nature"/>
+        <result property="cateName" column="cate_name"/>
+        <result property="processId" column="process_id"/>
+    </resultMap>
+
+    <!-- 查询医院商品历史分页数据 -->
+    <select id="selectHospitalGoodsHist"
+            resultType="com.ebig.hdi.modules.reagent.entity.UnicodeGoodsShipHistReagentEntityVo">
+        SELECT
+        t1.*,
+        t2.hospital_name,
+        t3.reagent_name goodsName,
+        t3.goods_nature,
+        t4.specs,
+        t3.approvals,
+        t5.factory_name,
+        haa.approval_status,
+        haa.user_name
+        FROM
+        hdi_unicode_goods_ship_hist t1
+        LEFT JOIN hdi_org_hospital_info t2
+        ON t1.torg_id = t2.id
+        LEFT JOIN hdi_goods_platform_reagent t3
+        ON t1.pgoods_id = t3.id
+        LEFT JOIN hdi_goods_platform_reagent_specs t4
+        ON t1.pspecs_id = t4.id
+        LEFT JOIN hdi_org_factory_info t5
+        ON t3.factory_id = t5.id
+        left join hdi_act_approval haa on haa.process_id = t1.process_id
+        <where>t1.del_flag = 0
+            AND t1.torg_type = 0
+            AND t1.tgoods_type = 2
+            AND t1.ship_id = #{shipId}
+
+        </where>
+        ORDER BY ship_flag desc ,editdate desc,credate desc
+    </select>
+
+    <!-- 查询供应商商品历史分页数据 -->
+    <select id="selectSupplierGoodsHist"
+            resultType="com.ebig.hdi.modules.reagent.entity.UnicodeGoodsShipHistReagentEntityVo">
+        SELECT
+        t1.*,
+        t2.supplier_name,
+        t3.reagent_name goodsName,
+        t3.goods_nature,
+        t4.specs,
+        t3.approvals,
+        t5.factory_name,
+        haa.approval_status,
+        haa.user_name
+        FROM
+        hdi_unicode_goods_ship_hist t1
+        LEFT JOIN hdi_org_supplier_info t2
+        ON t1.torg_id = t2.id
+        LEFT JOIN hdi_goods_platform_reagent t3
+        ON t1.pgoods_id = t3.id
+        LEFT JOIN hdi_goods_platform_reagent_specs t4
+        ON t1.pspecs_id = t4.id
+        LEFT JOIN hdi_org_factory_info t5
+        ON t3.factory_id = t5.id
+        left join hdi_act_approval haa on haa.process_id = t1.process_id
+        <where>t1.del_flag = 0
+            AND t1.torg_type = 1
+            AND t1.tgoods_type = 2
+            AND t1.ship_id = #{shipId}
+        </where>
+        ORDER BY ship_flag desc ,editdate desc,credate desc
+    </select>
+
+
+</mapper>

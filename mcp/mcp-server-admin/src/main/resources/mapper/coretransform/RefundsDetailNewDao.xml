@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.coretransform.dao.RefundsDetailNewDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.refunds.entity.RefundsDetailEntity" id="refundsDetailMap">
+        <result property="id" column="id"/>
+        <result property="masterId" column="master_id"/>
+        <result property="supplyMasterId" column="supply_master_id"/>
+        <result property="supplyDetailId" column="supply_detail_id"/>
+        <result property="supplyno" column="supplyno"/>
+        <result property="goodsType" column="goods_type"/>
+        <result property="sourcesGoodsId" column="sources_goods_id"/>
+        <result property="sourcesGoodsCode" column="sources_goods_code"/>
+        <result property="sourcesGoodsName" column="sources_goods_name"/>
+        <result property="sourcesSpecsId" column="sources_specs_id"/>
+        <result property="sourcesSpecsCode" column="sources_specs_code"/>
+        <result property="sourcesSpecsName" column="sources_specs_name"/>
+        <result property="goodsId" column="goods_id"/>
+        <result property="goodsCode" column="goods_code"/>
+        <result property="goodsName" column="goods_name"/>
+        <result property="specsId" column="specs_id"/>
+        <result property="specsCode" column="specs_code"/>
+        <result property="specsName" column="specs_name"/>
+        <result property="lotId" column="lot_id"/>
+        <result property="lotNo" column="lot_no"/>
+        <result property="goodsUnitCode" column="goods_unit_code"/>
+        <result property="applyRefundsNumber" column="apply_refunds_number"/>
+        <result property="realityRefundsNumber" column="reality_refunds_number"/>
+        <result property="refundsPrice" column="refunds_price"/>
+        <result property="refundsRemark" column="refunds_remark"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="createId" column="create_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="editId" column="edit_id"/>
+        <result property="editTime" column="edit_time"/>
+        <result property="delFlag" column="del_flag"/>
+    </resultMap>
+
+    <select id="selectByOrgdatadtlid" resultType="com.ebig.hdi.modules.refunds.entity.RefundsDetailEntity">
+		SELECT
+			*
+		FROM
+		hdi_refunds_detail
+		WHERE
+		 orgdatadtl_id = #{orgdatadtlid}
+	</select>
+</mapper>

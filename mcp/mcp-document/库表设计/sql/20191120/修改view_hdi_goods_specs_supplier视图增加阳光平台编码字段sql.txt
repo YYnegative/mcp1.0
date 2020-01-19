@@ -1,0 +1,296 @@
+DELIMITER $$
+
+ALTER ALGORITHM =
+  UNDEFINED DEFINER = "hscm" @"192.168.1.%" SQL SECURITY DEFINER VIEW "view_hdi_goods_specs_supplier" AS
+  SELECT
+    1 AS "goods_type",
+    "d"."supplier_id" AS "supplier_id",
+    "p"."sources_supplier_id" AS "supplier_sources_id",
+    "d"."id" AS "goods_id",
+    "d"."type_name" AS "type_name",
+    "d"."drugs_code" AS "goods_code",
+    "d"."drugs_name" AS "goods_name",
+    "d"."common_name" AS "common_name",
+    "d"."goods_nature" AS "goods_nature",
+    "d"."dept_id" AS "dept_id",
+    "d"."goods_unit" AS "goods_unit",
+    "d"."status" AS "status",
+    "d"."agent_id" AS "agent_id",
+    "d"."pic_url" AS "pic_url",
+    "d"."approvals" AS "approvals",
+    "d"."store_way" AS "store_way",
+    "d"."convert_unit" AS "convert_unit",
+    "d"."del_flag" AS "del_flag",
+    "d"."sunshine_pno" AS "sunshine_pno",
+    "s"."id" AS "goods_specs_id",
+    "s"."sources_specs_id" AS "sources_specs_id",
+    "s"."specs_code" AS "specs_code",
+    "s"."specs" AS "specs",
+    "f"."id" AS "factory_id",
+    "f"."factory_code" AS "factory_code",
+    "f"."factory_name" AS "factory_name"
+  FROM
+    (
+      (
+        (
+          "mcp-dev"."hdi_goods_supplier_drugs_specs" "s"
+          LEFT JOIN "mcp-dev"."hdi_goods_supplier_drugs" "d"
+            ON (("s"."drugs_id" = "d"."id"))
+        )
+        LEFT JOIN "mcp-dev"."hdi_org_factory_info" "f"
+          ON (("d"."factory_id" = "f"."id"))
+      )
+      LEFT JOIN
+        (SELECT
+          "mcp-dev"."hdi_unicode_supply_ship"."supplier_id" AS "supplier_id",
+          "mcp-dev"."hdi_unicode_supply_ship"."sources_supplier_id" AS "sources_supplier_id"
+        FROM
+          "mcp-dev"."hdi_unicode_supply_ship"
+        WHERE (
+            (
+              "mcp-dev"."hdi_unicode_supply_ship"."ship_flag" = 1
+            )
+            AND (
+              "mcp-dev"."hdi_unicode_supply_ship"."sources_supplier_id" IS NOT NULL
+            )
+          )
+        GROUP BY "mcp-dev"."hdi_unicode_supply_ship"."supplier_id",
+          "mcp-dev"."hdi_unicode_supply_ship"."sources_supplier_id") "p"
+        ON (
+          (
+            "d"."supplier_id" = "p"."supplier_id"
+          )
+        )
+    )
+    UNION
+    SELECT
+      2 AS "goods_type",
+      "d"."supplier_id" AS "supplier_id",
+      "p"."sources_supplier_id" AS "supplier_sources_id",
+      "d"."id" AS "goods_id",
+      "d"."type_name" AS "type_name",
+      "d"."reagent_code" AS "goods_code",
+      "d"."reagent_name" AS "goods_name",
+      "d"."common_name" AS "common_name",
+      "d"."goods_nature" AS "goods_nature",
+      "d"."dept_id" AS "dept_id",
+      "d"."goods_unit" AS "goods_unit",
+      "d"."status" AS "status",
+      "d"."agent_id" AS "agent_id",
+      "d"."pic_url" AS "pic_url",
+      "d"."approvals" AS "approvals",
+      "d"."store_way" AS "store_way",
+      "d"."convert_unit" AS "convert_unit",
+      "d"."del_flag" AS "del_flag",
+      "d"."sunshine_pno" AS "sunshine_pno",
+      "s"."id" AS "goods_specs_id",
+      "s"."sources_specs_id" AS "sources_specs_id",
+      "s"."specs_code" AS "specs_code",
+      "s"."specs" AS "specs",
+      "f"."id" AS "factory_id",
+      "f"."factory_code" AS "factory_code",
+      "f"."factory_name" AS "factory_name"
+    FROM
+      (
+        (
+          (
+            "mcp-dev"."hdi_goods_supplier_reagent_specs" "s"
+            LEFT JOIN "mcp-dev"."hdi_goods_supplier_reagent" "d"
+              ON (("s"."reagen_id" = "d"."id"))
+          )
+          LEFT JOIN "mcp-dev"."hdi_org_factory_info" "f"
+            ON (("d"."factory_id" = "f"."id"))
+        )
+        LEFT JOIN
+          (SELECT
+            "mcp-dev"."hdi_unicode_supply_ship"."supplier_id" AS "supplier_id",
+            "mcp-dev"."hdi_unicode_supply_ship"."sources_supplier_id" AS "sources_supplier_id"
+          FROM
+            "mcp-dev"."hdi_unicode_supply_ship"
+          WHERE (
+              (
+                "mcp-dev"."hdi_unicode_supply_ship"."ship_flag" = 1
+              )
+              AND (
+                "mcp-dev"."hdi_unicode_supply_ship"."sources_supplier_id" IS NOT NULL
+              )
+            )
+          GROUP BY "mcp-dev"."hdi_unicode_supply_ship"."supplier_id",
+            "mcp-dev"."hdi_unicode_supply_ship"."sources_supplier_id") "p"
+          ON (
+            (
+              "d"."supplier_id" = "p"."supplier_id"
+            )
+          )
+      )
+      UNION
+      SELECT
+        "g"."goods_type" AS "goods_type",
+        "g"."supplier_id" AS "supplier_id",
+        "g"."supplier_sources_id" AS "supplier_sources_id",
+        "g"."goods_id" AS "goods_id",
+        "g"."type_name" AS "type_name",
+        "g"."goods_code" AS "goods_code",
+        "g"."goods_name" AS "goods_name",
+        "g"."common_name" AS "common_name",
+        "g"."goods_nature" AS "goods_nature",
+        "g"."dept_id" AS "dept_id",
+        "g"."goods_unit" AS "goods_unit",
+        "g"."status" AS "status",
+        "g"."agent_id" AS "agent_id",
+        "g"."pic_url" AS "pic_url",
+        "h"."approvals" AS "approvals",
+        "g"."store_way" AS "store_way",
+        "g"."convert_unit" AS "convert_unit",
+        "g"."del_flag" AS "del_flag",
+        "g"."sunshine_pno" AS "sunshine_pno",
+        "g"."goods_specs_id" AS "goods_specs_id",
+        "g"."sources_specs_id" AS "sources_specs_id",
+        "g"."specs_code" AS "specs_code",
+        "g"."specs" AS "specs",
+        "g"."factory_id" AS "factory_id",
+        "g"."factory_code" AS "factory_code",
+        "g"."factory_name" AS "factory_name"
+      FROM
+        (
+          (
+            (SELECT
+              "e"."goods_type" AS "goods_type",
+              "e"."supplier_id" AS "supplier_id",
+              "e"."goods_id" AS "goods_id",
+              "e"."type_name" AS "type_name",
+              "e"."goods_code" AS "goods_code",
+              "e"."goods_name" AS "goods_name",
+              "e"."common_name" AS "common_name",
+              "e"."goods_nature" AS "goods_nature",
+              "e"."dept_id" AS "dept_id",
+              "e"."goods_unit" AS "goods_unit",
+              "e"."status" AS "status",
+              "e"."agent_id" AS "agent_id",
+              "e"."pic_url" AS "pic_url",
+              "e"."factory_id" AS "factory_id",
+              "e"."store_way" AS "store_way",
+              "e"."convert_unit" AS "convert_unit",
+              "e"."del_flag" AS "del_flag",
+              "e"."sunshine_pno" AS "sunshine_pno",
+              "e"."approvals_id" AS "approvals_id",
+              "e"."goods_specs_id" AS "goods_specs_id",
+              "e"."sources_specs_id" AS "sources_specs_id",
+              "e"."specs_code" AS "specs_code",
+              "e"."specs" AS "specs",
+              "p"."sources_supplier_id" AS "supplier_sources_id",
+              "f"."factory_code" AS "factory_code",
+              "f"."factory_name" AS "factory_name"
+            FROM
+              (
+                (
+                  (
+                    (SELECT
+                      3 AS "goods_type",
+                      "d"."supplier_id" AS "supplier_id",
+                      "d"."id" AS "goods_id",
+                      "d"."type_name" AS "type_name",
+                      "d"."consumables_code" AS "goods_code",
+                      "d"."consumables_name" AS "goods_name",
+                      "d"."common_name" AS "common_name",
+                      "d"."goods_nature" AS "goods_nature",
+                      "d"."dept_id" AS "dept_id",
+                      "d"."goods_unit" AS "goods_unit",
+                      "d"."status" AS "status",
+                      "d"."agent_id" AS "agent_id",
+                      "d"."pic_url" AS "pic_url",
+                      "d"."factory_id" AS "factory_id",
+                      "d"."store_way" AS "store_way",
+                      "d"."convert_unit" AS "convert_unit",
+                      "d"."del_flag" AS "del_flag",
+                      "d"."sunshine_pno" AS "sunshine_pno",
+                      (SELECT
+                        "a"."id" AS "approvals_id"
+                      FROM
+                        (SELECT
+                          "mcp-dev"."hdi_goods_supplier_consumables_approvals"."id" AS "id",
+                          "mcp-dev"."hdi_goods_supplier_consumables_approvals"."consumables_id" AS "consumables_id",
+                          "mcp-dev"."hdi_goods_supplier_consumables_approvals"."approvals" AS "approvals",
+                          (
+                            CASE
+                              WHEN (
+                                "mcp-dev"."hdi_goods_supplier_consumables_approvals"."approvals" REGEXP '食药监械'
+                              )
+                              THEN SUBSTRING_INDEX(
+                                SUBSTRING_INDEX(
+                                  "mcp-dev"."hdi_goods_supplier_consumables_approvals"."approvals",
+                                  '字',
+                                  - (1)
+                                ),
+                                '第',
+                                1
+                              )
+                              WHEN (
+                                "mcp-dev"."hdi_goods_supplier_consumables_approvals"."approvals" REGEXP '械注'
+                              )
+                              THEN SUBSTR(
+                                "mcp-dev"."hdi_goods_supplier_consumables_approvals"."approvals",
+                                5,
+                                4
+                              )
+                              WHEN (
+                                "mcp-dev"."hdi_goods_supplier_consumables_approvals"."approvals" REGEXP '械备'
+                              )
+                              THEN SUBSTR(
+                                "mcp-dev"."hdi_goods_supplier_consumables_approvals"."approvals",
+                                5,
+                                4
+                              )
+                              ELSE '0'
+                            END
+                          ) AS "approvals_year"
+                        FROM
+                          "mcp-dev"."hdi_goods_supplier_consumables_approvals"
+                        WHERE (
+                            "mcp-dev"."hdi_goods_supplier_consumables_approvals"."status" = 1
+                          )) "a"
+                      WHERE ("a"."consumables_id" = "d"."id")
+                      ORDER BY "a"."approvals_year" DESC
+                      LIMIT 1) AS "approvals_id",
+                      "s"."id" AS "goods_specs_id",
+                      "s"."sources_specs_id" AS "sources_specs_id",
+                      "s"."specs_code" AS "specs_code",
+                      "s"."specs" AS "specs"
+                    FROM
+                      (
+                        "mcp-dev"."hdi_goods_supplier_consumables_specs" "s"
+                        LEFT JOIN "mcp-dev"."hdi_goods_supplier_consumables" "d"
+                          ON (("s"."consumables_id" = "d"."id"))
+                      ))
+                  ) "e"
+                  LEFT JOIN "mcp-dev"."hdi_org_factory_info" "f"
+                    ON (("e"."factory_id" = "f"."id"))
+                )
+                LEFT JOIN
+                  (SELECT
+                    "mcp-dev"."hdi_unicode_supply_ship"."supplier_id" AS "supplier_id",
+                    "mcp-dev"."hdi_unicode_supply_ship"."sources_supplier_id" AS "sources_supplier_id"
+                  FROM
+                    "mcp-dev"."hdi_unicode_supply_ship"
+                  WHERE (
+                      (
+                        "mcp-dev"."hdi_unicode_supply_ship"."ship_flag" = 1
+                      )
+                      AND (
+                        "mcp-dev"."hdi_unicode_supply_ship"."sources_supplier_id" IS NOT NULL
+                      )
+                    )
+                  GROUP BY "mcp-dev"."hdi_unicode_supply_ship"."supplier_id",
+                    "mcp-dev"."hdi_unicode_supply_ship"."sources_supplier_id") "p"
+                  ON (
+                    (
+                      "e"."supplier_id" = "p"."supplier_id"
+                    )
+                  )
+              ))
+          ) "g"
+          LEFT JOIN "mcp-dev"."hdi_goods_supplier_consumables_approvals" "h"
+            ON (("g"."approvals_id" = "h"."id"))
+        ) $$
+
+DELIMITER;

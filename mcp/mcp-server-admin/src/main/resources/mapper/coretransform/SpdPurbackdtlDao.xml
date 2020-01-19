@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.coretransform.dao.SpdPurbackdtlDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.coretransform.entity.SpdPurbackdtlEntity" id="spdPurbackdtlMap">
+        <result property="purbackdtlid" column="purbackdtlid"/>
+        <result property="purbackid" column="purbackid"/>
+        <result property="goodsid" column="goodsid"/>
+        <result property="unitid" column="unitid"/>
+        <result property="purbackqty" column="purbackqty"/>
+        <result property="unitprice" column="unitprice"/>
+        <result property="plotid" column="plotid"/>
+        <result property="slotid" column="slotid"/>
+        <result property="batchid" column="batchid"/>
+        <result property="backreason" column="backreason"/>
+        <result property="memo" column="memo"/>
+        <result property="uorganid" column="uorganid"/>
+        <result property="originid" column="originid"/>
+        <result property="originno" column="originno"/>
+        <result property="sourceid" column="sourceid"/>
+        <result property="sourcedtlid" column="sourcedtlid"/>
+        <result property="sourceno" column="sourceno"/>
+        <result property="origindtlid" column="origindtlid"/>
+        <result property="orgdatadtlid" column="orgdatadtlid"/>
+        <result property="orgdataid" column="orgdataid"/>
+        <result property="unitqty" column="unitqty"/>
+        <result property="confirmflag" column="confirmflag"/>
+        <result property="udflag" column="udflag"/>
+        <result property="goodsunit" column="goodsunit"/>
+    </resultMap>
+
+    <select id="queryList" resultType="com.ebig.hdi.modules.coretransform.entity.SpdPurbackdtlEntity">
+        SELECT *
+        FROM
+        spd_purbackdtl
+        limit  #{row}
+    </select>
+    <select id="getSupplyMasterIdAndSupplyDetailId" resultType="java.lang.String">
+	select
+			l.supply_master_id,
+			l.supply_detail_id
+		from
+			spd_purbackdtl p,
+			hdi_core_label_detail l
+        where
+        	p.purbackdtlid=#{purbackdtlid}
+        and p.sourceid=l.labelid
+        and p.sourcedtlid=l.labeldtlid
+	</select>
+</mapper>

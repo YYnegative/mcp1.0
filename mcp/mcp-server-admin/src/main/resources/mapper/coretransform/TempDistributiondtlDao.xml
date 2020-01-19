@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.coretransform.dao.TempDistributiondtlDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.coretransform.entity.TempDistributiondtlEntity" id="tempDistributiondtlMap">
+        <result property="distributiondtlid" column="distributiondtlid"/>
+        <result property="distributionid" column="distributionid"/>
+        <result property="uorganid" column="uorganid"/>
+        <result property="uorganno" column="uorganno"/>
+        <result property="uorganname" column="uorganname"/>
+        <result property="horganid" column="horganid"/>
+        <result property="horganno" column="horganno"/>
+        <result property="horganname" column="horganname"/>
+        <result property="sgoodsid" column="sgoodsid"/>
+        <result property="labelno" column="labelno"/>
+        <result property="labeltype" column="labeltype"/>
+        <result property="sgoodsno" column="sgoodsno"/>
+        <result property="sgoodsname" column="sgoodsname"/>
+        <result property="sgoodstype" column="sgoodstype"/>
+        <result property="sgoodsunit" column="sgoodsunit"/>
+        <result property="approvedocno" column="approvedocno"/>
+        <result property="factorydoc" column="factorydoc"/>
+        <result property="factoryname" column="factoryname"/>
+        <result property="prodarea" column="prodarea"/>
+        <result property="spacksize" column="spacksize"/>
+        <result property="sunitprice" column="sunitprice"/>
+        <result property="sgoodsqty" column="sgoodsqty"/>
+        <result property="plotno" column="plotno"/>
+        <result property="pproddate" column="pproddate"/>
+        <result property="pvaliddate" column="pvaliddate"/>
+        <result property="pinvaliddate" column="pinvaliddate"/>
+        <result property="slotid" column="slotid"/>
+        <result property="slotno" column="slotno"/>
+        <result property="sproddate" column="sproddate"/>
+        <result property="svaliddate" column="svaliddate"/>
+        <result property="sinvaliddate" column="sinvaliddate"/>
+        <result property="addressid" column="addressid"/>
+        <result property="salid" column="salid"/>
+        <result property="salno" column="salno"/>
+        <result property="saldate" column="saldate"/>
+        <result property="invno" column="invno"/>
+        <result property="invfirstno" column="invfirstno"/>
+        <result property="invorder" column="invorder"/>
+        <result property="invdate" column="invdate"/>
+        <result property="invmoney" column="invmoney"/>
+        <result property="tpid" column="tpid"/>
+        <result property="credate" column="credate"/>
+        <result property="memo" column="memo"/>
+        <result property="wholeprice" column="wholeprice"/>
+        <result property="srgqty" column="srgqty"/>
+        <result property="rgflag" column="rgflag"/>
+        <result property="purplandocid" column="purplandocid"/>
+        <result property="purplandtlid" column="purplandtlid"/>
+        <result property="unitid" column="unitid"/>
+        <result property="unitcode" column="unitcode"/>
+        <result property="confirmed" column="confirmed"/>
+        <result property="printflag" column="printflag"/>
+        <result property="saldtlid" column="saldtlid"/>
+        <result property="bankaccount" column="bankaccount"/>
+        <result property="bank" column="bank"/>
+        <result property="sourceid" column="sourceid"/>
+        <result property="sourcedtlid" column="sourcedtlid"/>
+        <result property="stageflag" column="stageflag"/>
+        <result property="orderno" column="orderno"/>
+        <result property="pageno" column="pageno"/>
+        <result property="rowno" column="rowno"/>
+        <result property="ordertime" column="ordertime"/>
+        <result property="orderquantity" column="orderquantity"/>
+        <result property="platform" column="platform"/>
+        <result property="signforno" column="signforno"/>
+        <result property="signforqty" column="signforqty"/>
+        <result property="udflag" column="udflag"/>
+    </resultMap>
+
+
+
+	<!-- HDI转换用  查询是否存在此原始标识对应的库房 -->
+	<select id="selectTempDistributiondtl" resultType="com.ebig.hdi.modules.coretransform.entity.TempDistributiondtlEntity">
+		SELECT
+			* 
+		FROM
+			temp_hdi_distributiondtl hd 
+	</select>
+	
+	
+	<delete id="deleteTempDistributiondtl">
+		DELETE 
+		FROM
+			temp_hdi_distributiondtl
+		WHERE
+			distributiondtlid = #{distributiondtlid}
+    </delete>
+</mapper>

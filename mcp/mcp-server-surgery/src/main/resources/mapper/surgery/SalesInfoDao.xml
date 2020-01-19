@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.surgery.dao.SalesInfoDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.surgery.entity.SalesInfoEntity" id="salesInfoMap">
+        <result property="id" column="id"/>
+        <result property="salesNo" column="sales_no"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="sellerId" column="seller_id"/>
+        <result property="sellerName" column="seller_name"/>
+        <result property="customerId" column="customer_id"/>
+        <result property="customerName" column="customer_name"/>
+        <result property="sourceId" column="source_id"/>
+        <result property="sourceNo" column="source_no"/>
+        <result property="salesType" column="sales_type"/>
+        <result property="status" column="status"/>
+        <result property="createId" column="create_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="memo" column="memo"/>
+    </resultMap>
+    
+    <select id="listForPage" resultType="com.ebig.hdi.modules.surgery.entity.vo.SalesInfoVO">
+    	select
+    		*
+    	from 
+    		mcp_sales_info t1
+    	left join hdi_org_hospital_info t2
+    	on
+    		t1.customer_id = t2.id and t2.status = 1 and t2.del_flag = 0
+    	where
+			1=1
+    	<if test="fileterDept != null and fileterDept != ''">
+			and ${fileterDept}
+		</if>
+		<if test="isDefaultOrder == 1">
+			order by t1.create_time desc
+		</if>
+    </select>
+
+
+</mapper>

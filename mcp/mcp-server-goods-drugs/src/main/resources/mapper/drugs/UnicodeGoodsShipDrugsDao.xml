@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.drugs.dao.UnicodeGoodsShipDrugsDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.drugs.entity.UnicodeGoodsShipDrugsEntity" id="unicodeGoodsShipMap">
+        <result property="shipId" column="ship_id"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="torgId" column="torg_id"/>
+        <result property="torgType" column="torg_type"/>
+        <result property="tgoodsType" column="tgoods_type"/>
+        <result property="tgoodsId" column="tgoods_id"/>
+        <result property="pgoodsId" column="pgoods_id"/>
+        <result property="tspecsId" column="tspecs_id"/>
+        <result property="pspecsId" column="pspecs_id"/>
+        <result property="tapprovalId" column="tapproval_id"/>
+        <result property="papprovalId" column="papproval_id"/>
+        <result property="shipFlag" column="ship_flag"/>
+        <result property="checkStatus" column="check_status"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="cremanid" column="cremanid"/>
+        <result property="cremanname" column="cremanname"/>
+        <result property="credate" column="credate"/>
+        <result property="editmanid" column="editmanid"/>
+        <result property="editmanname" column="editmanname"/>
+        <result property="editdate" column="editdate"/>
+        <result property="memo" column="memo"/>
+        <result property="hospitalName" column="hospital_name"/>
+        <result property="goodsName" column="goods_name"/>
+        <result property="factoryName" column="factory_name"/>
+        <result property="specs" column="specs"/>
+        <result property="approvals" column="approvals"/>
+        <result property="pdrugsName" column="pdrugs_name"/>
+        <result property="id" column="id"/>
+        <result property="goodsNature" column="goods_nature"/>
+        <result property="cateName" column="cate_name"/>
+        <result property="supplierName" column="supplier_name"/>
+        <result property="pspecs" column="pspecs"/>
+        <result property="onlyId" column="only_id"/>
+    </resultMap>
+	
+	<select id="listHospitalMatchGoods" resultType="com.ebig.hdi.modules.drugs.entity.UnicodeGoodsShipDrugsEntity">
+		SELECT 
+		  * 
+		FROM
+		  hdi_unicode_goods_ship 
+		WHERE torg_type = 0 
+		  AND tgoods_type = 1 
+		  AND ship_flag = 1 
+		  AND del_flag = 0 
+		  AND torg_id = #{torgId} 
+		  AND pgoods_id = #{pgoodsId} 
+		  AND pspecs_id = #{pspecsId}
+	</select>
+	
+	<select id="listSupplierMatchGoods" resultType="com.ebig.hdi.modules.drugs.entity.UnicodeGoodsShipDrugsEntity">
+		SELECT 
+		  * 
+		FROM
+		  hdi_unicode_goods_ship 
+		WHERE torg_type = 1 
+		  AND tgoods_type = 1 
+		  AND ship_flag = 1 
+		  AND del_flag = 0 
+		  AND torg_id = #{torgId}
+		  AND pgoods_id = #{pgoodsId} 
+		  AND pspecs_id = #{pspecsId}
+	</select>
+</mapper>

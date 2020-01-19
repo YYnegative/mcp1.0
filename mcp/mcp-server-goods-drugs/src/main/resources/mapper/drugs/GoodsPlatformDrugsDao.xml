@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.drugs.dao.GoodsPlatformDrugsDao">
+
+    <resultMap type="com.ebig.hdi.modules.drugs.vo.GoodsPlatformDrugsEntityVo" id="goodsPlatformDrugsMap">
+        <result property="id" column="drugs_id"/>
+        <result property="goodsUnicode" column="goods_unicode"/>
+        <result property="drugsCode" column="drugs_code"/>
+        <result property="drugsName" column="drugs_name"/>
+        <result property="commonName" column="common_name"/>
+        <result property="goodsNature" column="goods_nature"/>
+        <result property="typeId" column="type_id"/>
+        <result property="typeName" column="type_name"/>
+        <result property="factoryId" column="drugs_factory_id"/>
+        <result property="approvals" column="approvals"/>
+        <result property="status" column="drugs_status"/>
+        <result property="goodsUnit" column="goods_unit"/>
+        <result property="storeWay" column="store_way"/>
+        <result property="picUrl" column="pic_url"/>
+        <result property="factoryName" column="factory_name"/>
+        <collection property="specsEntityList" ofType="com.ebig.hdi.modules.drugs.entity.GoodsPlatformDrugsSpecsEntity">
+        	<id property="id" column="specs_id"/>
+        	<result property="specs" column="specs"/>
+        	<result property="guid" column="guid"/>
+        	<result property="status" column="specs_status"/>
+        </collection>
+    </resultMap>
+
+	<select id="selectPlatformDrugsById" resultMap="goodsPlatformDrugsMap">
+		SELECT 
+			d.id AS drugs_id,
+			d.goods_unicode,
+			d.drugs_code, 
+			d.drugs_name,
+			d.common_name,
+			d.goods_nature,
+			d.type_id,
+			d.factory_id AS drugs_factory_id,
+			d.approvals,
+			d.status AS drugs_status,
+			d.goods_unit,
+			d.store_way,
+			d.pic_url,
+			d.dept_id,
+			f.factory_name,
+			s.id AS specs_id,
+			s.specs,
+			s.guid,
+			s.status AS specs_status, 
+			c.cate_name AS type_name
+		FROM hdi_goods_platform_drugs d
+			LEFT JOIN hdi_org_factory_info f ON d.factory_id = f.id
+			LEFT JOIN hdi_goods_platform_drugs_specs s ON d.id = s.drugs_id
+			LEFT JOIN hdi_unicode_drugs_cate c ON d.type_id = c.cate_id
+		WHERE d.id = #{id}
+	</select>
+	
+	<select id="selectPlatformDrugsList" resultMap="goodsPlatformDrugsMap">
+		SELECT 
+			d.id AS drugs_id,
+			d.goods_unicode,
+			d.drugs_name,
+			d.common_name,
+			d.goods_nature,
+			d.type_id,
+			d.factory_id AS drugs_factory_id,
+			d.approvals,
+			d.status AS drugs_status,
+			d.goods_unit,
+			d.store_way,
+			d.pic_url,
+			d.dept_id,
+			f.factory_name,
+			c.cate_name AS type_name
+		FROM hdi_goods_platform_drugs d
+			LEFT JOIN hdi_org_factory_info f ON d.factory_id = f.id
+			LEFT JOIN hdi_unicode_drugs_cate c ON d.type_id = c.cate_id
+		<where>
+			d.del_flag = 0
+			<if test="goodsNature != null">
+				AND d.goods_nature = #{goodsNature}
+			</if>
+			<if test="typeId != null">
+				AND d.type_id IN
+				<foreach collection="typeId" item="item" separator="," open="(" close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="status != null">
+				AND d.status = #{status}
+			</if>
+			<if test="drugsName != null and drugsName != ''">
+				AND d.drugs_name like CONCAT('%', #{drugsName}, '%')
+			</if>
+			<if test="factoryName != null and factoryName != ''">
+				AND f.factory_name like CONCAT('%', #{factoryName}, '%')
+			</if>
+			<if test="sql_filter != null and sql_filter != ''">
+				AND ${sql_filter}
+			</if>
+		</where>
+		ORDER BY IFNULL(d.edit_time, d.create_time) DESC
+	</select>
+
+	<select id="selectByDrugsName" resultType="com.ebig.hdi.modules.drugs.entity.GoodsPlatformDrugsEntity">
+		SELECT * FROM hdi_goods_platform_drugs WHERE del_flag = 0 AND drugs_name = #{drugsName}
+	</select>
+	
+	<select id="selectMatch" resultType="map">
+		SELECT 
+		  t1.id AS drugsId,
+		  t1.drugs_name drugsName,
+		  t1.approvals,
+		  t1.goods_nature,
+		  t2.id AS specsId,
+		  t2.specs,
+		  info.id as factory_id,
+		  info.factory_name
+		FROM
+		  hdi_goods_platform_drugs t1 
+		  LEFT JOIN hdi_goods_platform_drugs_specs t2 
+		    ON t1.id = t2.drugs_id
+		  LEFT JOIN hdi_org_factory_info info
+		  ON info.id = t1.factory_id
+		WHERE t1.del_flag = 0 AND t1.status = 1
+		 and info.del_flag = 0
+		  AND t2.status = 1 
+		<choose>
+			<when test="guid != null and guid != ''">
+				AND (t2.guid = #{guid} OR (t1.approvals = #{approvals} AND t2.specs = #{specs}))
+			</when>
+			<otherwise>
+				AND (t1.approvals = #{approvals} AND t2.specs = #{specs})
+			</otherwise>
+		</choose>
+	</select>
+
+</mapper>

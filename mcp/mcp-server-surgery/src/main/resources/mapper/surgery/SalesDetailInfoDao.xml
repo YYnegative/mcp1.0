@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.surgery.dao.SalesDetailInfoDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.surgery.entity.SalesDetailInfoEntity" id="salesDetailInfoMap">
+        <result property="id" column="id"/>
+        <result property="salesId" column="sales_id"/>
+        <result property="goodsId" column="goods_id"/>
+        <result property="goodsName" column="goods_name"/>
+        <result property="goodsSpecsId" column="goods_specs_id"/>
+        <result property="goodsSpecs" column="goods_specs"/>
+        <result property="goodsUnit" column="goods_unit"/>
+        <result property="plotId" column="plot_id"/>
+        <result property="plotNo" column="plot_no"/>
+        <result property="plotProddate" column="plot_proddate"/>
+        <result property="plotValidto" column="plot_validto"/>
+        <result property="slotId" column="slot_id"/>
+        <result property="slotNo" column="slot_no"/>
+        <result property="slotProddate" column="slot_proddate"/>
+        <result property="slotValidto" column="slot_validto"/>
+        <result property="salesQuantity" column="sales_quantity"/>
+        <result property="salesPrice" column="sales_price"/>
+    </resultMap>
+	
+	<select id="listForPage" resultType="com.ebig.hdi.modules.surgery.entity.vo.SalesDetailInfoVO">
+		select
+			t1.*,
+			t3.factory_name as factoryName
+		from 
+			mcp_sales_detail_info t1
+		left join hdi_goods_supplier_consumables t2 
+		on 
+			t1.goods_id = t2.id and t2.status = 1 and t2.del_flag = 0
+		left join hdi_org_factory_info t3
+		on
+			t2.factory_id = t3.id and t3.del_flag = 0 
+	</select>
+
+</mapper>

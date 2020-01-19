@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.org.dao.OrgSupplierHospitalRefDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.org.entity.OrgSupplierHospitalRefEntity" id="orgSupplierHospitalRefMap">
+        <result property="id" column="id"/>
+        <result property="supplierId" column="supplier_id"/>
+        <result property="hospitalId" column="hospital_id"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="createId" column="create_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="editId" column="edit_id"/>
+        <result property="editTime" column="edit_time"/>
+    </resultMap>
+    
+    <!-- 根据供应商ID获取供应商医院关系 -->
+	<select id="selectBySupplierId" resultType="com.ebig.hdi.modules.org.entity.OrgSupplierHospitalRefEntity">
+		select
+		*
+		from
+		hdi_org_supplier_hospital_ref
+		where
+		del_flag = 0
+		and supplier_id = #{supplierId}
+	</select>
+    
+    <!-- 根据供应商ID和医院ID获取供应商医院关系 -->
+	<select id="selectBySupplierIdAndHospitalId" resultType="com.ebig.hdi.modules.org.entity.OrgSupplierHospitalRefEntity">
+		select * from hdi_org_supplier_hospital_ref where del_flag = 0 and supplier_id = #{supplierId} and hospital_id = #{hospitalId} 
+	</select>
+
+    <select id="selectByHospitalIds" parameterType="java.util.ArrayList" resultType="com.ebig.hdi.modules.org.entity.OrgSupplierHospitalRefEntity">
+		select * from hdi_org_supplier_hospital_ref where  del_flag = 0 and hospital_id in
+		<foreach collection="hospitalIds" item="item" index="index" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+	
+	<select id="queryAllHospital" resultType="com.ebig.hdi.modules.org.entity.OrgHospitalInfoEntity">
+		SELECT 
+		  t1.* 
+		FROM
+		  hdi_org_hospital_info t1 
+		  LEFT JOIN hdi_org_supplier_hospital_ref t2 
+		  ON t1.id = t2.hospital_id
+		WHERE t2.supplier_id = #{id}
+		 	AND t1.del_flag = 0
+		    AND t1.status = 1
+		    AND t2.del_flag = 0
+	</select>
+
+	<!-- 根据原系统供应商医院关系ID获取供应商医院关系 -->
+	<select id="selectBySourcesId" resultType="com.ebig.hdi.modules.org.entity.OrgSupplierHospitalRefEntity">
+		select * from hdi_org_supplier_hospital_ref where sources_id = #{sourcesId} 
+	</select>
+	
+	<!-- 查询时间范围内有变动的数据 -->
+	<select id="selectChanged" resultType="com.ebig.hdi.modules.org.entity.OrgSupplierHospitalRefEntity">
+		SELECT * FROM hdi_org_supplier_hospital_ref 
+		WHERE ((create_time BETWEEN #{beginTime,jdbcType=TIMESTAMP} AND #{endTime,jdbcType=TIMESTAMP}) OR (edit_time BETWEEN #{beginTime,jdbcType=TIMESTAMP} AND #{endTime,jdbcType=TIMESTAMP})) 
+	</select>
+	
+	<select id="queryMatchHospital" resultType="com.ebig.hdi.modules.org.entity.OrgHospitalInfoEntity">
+		SELECT 
+		  * 
+		FROM
+		  hdi_org_hospital_info 
+		WHERE id IN 
+		  (SELECT 
+		    hospital_id 
+		  FROM
+		    hdi_unicode_supply_ship 
+		  WHERE supplier_id = #{id})
+	</select>
+</mapper>

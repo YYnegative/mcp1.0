@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.license.dao.LicenseClassifyInfoDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.license.entity.LicenseClassifyInfoEntity" id="licenseClassifyInfoMap">
+        <result property="id" column="id"/>
+        <result property="type" column="type"/>
+        <result property="name" column="name"/>
+        <result property="isWarning" column="is_warning"/>
+        <result property="earlyDate" column="early_date"/>
+        <result property="status" column="status"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="createId" column="create_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="editId" column="edit_id"/>
+        <result property="editTime" column="edit_time"/>
+        <result property="delFlag" column="del_flag"/>
+    </resultMap>
+	
+	<select id="selectReferNumber" resultType="int">
+		SELECT 
+		  SUM(a.refer_number) 
+		FROM
+		  (SELECT 
+		    COUNT(classify_id) AS refer_number 
+		  FROM
+		    hdi_license_agent_info 
+		  WHERE classify_id = #{classifyId}
+		  UNION
+		  ALL 
+		  SELECT 
+		    COUNT(classify_id) AS refer_number 
+		  FROM
+		    hdi_license_factory_info 
+		  WHERE classify_id = #{classifyId}
+		  UNION
+		  ALL 
+		  SELECT 
+		    COUNT(classify_id) AS refer_number 
+		  FROM
+		    hdi_license_goods_info 
+		  WHERE classify_id = #{classifyId} 
+		  UNION
+		  ALL 
+		  SELECT 
+		    COUNT(classify_id) AS refer_number 
+		  FROM
+		    hdi_license_supplier_info 
+		  WHERE classify_id = #{classifyId}) a 
+	</select>
+
+</mapper>

@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.core.dao.CorePurchaseMasterDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.core.entity.CorePurchaseMasterEntity" id="corePurchaseMasterMap">
+        <result property="purchaseMasterId" column="purchase_master_id"/>
+        <result property="purplanno" column="purplanno"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="horgId" column="horg_id"/>
+        <result property="storehouseid" column="storehouseid"/>
+        <result property="expecttime" column="expecttime"/>
+        <result property="purchasestatus" column="purchasestatus"/>
+        <result property="purplantime" column="purplantime"/>
+        <result property="sourceid" column="sourceid"/>
+        <result property="datasource" column="datasource"/>
+        <result property="memo" column="memo"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="orgdataid" column="orgdataid"/>
+        <result property="cremanid" column="cremanid"/>
+        <result property="cremanname" column="cremanname"/>
+        <result property="credate" column="credate"/>
+        <result property="hospitalName" column="hospital_name"/>
+        <result property="detailNumber" column="detail_number"/>
+        <result property="purplanStartingTime" column="purplanStartingTime"/>
+        <result property="purplanEndTime" column="purplanEndTime"/>
+        <result property="expectStartingTime" column="expectStartingTime"/>
+        <result property="expectEndTime" column="expectEndTime"/>
+        <result property="goodsid" column="goodsid"/>
+        <result property="goodsno" column="goodsno"/>
+        <result property="purchaseDetailId" column="purchase_detail_id"/>
+        <result property="storehousename" column="storehousename"/>
+    </resultMap>
+
+    <!-- 根据deptId获取到供应商id -->
+    <select id="getSupplierId" resultType="com.ebig.hdi.modules.core.entity.CorePurchaseMasterEntity">
+		SELECT
+			osi.id supplierId
+		FROM
+			hdi_org_supplier_info osi 
+		WHERE
+			osi.dept_id = #{deptId}
+			and osi.del_flag=0
+	</select>
+
+
+    <!-- 根据deptId查询采购主单信息 -->
+    <select id="selectByDeptId" resultType="com.ebig.hdi.modules.core.entity.CorePurchaseMasterEntity">
+        SELECT
+        cpm.*,
+        (SELECT count(1) FROM hdi_core_purchase_detail cpd where cpm.purchase_master_id = cpd.purchase_master_id)
+        detail_number
+        FROM
+        hdi_core_purchase_master cpm
+        <where>
+             cpm.del_flag = 0
+            <if test="deptIds != null and deptIds != ''">
+                AND ${deptIds}
+            </if>
+            ORDER BY cpm.credate DESC,cpm.edit_time DESC
+        </where>
+    </select>
+
+    <!-- 根据条件查询主单信息 -->
+    <select id="selectByBedingungen" resultType="com.ebig.hdi.modules.core.entity.CorePurchaseMasterEntity">
+        SELECT
+        cpm.*,
+        (SELECT count(1) FROM hdi_core_purchase_detail cpd where cpm.purchase_master_id = cpd.purchase_master_id)
+        detail_number
+        FROM
+        hdi_core_purchase_master cpm
+        <where>
+            cpm.del_flag = 0
+            <if test="deptIds != null and deptIds != ''">
+                AND ${deptIds}
+            </if>
+            <if test="hospitalName != null and hospitalName != ''">
+                AND cpm.hospital_name like CONCAT('%',#{hospitalName}, '%')
+            </if>
+            <if test="storehousename != null and storehousename != ''">
+                AND cpm.storehouse_name like CONCAT('%',#{storehousename}, '%')
+            </if>
+            <if test="purplanno != null and purplanno != ''">
+                AND cpm.purplanno like CONCAT('%',#{purplanno}, '%')
+            </if>
+            <if test="purplanStartingTime != null and purplanStartingTime != ''">
+                <![CDATA[ AND cpm.purplantime > #{purplanStartingTime} ]]>
+            </if>
+            <if test="purplanEndTime != null and purplanEndTime != ''">
+                <![CDATA[ AND cpm.purplantime < #{purplanEndTime} ]]>
+            </if>
+            <if test="expectStartingTime != null and expectStartingTime != ''">
+                <![CDATA[ AND cpm.expecttime > #{expectStartingTime} ]]>
+            </if>
+            <if test="expectEndTime != null and expectEndTime != ''">
+                <![CDATA[ AND cpm.expecttime < #{expectEndTime} ]]>
+            </if>
+            <if test="purchasestatus != null">
+                AND cpm.purchasestatus = #{purchasestatus}
+            </if>
+            ORDER BY cpm.credate DESC,cpm.edit_time DESC
+        </where>
+
+    </select>
+
+
+    <insert id="insertDetail" parameterType="com.ebig.hdi.modules.core.entity.CorePurchaseMasterEntity"
+            useGeneratedKeys="true" keyProperty="purchaseMasterId" keyColumn="purchase_master_id">
+		INSERT INTO
+			hdi_core_purchase_master(purplanno,dept_id,horg_id,storehouseid,expecttime,purchasestatus,purplantime,sourceid,datasource,memo,cremanid,cremanname,credate)
+		VALUES
+			(#{purplanno},#{deptId},#{horgId},#{storehouseid},#{expecttime},#{purchasestatus},#{purplantime},#{sourceid},#{datasource},#{memo},#{cremanid},#{cremanname},#{credate})
+	</insert>
+
+
+    <!-- 根据purchaseMasterId查询所对应的细单 -->
+    <select id="selectByPurchaseMasterId" resultType="com.ebig.hdi.modules.core.entity.CorePurchaseMasterEntity">
+		SELECT
+			purchase_detail_id 
+		FROM
+			hdi_core_purchase_detail 
+		WHERE
+			purchase_master_id = #{purchaseMasterId}
+	</select>
+
+    <!-- 根据purchaseMasterId查询所对应的细单 -->
+    <select id="selectByMasterId" resultType="com.ebig.hdi.modules.core.entity.CorePurchaseMasterEntity">
+		SELECT
+			cpm.*
+		FROM
+			hdi_core_purchase_master cpm
+		WHERE
+			cpm.purchasestatus !=2 
+			AND cpm.datasource !=2
+			AND cpm.purchase_master_id = #{purchaseMasterId}
+			and cpm.del_flag=0
+	</select>
+
+
+    <!-- 根据purchaseMasterId查询所对应的细单 -->
+    <select id="selectMasterId" resultType="com.ebig.hdi.modules.core.entity.CorePurchaseMasterEntity">
+		SELECT
+			cpm.*
+		FROM
+			hdi_core_purchase_master cpm
+		WHERE
+			1 = 1
+			AND cpm.purchase_master_id = #{purchaseMasterId}
+			and cpm.del_flag=0
+	</select>
+
+    <!-- 根据purchaseMasterId查询主单的状态是否为 已确认 -->
+    <select id="selectPurchasestatus" resultType="com.ebig.hdi.modules.core.entity.CorePurchaseMasterEntity">
+		SELECT
+			cpm.purchasestatus 
+		FROM
+			hdi_core_purchase_master cpm 
+		WHERE
+			cpm.purchase_master_id = #{purchaseMasterId}
+			and cpm.del_flag=0
+	</select>
+
+
+    <!-- HDI转换用   查询是否存在此原始数据标识对应的主单 -->
+    <select id="selectByOrgdataid" resultType="com.ebig.hdi.modules.core.entity.CorePurchaseMasterEntity">
+		SELECT
+			* 
+		FROM
+			hdi_core_purchase_master cpm
+		WHERE
+			cpm.orgdataid = #{orgdataid}
+			and cpm.del_flag=0
+	</select>
+
+    <select id="selectByPurplanno" resultType="com.ebig.hdi.modules.core.entity.CorePurchaseMasterEntity">
+		SELECT 
+		  * 
+		FROM
+		  hdi_core_purchase_master 
+		WHERE purplanno = #{purplanno} 
+		  AND del_flag = 0  
+	</select>
+
+    <select id="selectLikePurplanno" resultType="com.ebig.hdi.modules.core.entity.CorePurchaseMasterEntity">
+        SELECT
+        *
+        FROM
+        hdi_core_purchase_master
+        <where>
+            del_flag = 0
+            AND purchasestatus IN (2, 4)
+            AND supplier_id=#{supplierId}
+            <if test="purplanno != null and purplanno != ''">
+                AND purplanno LIKE CONCAT( '%',#{purplanno}, '%')
+            </if>
+        </where>
+    </select>
+    <select id="getList" resultType="map">
+        SELECT
+        <foreach collection="columns" index="index" item="item"
+                 open="" separator="," close="">
+            ${item}
+        </foreach>
+        FROM
+        hdi_core_purchase_master m,
+        hdi_core_purchase_detail d
+        <where>
+             d.purchase_master_id = m.purchase_master_id
+            AND m.del_flag = 0
+            <if test="queryParam.hospitalName != null and queryParam.hospitalName != ''">
+                AND m.hospital_name like CONCAT('%',#{queryParam.hospitalName}, '%')
+            </if>
+            <if test="queryParam.storeHouseName != null and queryParam.storeHouseName != ''">
+                AND m.storehouse_name like CONCAT('%',#{queryParam.storeHouseName}, '%')
+            </if>
+            <if test="queryParam.purPlanNo != null and queryParam.purPlanNo != ''">
+                AND m.purplanno like CONCAT('%',#{queryParam.purPlanNo}, '%')
+            </if>
+            <if test="queryParam.purPlanStartingTime != null and queryParam.purPlanStartingTime != ''">
+                <![CDATA[ AND m.purplantime > #{queryParam.purPlanStartingTime} ]]>
+            </if>
+            <if test="queryParam.purPlanEndTime != null and queryParam.purPlanEndTime != ''">
+                <![CDATA[ AND m.purplantime < #{queryParam.purPlanEndTime} ]]>
+            </if>
+            <if test="queryParam.expectStartingTime != null and queryParam.expectStartingTime != ''">
+                <![CDATA[ AND m.expecttime > #{queryParam.expectStartingTime} ]]>
+            </if>
+            <if test="queryParam.expectEndTime != null and queryParam.expectEndTime != ''">
+                <![CDATA[ AND m.expecttime < #{queryParam.expectEndTime} ]]>
+            </if>
+            <if test="queryParam.purchaseStatus != null and queryParam.purchaseStatus != ''">
+                AND m.purchasestatus = #{queryParam.purchaseStatus}
+            </if>
+            ORDER BY m.credate DESC,m.edit_time DESC
+        </where>
+    </select>
+
+
+</mapper>

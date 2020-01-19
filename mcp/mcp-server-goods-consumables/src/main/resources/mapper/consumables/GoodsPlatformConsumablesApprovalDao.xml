@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.consumables.dao.GoodsPlatformConsumablesApprovalDao">
+
+    <resultMap type="com.ebig.hdi.modules.consumables.vo.GoodsPlatformConsumablesEntityVo" id="goodsPlatformConsumablesMap">
+        <result property="id" column="consumables_id"/>
+        <result property="goodsUnicode" column="goods_unicode"/>
+        <result property="consumablesCode" column="consumables_code"/>
+        <result property="consumablesName" column="consumables_name"/>
+        <result property="commonName" column="common_name"/>
+        <result property="goodsNature" column="goods_nature"/>
+        <result property="typeId" column="type_id"/>
+        <result property="typeName" column="type_name"/>
+        <result property="factoryId" column="consumables_factory_id"/>
+        <result property="status" column="consumables_status"/>
+        <result property="goodsUnit" column="goods_unit"/>
+        <result property="storeWay" column="store_way"/>
+        <result property="picUrl" column="pic_url"/>
+        <result property="factoryName" column="factory_name"/>
+		<result property="checkStatus" column="check_status"/>
+		<result property="processId" column="process_id"/>
+        <collection property="specsEntityList" ofType="com.ebig.hdi.modules.consumables.entity.GoodsPlatformConsumablesSpecsEntity">
+        	<id property="id" column="specs_id"/>
+        	<result property="specs" column="specs"/>
+        	<result property="guid" column="guid"/>
+        	<result property="status" column="specs_status"/>
+        </collection>
+        <collection property="approvalsEntityList" ofType="com.ebig.hdi.modules.consumables.entity.GoodsPlatformConsumablesApprovalsEntity">
+        	<id property="id" column="approvals_id"/>
+        	<result property="approvals" column="approvals"/>
+        	<result property="status" column="approvals_status"/>
+        </collection>
+    </resultMap>
+
+	<select id="selectPlatformConsumablesById" resultMap="goodsPlatformConsumablesMap">
+		SELECT 
+			c.id AS consumables_id,
+			c.goods_unicode,
+			c.consumables_code, 
+			c.consumables_name,
+			c.common_name,
+			c.goods_nature,
+			c.type_id,
+			c.factory_id AS consumables_factory_id,
+			c.status AS consumables_status,
+			c.goods_unit,
+			c.store_way,
+			c.pic_url,
+			c.dept_id,
+			c.process_id,
+			f.factory_name,
+			s.id AS specs_id,
+			s.specs,
+			s.guid,
+			s.status AS specs_status,
+			a.id AS approvals_id,
+			a.approvals,
+			a.status AS approvals_status
+		FROM hdi_goods_platform_consumables_approval c
+			LEFT JOIN hdi_org_factory_info f ON c.factory_id = f.id
+			LEFT JOIN hdi_goods_platform_consumables_specs s ON c.id = s.consumables_id
+			LEFT JOIN hdi_goods_platform_consumables_approvals a ON c.id = a.consumables_id
+		WHERE c.id = #{id} 
+	</select>
+	
+	<select id="selectPlatformConsumablesList" resultMap="goodsPlatformConsumablesMap">
+		SELECT 
+			c.id AS consumables_id,
+			c.goods_unicode,
+			c.consumables_name,
+			c.common_name,
+			c.goods_nature,
+			c.type_id,
+			c.factory_id AS consumables_factory_id,
+			c.status AS consumables_status,
+			c.goods_unit,
+			c.store_way,
+			c.pic_url,
+			c.dept_id,
+			c.check_status,
+			c.process_id,
+			c.consumables_code,
+			f.factory_name,
+			u.cate_name AS type_name
+		FROM hdi_goods_platform_consumables_approval c
+			LEFT JOIN hdi_org_factory_info f ON c.factory_id = f.id
+			LEFT JOIN hdi_unicode_consumables_cate u ON c.type_id = u.cate_id
+		<where>
+			c.del_flag = 0
+			<if test="goodsNature != null">
+				AND c.goods_nature = #{goodsNature}
+			</if>
+			<if test="typeId != null">
+				AND c.type_id IN
+				<foreach collection="typeId" item="item" separator="," open="(" close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="status != null">
+				AND c.status = #{status}
+			</if>
+			<if test="consumablesName != null and consumablesName != ''">
+				AND c.consumables_name like CONCAT('%', #{consumablesName}, '%')
+			</if>
+			<if test="checkStatus != null">
+				AND c.check_status = #{checkStatus}
+			</if>
+			<if test="factoryName != null and factoryName != ''">
+				AND f.factory_name like CONCAT('%', #{factoryName}, '%')
+			</if>
+			<if test="sql_filter != null and sql_filter != ''">
+				AND ${sql_filter}
+			</if>
+		</where>
+		ORDER BY IFNULL(c.edit_time, c.create_time) DESC
+	</select>
+
+	<select id="selectByConsumablesName" resultType="com.ebig.hdi.modules.consumables.entity.GoodsPlatformConsumablesApprovalEntity">
+		SELECT * FROM hdi_goods_platform_consumables_approval WHERE del_flag = 0 AND consumables_name = #{consumablesName}
+	</select>
+	
+	<select id="selectMatch" resultType="map">
+		SELECT 
+		  f.id AS consumablesId,
+		  f.specs_id AS specsId,
+		  f.specs,
+		  f.guid,
+		  f.approvals_id AS approvalsId,
+		  g.approvals 
+		FROM
+		  (SELECT 
+		    c.id,
+		    s.id AS specs_id,
+		    s.specs,
+		    s.guid,
+		    (SELECT 
+		      a.id AS approvals_id 
+		    FROM
+		      (SELECT 
+		        id,
+		        consumables_id,
+		        approvals,
+		        CASE
+		          WHEN approvals REGEXP '食药监械' 
+		          THEN SUBSTRING_INDEX(SUBSTRING_INDEX(approvals, '字', -1), '第', 1) 
+		          WHEN approvals REGEXP '械注' 
+		          THEN SUBSTRING(approvals, 5, 4) 
+		          WHEN approvals REGEXP '械备' 
+		          THEN SUBSTRING(approvals, 5, 4) 
+		          ELSE '0' 
+		        END AS approvals_year 
+		      FROM
+		        hdi_goods_platform_consumables_approvals 
+		      WHERE status = 1) a 
+		    WHERE a.consumables_id = c.id 
+		    ORDER BY a.approvals_year DESC 
+		    LIMIT 1) AS approvals_id 
+		  FROM
+		    (SELECT 
+		      id 
+		    FROM
+				hdi_goods_platform_consumables_approval
+		    WHERE del_flag = 0 AND status = 1) c 
+		    LEFT JOIN hdi_goods_platform_consumables_specs s 
+		      ON c.id = s.consumables_id 
+		  WHERE s.status = 1) f 
+		  LEFT JOIN hdi_goods_platform_consumables_approvals g 
+		    ON f.approvals_id = g.id 
+		<where>
+			<choose>
+				<when test="guid != null and guid != ''">
+					f.guid = #{guid} OR (g.approvals = #{approvals} AND f.specs = #{specs})
+				</when>
+				<otherwise>
+					g.approvals = #{approvals} AND f.specs = #{specs}
+				</otherwise>
+			</choose> 
+		</where>
+	</select>
+	<select id="getList" resultType="map">
+		SELECT
+            c.`consumables_name`,
+            (CASE c.`goods_nature` WHEN 0 THEN '国产' ELSE '进口' END) AS goods_nature,
+            c.`type_id`,
+		    (CASE s.status WHEN 0 THEN '规格已停用' ELSE s.specs END) AS specs,
+            i.`factory_name`,
+            a.`approvals`,
+            (CASE c.`status` WHEN 0 THEN '停用' ELSE '启用' END) AS status,
+		    (CASE c.`check_status` WHEN 0 THEN '待审批' WHEN 1 THEN '审批通过' ELSE '审批不通过' END) AS check_status
+            FROM
+            `hdi_goods_platform_consumables_approval` c,`hdi_goods_platform_consumables_approvals` a,`hdi_goods_platform_consumables_specs` s,`hdi_org_factory_info` i
+            WHERE c.`id`=a.`consumables_id`
+            AND c.`id`=s.`consumables_id`
+            AND c.`factory_id`=i.id
+		    AND c.`del_flag`=0
+		<if test="queryParam.checkStatus!=null">
+			AND c.check_status = #{queryParam.checkStatus}
+		</if>
+		<if test="queryParam.consumablesName!=null and queryParam.consumablesName!=''">
+			AND c.consumables_name like CONCAT('%',#{queryParam.consumablesName},'%')
+		</if>
+		<if test="queryParam.factoryName!=null and queryParam.factoryName!=''">
+			AND factory_name like CONCAT('%',#{queryParam.factoryName},'%')
+		</if>
+		<if test="queryParam.goodsNature!=null">
+			AND c.goods_nature = #{queryParam.goodsNature}
+		</if>
+		<if test="queryParam.status!=null">
+			AND c.status = #{queryParam.status}
+		</if>
+		<if test="queryParam.typeId!=null and queryParam.typeId!=''">
+			AND c.type_id IN
+			<foreach collection="queryParam.typeIds" item="item" separator="," open="(" close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="sql_filter != null and sql_filter != ''">
+			AND ${sql_filter}
+		</if>
+            ORDER BY c.create_time DESC,c.edit_time DESC;
+	</select>
+    <select id="selectGoodsPlatformConsumablesById"
+            resultType="com.ebig.hdi.modules.consumables.entity.GoodsPlatformConsumablesEntity">
+		SELECT * FROM `hdi_goods_platform_consumables` WHERE id=#{id,jdbcType=BIGINT}
+	</select>
+	<update id="updateGoodsPlatformConsumablesById">
+		UPDATE hdi_goods_platform_consumables SET STATUS = #{status} WHERE id = #{id,jdbcType=BIGINT}
+	</update>
+    <select id="selectListByPlatformConsumablesCode"
+            resultType="com.ebig.hdi.modules.consumables.entity.GoodsPlatformConsumablesEntity">
+		SELECT * FROM `hdi_goods_platform_consumables` WHERE consumables_code=#{consumablesCode}
+	</select>
+    <select id="selectFactoryList" resultType="com.ebig.hdi.common.entity.OrgFactoryInfoEntity">
+		SELECT * FROM `hdi_org_factory_info` WHERE del_flag=0
+	</select>
+    <select id="selectCate" resultType="com.ebig.hdi.modules.consumables.entity.UnicodeConsumablesCateEntity">
+		SELECT * FROM hdi_unicode_consumables_cate
+	</select>
+    <select id="selectAllApprovalsByConsumablesId" resultType="java.lang.String">
+		SELECT approvals FROM `hdi_goods_platform_consumables_approvals` WHERE consumables_id=#{id};
+	</select>
+    <select id="selectByConsumablesNameAndApprovals" resultType="com.ebig.hdi.modules.consumables.vo.GoodsPlatformConsumablesEntityVo">
+	SELECT t1.* FROM `hdi_goods_platform_consumables_approval` t1 ,`hdi_goods_platform_consumables_approvals` t2
+           WHERE t1.id=t2.consumables_id
+           AND t1.del_flag=0
+           AND t1.consumables_name= #{consumablesName}
+           AND t2.approvals=#{approvals}
+	</select>
+	<select id="selectByGoodsNameOrApporvaols" resultType="java.lang.Integer">
+				SELECT DISTINCT
+	 t.count
+     FROM
+	(
+		SELECT
+			COUNT(*) AS COUNT
+		FROM
+			hdi_goods_platform_consumables_approval t1,hdi_goods_platform_consumables_approvals t2
+		WHERE
+		t1.id=t2.consumables_id
+		AND del_flag = 0
+		AND t1.consumables_name = #{consumablesName}
+		AND NOT t2.approvals = #{approvals}
+		UNION
+		SELECT
+			COUNT(*) AS COUNT
+		FROM
+			hdi_goods_platform_consumables_approval t1,hdi_goods_platform_consumables_approvals t2
+		WHERE
+		t1.id=t2.consumables_id
+		AND del_flag = 0
+		AND NOT t1.consumables_name = #{consumablesName}
+		AND t2.approvals = #{approvals}
+	) t
+WHERE
+	t.count = 1
+	</select>
+    <select id="selectAllApprovals" resultType="java.lang.String">
+		SELECT approvals FROM `hdi_goods_platform_consumables_approvals`;
+	</select>
+    <select id="selectApprovalsEntity"
+            resultType="com.ebig.hdi.modules.consumables.entity.GoodsPlatformConsumablesApprovalsEntity">
+		SELECT * FROM `hdi_goods_platform_consumables_approvals`;
+	</select>
+
+</mapper>

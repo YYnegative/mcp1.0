@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.refunds.dao.RefundsMasterDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.refunds.entity.RefundsMasterEntity" id="refundsMasterMap">
+        <result property="id" column="id"/>
+        <result property="supplierCode" column="supplier_code"/>
+        <result property="hospitalCode" column="hospital_code"/>
+        <result property="storeHouseCode" column="store_house_code"/>
+        <result property="refundsApplyNo" column="refunds_apply_no"/>
+        <result property="applyTime" column="apply_time"/>
+        <result property="regressionNumber" column="regression_number"/>
+        <result property="refundsTime" column="refunds_time"/>
+        <result property="status" column="status"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="createId" column="create_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="editId" column="edit_id"/>
+        <result property="editTime" column="edit_time"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="dataSource" column="data_source"/>
+    </resultMap>
+
+    <select id="listForPage" parameterType="com.ebig.hdi.modules.refunds.entity.vo.RefundsMasterVO"
+            resultType="com.ebig.hdi.modules.refunds.entity.vo.RefundsMasterVO">
+        select
+        t1.refunds_no,t1.regression_number,t1.hospital_name,t1.storehouse_name,t1.refunds_apply_no,
+        (select count(id) from hdi_refunds_detail where master_id = t1.id and del_flag = 0) as detailNumber,
+        t1.refunds_time,
+        t1.status,
+        t1.id
+        from hdi_refunds_master t1
+        where t1.del_flag = 0
+        <if test="fileterDept != null and fileterDept != ''">
+            and ${fileterDept}
+        </if>
+        <if test="hospitalName != null and hospitalName != ''">
+            and t1.hospital_name like CONCAT('%',#{hospitalName},'%')
+        </if>
+        <if test="storeHouseName != null and storeHouseName != ''">
+            and t1.storehouse_name like CONCAT('%',#{storeHouseName},'%')
+        </if>
+        <if test="refundsNo != null and refundsNo != ''">
+            and t1.refunds_no like CONCAT('%',#{refundsNo},'%')
+        </if>
+        <if test="refundsTimeBeginStr != null and refundsTimeBeginStr != ''">
+            and t1.refunds_time &gt;= #{refundsTimeBeginStr,jdbcType=DATE}
+        </if>
+        <if test="refundsTimeEndStr != null and refundsTimeEndStr != ''">
+            and t1.refunds_time &lt;= #{refundsTimeEndStr,jdbcType=DATE}
+        </if>
+        <if test="status != null">
+            and t1.status = #{status}
+        </if>
+        <if test="isDefaultOrder == 1">
+            order by t1.edit_time DESC, t1.create_time desc
+        </if>
+    </select>
+
+    <select id="selectRefundsById" resultType="com.ebig.hdi.modules.refunds.entity.vo.RefundsMasterVO">
+		select 
+			t1.id,
+			t1.refunds_no as refundsNo,
+			t1.supplier_id as supplierId,
+			t1.sources_supplier_id as sourcesSupplierId,
+			t1.hospital_id as hospitalId,
+			t1.sources_hospital_id as sourcesHospitalId,
+			t1.store_house_id as storeHouseId,
+			t1.sources_store_house_id as sourcesStoreHouseId,
+			t1.refunds_apply_no as refundsApplyNo,
+			t1.regression_number as regressionNumber,
+			t1.refunds_time as refundsTime,
+			t1.dept_id as deptId,
+			t2.hospital_name as hospitalName,
+			t3.storehousename as storeHouseName
+		from hdi_refunds_master t1
+		left join hdi_org_hospital_info t2 on t1.hospital_id = t2.id
+		left join hdi_core_storehouse t3 on t1.store_house_id = t3.storehouseid
+		where t1.id = #{id}
+	</select>
+
+    <select id="selectToSave" resultType="com.ebig.hdi.modules.refunds.entity.vo.RefundsDetailVO">
+        <choose>
+            <when test="params.acceptNo == null or params.acceptNo == ''">
+                select
+                distinct accept_no
+                from
+                view_hdi_core_accept_detail
+                where
+                hospital_id = #{params.hospitalId}
+                and
+                store_house_id = #{params.storeHouseId}
+                and
+                supplier_id = #{params.supplierId}
+            </when>
+            <when test="params.hospitalGoodsId == null and params.acceptNo != null">
+                select
+                distinct hospital_goods_name as goodsName,
+                hospital_goods_id as goodsId,
+                hospital_factory_name as factoryName
+                from
+                view_hdi_core_accept_detail
+                where
+                hospital_id = #{params.hospitalId}
+                and
+                store_house_id = #{params.storeHouseId}
+                and
+                supplier_id = #{params.supplierId}
+                and
+                accept_no = #{params.acceptNo}
+            </when>
+            <when test="params.hospitalGoodsSpecsId == null and params.hospitalGoodsId != null and params.acceptNo != null">
+                select
+                hospital_goods_specs_name as specsName,
+                hospital_goods_specs_id as specsId
+                from
+                view_hdi_core_accept_detail
+                where
+                hospital_id = #{params.hospitalId}
+                and
+                store_house_id = #{params.storeHouseId}
+                and
+                supplier_id = #{params.supplierId}
+                and
+                accept_no = #{params.acceptNo}
+            </when>
+            <otherwise>
+                select
+                accept_no as acceptNo,
+                goods_type as goodsType,
+                hospital_goods_id as goodsId,
+                sources_hospital_goods_id as sourcesGoodsId,
+                hospital_goods_name as goodsName,
+                hospital_factory_name as factoryName,
+                hospital_goods_specs_name as specsName,
+                lot_no as lotName,
+                hospital_goods_unit as goodsUnitCode,
+                supply_number as applyRefundsNumber,
+                supply_price as refundsPrice,
+                lot_id as lotId,
+                sources_hospital_goods_specs_id as sourcesSpecsId,
+                hospital_goods_specs_id as specsId,
+                accept_detail_id as sourcesDetailId,
+                accept_master_id as sourcesMasterId
+                from view_hdi_core_accept_detail
+                where
+                hospital_id = #{params.hospitalId}
+                and
+                store_house_id = #{params.storeHouseId}
+                and
+                supplier_id = #{params.supplierId}
+                and
+                accept_no = #{params.acceptNo}
+                and
+                hospital_goods_id = #{params.hospitalGoodsId}
+                and
+                hospital_goods_specs_id = #{params.hospitalGoodsSpecsId}
+            </otherwise>
+        </choose>
+
+    </select>
+    <select id="getList" resultType="map">
+        SELECT
+        <foreach collection="columns" index="index" item="item"
+                 open="" separator="," close="">
+            ${item}
+        </foreach>
+        FROM
+        hdi_refunds_master m
+        LEFT JOIN hdi_refunds_detail d
+        ON m.id = d.master_id
+        LEFT JOIN hdi_core_supply_detail t2
+        ON d.supply_detail_id = t2.supply_detail_id
+        LEFT JOIN view_hdi_goods_specs_supplier a
+        ON a.goods_type = t2.goodsclass
+        AND a.goods_id = t2.goodsid
+        AND a.goods_specs_id = t2.goodstypeid
+
+        <where>
+            m.del_flag = 0
+            <if test="queryParam.fileterDept != null and queryParam.fileterDept != ''">
+                and ${queryParam.fileterDept}
+            </if>
+            <if test="queryParam.hospitalName != null and queryParam.hospitalName != ''">
+                AND m.hospital_name like CONCAT('%',#{queryParam.hospitalName}, '%')
+            </if>
+            <if test="queryParam.storeHouseName != null and queryParam.storeHouseName != ''">
+                AND m.storehouse_name like CONCAT('%',#{queryParam.storeHouseName}, '%')
+            </if>
+            <if test="queryParam.refundsNo != null and queryParam.refundsNo != ''">
+                AND m.refunds_no like CONCAT('%',#{queryParam.refundsNo}, '%')
+            </if>
+            <if test="queryParam.refundsTimeBeginStr != null and queryParam.refundsTimeBeginStr != ''">
+                <![CDATA[ AND m.refunds_time >= #{queryParam.refundsTimeBeginStr} ]]>
+            </if>
+            <if test="queryParam.refundsTimeEndStr != null and queryParam.refundsTimeEndStr != ''">
+                <![CDATA[ AND m.refunds_time <= #{queryParam.refundsTimeEndStr} ]]>
+            </if>
+            <if test="queryParam.status != null and queryParam.status != ''">
+                AND m.status = #{queryParam.status}
+            </if>
+            ORDER BY m.create_time DESC,m.edit_time DESC
+        </where>
+    </select>
+
+    <select id="getMap" resultType="map">
+        SELECT
+        hospital_sources_specs_id,platform_goods_id,platform_goods_code,platform_goods_name,platform_goods_specs_id,
+        platform_goods_specs_code,platform_goods_specs_name,goods_type,hospital_goods_id,
+        hospital_goods_code,hospital_goods_name,hospital_goods_specs_id,hospital_goods_specs_code,
+        hospital_goods_specs_name
+        FROM
+        view_hdi_goods_specs_match
+        <where>
+
+            <if test="supplierId != null and supplierId != ''">
+                AND supplier_id = #{supplierId}
+            </if>
+            <if test="hospitalId != null and hospitalId != ''">
+                AND hospital_id = #{hospitalId}
+            </if>
+            <if test="supplierGoodsName != null and supplierGoodsName != ''">
+                AND supplier_goods_name = #{supplierGoodsName}
+            </if>
+
+            <if test="supplierGoodsSpecsName != null and supplierGoodsSpecsName != ''">
+                AND supplier_goods_specs_name = #{supplierGoodsSpecsName}
+            </if>
+        </where>
+    </select>
+
+    <select id="getDetailAndFactoryName" resultType="com.ebig.hdi.modules.refunds.entity.vo.ReturnDetailVo">
+		SELECT
+		c.goodsname as goodsName,
+		c.goodsunit as goodsUnit,
+		v.goods_type,
+		v.goods_id,
+		v.factory_name as factoryName
+		FROM
+		(
+			SELECT
+				d.*
+			FROM
+				hdi_core_supply_detail d
+			LEFT JOIN hdi_core_supply_master m ON d.supply_master_id = m.supply_master_id
+			WHERE
+				m.supplyno = #{supplyNo}
+		) c
+			LEFT JOIN view_hdi_goods_specs_supplier v ON c.goodsclass = v.goods_type
+			AND c.goodsid = v.goods_id
+			AND c.goodstypeid = v.goods_specs_id
+			GROUP BY c.goodsname ,
+					 c.goodsunit,
+					 v.goods_type,
+					 v.goods_id,
+					 v.factory_name
+	</select>
+
+    <select id="getMaster" resultType="map">
+	SELECT
+	platform_goods_id,
+	platform_goods_code,
+	platform_goods_name,
+	platform_goods_specs_id,
+	platform_goods_specs_code,
+	platform_goods_specs_name,
+	hospital_sources_specs_id,
+	goods_type,
+	hospital_goods_id,
+	hospital_goods_code,
+	hospital_goods_name,
+	hospital_goods_specs_id,
+	hospital_goods_specs_code,
+	hospital_goods_specs_name
+	FROM
+	view_hdi_goods_specs_match
+	WHERE
+	supplier_id = #{supplierId}
+	AND
+	hospital_id = #{hospitalId}
+	AND
+	goods_type= #{goodsType}
+	AND
+	supplier_goods_id = #{supplierGoodsId}
+	AND
+	supplier_goods_specs_id = #{supplierGoodsSpecsId}
+	</select>
+
+    <delete id="deleteDetailByMasterId">
+		delete from hdi_refunds_detail where master_id  = #{refundsMasterId}
+	</delete>
+
+    <select id="selectByRefundsNo" resultType="Integer">
+		select count(1) from hdi_refunds_master where refunds_no = #{refundsNo}
+	</select>
+
+    <select id="getGoodsSpecsMap" resultType="map">
+        SELECT
+        d.goodstypeid AS specsId,d.goodstype AS goodsSpecs
+        FROM
+        hdi_core_supply_detail d LEFT JOIN
+        hdi_core_supply_master m ON d.supply_master_id = m.supply_master_id
+        WHERE
+        <if test="supplyNo != null and supplyNo != ''">
+        m.supplyno = #{supplyNo}
+        </if>
+        <if test="goodsClass != null and goodsClass != ''">
+        AND d.goodsclass = #{goodsClass}
+        </if>
+        <if test="goodsId != null and goodsId != ''">
+        AND d.goodsid = #{goodsId}
+        </if>
+        GROUP BY d.goodstypeid , d.goodstype
+    </select>
+    <select id="getLotMap" resultType="map">
+		SELECT
+		d.lotno AS lotNo,d.lotid AS lotId
+		FROM
+		hdi_core_supply_detail d LEFT JOIN
+        hdi_core_supply_master m ON d.supply_master_id = m.supply_master_id
+        WHERE
+        <if test="supplyNo != null and supplyNo != ''">
+        m.supplyno = #{supplyNo}
+        </if>
+        <if test="goodsClass != null and goodsClass != ''">
+        AND d.goodsclass = #{goodsClass}
+        </if>
+        <if test="goodsId != null and goodsId != ''">
+        AND d.goodsid = #{goodsId}
+        </if>
+        <if test="goodsSpecsId != null and goodsSpecsId != ''">
+        AND d.goodstypeid = #{goodsSpecsId}
+        </if>
+    </select>
+
+    <select id="selectDetail" resultType="com.ebig.hdi.modules.refunds.entity.RefundsDetailEntity">
+        select * from hdi_refunds_detail  where master_id =  #{id}
+    </select>
+</mapper>

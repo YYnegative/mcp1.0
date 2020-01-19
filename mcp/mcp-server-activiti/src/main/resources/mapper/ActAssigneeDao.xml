@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.activiti.dao.ActAssigneeDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.activiti.entity.ActAssigneeEntity" id="BaseResultMap">
+        <result property="id" column="id"/>
+        <result property="nodeId" column="node_id"/>
+        <result property="assignee" column="assignee"/>
+        <result property="roleId" column="role_id"/>
+        <result property="assigneeType" column="assignee_type"/>
+        <result property="nodeName" column="node_name"/>
+        <result property="deploymentId" column="deployment_id"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+    id, node_id, assignee, role_id, assignee_type, node_name
+  </sql>
+    <select id="selectListByPage"
+            parameterType="com.ebig.hdi.modules.activiti.entity.ActAssigneeEntity"
+            resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        from act_assignee
+        <where>
+            <if test="nodeId!=null and nodeId!=''">
+                and node_id = #{nodeId}
+            </if>
+            <if test="roleId!=null and roleId!=''">
+                and role_id = #{roleId}
+            </if>
+            <if test="deploymentId!=null and deploymentId!=''">
+                and deployment_id = #{deploymentId}
+            </if>
+        </where>
+    </select>
+
+    <delete id="deleteByNodeId" parameterType="java.lang.String">
+    delete from act_assignee
+    where node_id = #{nodeId,jdbcType=VARCHAR}
+  </delete>
+</mapper>

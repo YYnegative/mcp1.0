@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.job.dao.TempSpdStageinfoDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.job.entity.TempSpdStageinfoEntity" id="tempSpdStageinfoMap">
+        <result property="stageinfoid" column="stageinfoid"/>
+        <result property="stageinfono" column="stageinfono"/>
+        <result property="uorganid" column="uorganid"/>
+        <result property="surgeryid" column="surgeryid"/>
+        <result property="sourceid" column="sourceid"/>
+        <result property="sourceno" column="sourceno"/>
+        <result property="supplyid" column="supplyid"/>
+        <result property="supplyno" column="supplyno"/>
+        <result property="supplyname" column="supplyname"/>
+        <result property="stageinfostatus" column="stageinfostatus"/>
+        <result property="stageinfotype" column="stageinfotype"/>
+        <result property="datasource" column="datasource"/>
+        <result property="cremanid" column="cremanid"/>
+        <result property="cremanname" column="cremanname"/>
+        <result property="credate" column="credate"/>
+        <result property="editmanid" column="editmanid"/>
+        <result property="editmanname" column="editmanname"/>
+        <result property="editdate" column="editdate"/>
+        <result property="memo" column="memo"/>
+        <result property="udflag" column="udflag"/>
+    </resultMap>
+	
+	<select id="selectAll" resultType="com.ebig.hdi.modules.job.entity.TempSpdStageinfoEntity">
+		select
+			*
+		from 
+			temp_spd_stageinfo
+		where
+			udflag &lt;&gt; 1
+		limit 300
+	</select>
+
+</mapper>

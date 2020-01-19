@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.core.dao.UnicodeGoodsShipHistDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.common.entity.UnicodeGoodsShipHistEntity" id="unicodeGoodsShipHistMap">
+        <result column="shiphist_id" property="shiphistId"/>
+
+        <result column="ship_id" property="shipId"/>
+
+        <result column="dept_id" property="deptId"/>
+
+        <result column="torg_id" property="torgId"/>
+
+        <result column="torg_type" property="torgType"/>
+
+        <result column="tgoods_type" property="tgoodsType"/>
+
+        <result column="tgoods_nature" property="tgoodsNature"/>
+
+        <result column="tgoods_name" property="tgoodsName"/>
+
+        <result column="tgoods_id" property="tgoodsId"/>
+
+        <result column="pgoods_nature" property="pgoodsNature"/>
+
+        <result column="pgoods_name" property="pgoodsName"/>
+
+        <result column="pgoods_id" property="pgoodsId"/>
+
+        <result column="tspecs" property="tspecs"/>
+
+        <result column="tspecs_id" property="tspecsId"/>
+
+        <result column="pspecs" property="pspecs"/>
+
+        <result column="pspecs_id" property="pspecsId"/>
+
+        <result column="tapprovals" property="tapprovals"/>
+
+        <result column="tapproval_id" property="tapprovalId"/>
+
+        <result column="papprovals" property="papprovals"/>
+
+        <result column="papproval_id" property="papprovalId"/>
+
+        <result column="ship_flag" property="shipFlag"/>
+
+        <result column="check_status" property="checkStatus"/>
+
+        <result column="oper_type" property="operType"/>
+
+        <result column="del_flag" property="delFlag"/>
+
+        <result column="cremanid" property="cremanid"/>
+
+        <result column="cremanname" property="cremanname"/>
+
+        <result column="credate" property="credate"/>
+
+        <result column="editmanid" property="editmanid"/>
+
+        <result column="editmanname" property="editmanname"/>
+
+        <result column="editdate" property="editdate"/>
+
+        <result column="memo" property="memo"/>
+
+        <result column="process_id" property="processId"/>
+
+        <result column="pfactory_name" property="pfactoryName"/>
+
+        <result column="pfactory_id" property="pfactoryId"/>
+    </resultMap>
+
+    <!-- 查询医院商品历史分页数据 -->
+    <select id="selectHospitalGoodsHist" resultType="com.ebig.hdi.common.entity.UnicodeGoodsShipHistEntityVo">
+        SELECT
+        t1.*,
+        t1.tgoods_name,
+        t1.pgoods_nature,
+        t2.hospital_name,
+        t3.consumables_name goodsName,
+        t3.goods_nature,
+        t4.specs AS pspecs,
+        t6.approvals,
+        t5.factory_name as pfactoryName,
+        haa.approval_status AS tapprovals,
+        haa.user_name
+        FROM
+        hdi_unicode_goods_ship_hist t1
+        LEFT JOIN hdi_org_hospital_info t2
+        ON t1.torg_id = t2.id
+        LEFT JOIN hdi_goods_platform_consumables t3
+        ON t1.pgoods_id = t3.id
+        LEFT JOIN hdi_goods_platform_consumables_specs t4
+        ON t1.pspecs_id = t4.id
+        LEFT JOIN hdi_goods_platform_consumables_approvals t6
+        ON t1.papproval_id = t6.id
+        LEFT JOIN hdi_org_factory_info t5
+        ON t3.factory_id = t5.id
+        left join hdi_act_approval haa on haa.process_id = t1.process_id
+        <where>t1.del_flag = 0
+            AND t1.torg_type = 0
+            AND t1.tgoods_type = 3
+            AND t1.ship_id =#{shipId}
+        </where>
+        ORDER BY ship_flag desc ,editdate desc,credate desc
+    </select>
+
+    <!-- 查询供应商商品历史分页数据 -->
+    <select id="selectSupplierGoodsHist" resultType="com.ebig.hdi.common.entity.UnicodeGoodsShipHistEntityVo">
+        SELECT
+        t1.*,
+        t2.supplier_name,
+        t3.consumables_name goodsName,
+        t3.goods_nature,
+        t4.specs,
+        t6.approvals,
+        t5.factory_name,
+        haa.approval_status,
+        haa.user_name
+        FROM
+        hdi_unicode_goods_ship_hist t1
+        LEFT JOIN hdi_org_supplier_info t2
+        ON t1.torg_id = t2.id
+        LEFT JOIN hdi_goods_platform_consumables t3
+        ON t1.pgoods_id = t3.id
+        LEFT JOIN hdi_goods_platform_consumables_specs t4
+        ON t1.pspecs_id = t4.id
+        LEFT JOIN hdi_goods_platform_consumables_approvals t6
+        ON t1.papproval_id = t6.id
+        LEFT JOIN hdi_org_factory_info t5
+        ON t3.factory_id = t5.id
+        left join hdi_act_approval haa on haa.process_id = t1.process_id
+        <where>t1.del_flag = 0
+            AND t1.torg_type = 1
+            AND t1.tgoods_type = 3
+            AND t1.ship_id =#{shipId}
+        </where>
+        ORDER BY ship_flag desc ,editdate desc,credate desc
+    </select>
+    <select id="selectGoodsHist" resultType="com.ebig.hdi.common.entity.UnicodeGoodsShipHistEntityVo">
+        SELECT
+        t1.shiphist_id AS shiphistId,
+        t1.ship_id,
+        t1.pgoods_id AS pgoodsId,
+        t1.oper_type AS operType,
+        t1.cremanname AS cremanname,
+        t1.credate,
+        t1.ship_flag AS shipFlag,
+        haa.approval_status,
+        t1.pgoods_name AS pgoodsName,
+        t1.pgoods_nature AS pgoodsNature,
+        t1.pfactory_name AS pfactoryName,
+        t1.papprovals AS papprovals,
+        t1.pspecs AS pspecs,
+        t1.pspecs_id AS pspecsId,
+        if(haa.user_name is null ,t1.cremanname,haa.user_name) as user_name
+        FROM
+        hdi_unicode_goods_ship_hist t1
+        left join hdi_act_approval haa on haa.process_id = t1.process_id
+        <where>
+            t1.del_flag = 0
+            AND t1.torg_type = #{torgType}
+            AND t1.tgoods_type = #{tgoodsType}
+            AND t1.ship_id =#{shipId}
+        </where>
+        ORDER BY credate desc
+
+    </select>
+
+
+</mapper>

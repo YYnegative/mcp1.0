@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.refunds.dao.RefundsApplyDetailDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.refunds.entity.RefundsApplyDetailEntity" id="refundsApplyDetailMap">
+        <result property="id" column="id"/>
+        <result property="applyMasterId" column="apply_master_id"/>
+        <result property="acceptNo" column="accept_no"/>
+        <result property="sourcesGoodsId" column="sources_goods_id"/>
+        <result property="goodsId" column="goods_id"/>
+        <result property="specsId" column="specs_id"/>
+        <result property="lotId" column="lot_id"/>
+        <result property="goodsUnitCode" column="goods_unit_code"/>
+        <result property="refundsNumber" column="refunds_number"/>
+        <result property="refundsRemark" column="refunds_remark"/>
+        <result property="createId" column="create_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="editId" column="edit_id"/>
+        <result property="editTime" column="edit_time"/>
+        <result property="delFlag" column="del_flag"/>
+    </resultMap>
+	
+	<select id="selectByMasterId" resultType="com.ebig.hdi.modules.refunds.entity.vo.RefundsApplyDetailVO">
+		select 
+			t1.*,
+			t2.hospital_goods_name as goodsName,
+			t2.hospital_factory_name as factoryName,
+			t2.hospital_goods_specs_name as specsName,
+			t3.lotno as lotName
+		from 
+			hdi_refunds_apply_detail t1
+		left join
+			view_hdi_goods_specs_match t2 
+			on  t1.goods_id = t2.platform_goods_id 
+			and t1.specs_id = t2.platform_goods_specs_id
+			and t1.goods_type = t2.goods_type
+		left join
+			hdi_core_lot t3
+			on	t1.lot_id = t3.lotid
+			and t3.lotstatus = 1
+		where 
+			t1.del_flag = 0
+		and
+			t1.apply_master_id = #{id}
+	</select>
+	
+	<select id="changeDetail" resultType="com.ebig.hdi.modules.refunds.entity.vo.RefundsDetailVO">
+		select
+			t1.apply_master_id as sourcesMasterId,
+			t1.id as sourcesDetailId,
+			t1.goods_type as goodsType,
+			t1.goods_id as goodsId,
+			t1.sources_goods_id as sourcesGoodsId,
+			t1.specs_id as specsId,
+			t1.sources_specs_id as sourcesSpecsId,
+			t1.lot_id as lotId,
+			t1.accept_no as acceptNo,
+			t2.hospital_goods_name as goodsName,
+			t2.hospital_factory_name as factoryName,
+			t2.hospital_goods_specs_name as specsName,
+			t3.lotno as lotName,
+			t1.goods_unit_code as goodsUnitCode,
+			t1.apply_refunds_number as applyRefundsNumber,
+			t1.supply_price as refundsPrice,
+			t1.refunds_remark as refundsRemark 
+		from 
+			hdi_refunds_apply_detail t1
+		left join
+			view_hdi_goods_specs_match t2 
+			on  t1.goods_id = t2.platform_goods_id 
+			and t1.specs_id = t2.platform_goods_specs_id
+			and t1.goods_type = t2.goods_type
+		left join
+			hdi_core_lot t3
+			on	t1.lot_id = t3.lotid
+			and t3.lotstatus = 1
+		where 
+			t1.del_flag = 0
+		and
+			t1.apply_master_id = #{id}
+	</select>
+	
+	<select id="listForPage" resultType="com.ebig.hdi.modules.refunds.entity.vo.RefundsApplyDetailVO">
+		select 
+			t1.id,
+			t1.accept_no as acceptNo,
+			t2.supplier_goods_name as goodsName,
+			t2.supplier_factory_name as factoryName,
+			t2.supplier_goods_specs_name as specsName,
+			t3.lotno as lotName,
+			t1.goods_unit_code as goodsUnitName,
+			t1.apply_refunds_number as applyRefundsNumber,
+			t1.refunds_remark as refundsRemark
+		from 
+			hdi_refunds_apply_detail t1
+		left join 
+			view_hdi_goods_specs_match t2
+		on t1.goods_id = t2.platform_goods_id
+		and t1.specs_id = t2.platform_goods_specs_id
+		and t1.goods_type = t2.goods_type
+		left join
+			hdi_core_lot t3
+			on	t1.lot_id = t3.lotid
+			and t3.lotstatus = 1
+		where 
+			t1.del_flag = 0
+		and apply_master_id = #{id}
+	</select>
+
+</mapper>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.reagent.dao.UnicodeReagentCateDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.reagent.entity.UnicodeReagentCateEntity" id="unicodeReagentCateMap">
+        <result property="cateId" column="cate_id"/>
+        <result property="cateName" column="cate_name"/>
+        <result property="cateNo" column="cate_no"/>
+        <result property="cateLevel" column="cate_level"/>
+        <result property="pcateId" column="pcate_id"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="memo" column="memo"/>
+        <result property="pcateName" column="pcateName"/>
+    </resultMap>
+
+
+	<!-- 查询耗材商品分类信息 -->
+	<select id="selectReagent" resultType="com.ebig.hdi.modules.reagent.entity.UnicodeReagentCateEntity">
+		SELECT
+			* 
+		FROM
+			hdi_unicode_reagent_cate urc
+		WHERE
+			urc.del_flag = 0 
+			AND urc.pcate_id = #{pcateId}
+	</select>
+	
+	<!-- 查询耗材商品分类的子类信息 -->
+	<select id="selectCateId" resultType="com.ebig.hdi.modules.reagent.entity.UnicodeReagentCateEntity">
+		select cate_id from hdi_unicode_reagent_cate where del_flag = 0 and pcate_id =#{cateId}
+	</select>
+
+	<!-- 查询同一级下耗材商品编码信息 -->
+	<select id="selectByCateLevel" resultType="com.ebig.hdi.modules.reagent.entity.UnicodeReagentCateEntity">
+		select cate_no from hdi_unicode_reagent_cate where del_flag = 0 and cate_level=#{cateLevel}
+	</select>
+	
+	<!-- 查询同一级下排除自己的耗材商品编码信息 -->
+	<select id="selectCateLevel" resultType="com.ebig.hdi.modules.reagent.entity.UnicodeReagentCateEntity">
+		select cate_no from hdi_unicode_reagent_cate where del_flag = 0 and cate_level=#{cateLevel} and cate_id != #{cateId}
+	</select>
+	
+	<!-- 查询当前级的父名称信息 -->
+	<select id="selectBypcateId" resultType="com.ebig.hdi.modules.reagent.entity.UnicodeReagentCateEntity">
+		select cate_name from hdi_unicode_reagent_cate where del_flag = 0 and cate_id= #{pcateId}
+	</select>
+	
+
+</mapper>

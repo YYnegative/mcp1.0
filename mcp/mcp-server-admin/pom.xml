@@ -1,0 +1,217 @@
+<?xml version="1.0"?>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.ebig.mcp</groupId>
+		<artifactId>mcp</artifactId>
+		<version>1.1.TRUNK</version>
+	</parent>
+	<artifactId>mcp-server-admin</artifactId>
+	<packaging>jar</packaging>
+	<name>mcp-server-admin</name>
+	<url>http://maven.apache.org</url>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.ebig.mcp</groupId>
+			<artifactId>mcp-server-report</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.ebig.mcp</groupId>
+			<artifactId>mcp-server-activiti</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>${mysql.version}</version>
+		</dependency>
+	    <dependency>
+			<groupId>com.ebig.mcp</groupId>
+			<artifactId>mcp-common-code</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.ebig.mcp</groupId>
+			<artifactId>mcp-server-system</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.ebig.mcp</groupId>
+			<artifactId>mcp-server-goods-drugs</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.ebig.mcp</groupId>
+			<artifactId>mcp-server-goods-reagent</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.ebig.mcp</groupId>
+			<artifactId>mcp-server-goods-consumables</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.ebig.mcp</groupId>
+			<artifactId>mcp-server-license</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.ebig.mcp</groupId>
+			<artifactId>mcp-server-surgery</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<!-- 集群环境，需要打开注释 -->
+		<!--<dependency>
+		    <groupId>org.springframework.session</groupId>
+		    <artifactId>spring-session-data-redis</artifactId>
+		</dependency> -->
+		<!-- <dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-config</artifactId>
+		</dependency> -->
+		<!-- <dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+		</dependency> -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>com.ebig.mcp</groupId>
+			<artifactId>mcp-common-core</artifactId>
+			<version>1.1.TRUNK</version>
+		</dependency>
+	</dependencies>
+
+	<profiles>
+	    <profile>
+	        <id>dev</id>
+	        <properties>
+	            <package.environment>dev</package.environment>
+	        </properties>
+	        <!-- 默认环境 -->
+	        <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+	    </profile>
+
+	    <profile>
+	        <id>test</id>
+	        <properties>
+	            <package.environment>test</package.environment>
+	        </properties>
+	    </profile>
+
+	    <profile>
+	        <id>120mcptest</id>
+	        <properties>
+	            <package.environment>120mcptest</package.environment>
+	        </properties>
+	    </profile>
+
+	    <profile>
+	        <id>prod</id>
+	        <properties>
+	            <package.environment>prod</package.environment>
+	        </properties>
+	    </profile>
+	</profiles>
+
+	<build>
+		<finalName>${project.artifactId}-${project.version}_${maven.build.timestamp}</finalName>
+		<resources>
+	        <resource>
+	            <!-- 扫描替换配置文件 -->
+	            <directory>${project.basedir}/src/main/resources</directory>
+	            <filtering>true</filtering>
+	            <includes>
+	                <include>banner.txt</include>
+	                <include>application.yml</include>
+	                <include>application-${package.environment}.yml</include>
+	                <include>static/**/**/*.*</include>
+	                <include>**/*.xml</include>
+					<include>**/*.jrxml</include>
+					<include>**/*.jasper</include>
+	            </includes>
+	        </resource>
+	    </resources>
+		<plugins>
+			<!-- 代码混淆插件 -->
+			<plugin>
+				<groupId>com.github.wvengen</groupId>
+				<artifactId>proguard-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals><goal>proguard</goal></goals>
+					</execution>
+				</executions>
+				<configuration>
+					<proguardVersion>6.0.2</proguardVersion>
+					<!-- 是否混淆 -->
+					<obfuscate>true</obfuscate>
+					<!-- 对什么进行混淆 -->
+					<injar>classes</injar>
+					<!--指定输出的jar包名 -->
+					<outjar>${project.build.finalName}.jar</outjar>
+					<!-- 是否将生成的PG文件安装部署，不用这个属性时混淆后直接生成目标包 -->
+					<!-- <attach>true</attach> -->
+					<!-- 指定生成文件分类 -->
+					<attachArtifactClassifier>pg</attachArtifactClassifier>
+					<options>
+						<option>-keepdirectories</option> <!-- 保持目录结构，默认删除目录结构使jar包更小 -->
+						<option>-ignorewarnings</option> <!--忽略所有告警 -->
+						<option>-dontshrink</option> <!--不做收缩（删除注释、未被引用代码，若不用这个属性则将多个同类变量压缩成变量数组） -->
+						<!-- 不路过非公用类文件及成员 -->
+						<option>-dontskipnonpubliclibraryclasses </option>
+						<option>-dontskipnonpubliclibraryclassmembers </option>
+						<option>-dontusemixedcaseclassnames</option> <!--不用大小写混合类名机制 -->
+						<option>-optimizations !code/simplification/arithmetic,!field/*,!class/merging/* </option>
+						<option>-keeppackagenames</option> <!-- 不混淆包名 -->
+						<!--保持源码名与行号（异常时有明确的栈信息），注解（默认会过滤掉所有注解，会影响框架的注解） -->
+						<option>-keepattributes
+							Exceptions,InnerClasses,*Annotation*,Signature,LineNumberTable</option>
+						<!-- 保持bean类名与属性名不变 -->
+						<option>-keep class com.ebig.**.entity.**</option>
+						<option>-keepclassmembers class com.ebig.**.entity.**
+							{ *;}</option>
+						<option>-keepclassmembers class * {public *;protected *;}</option> <!-- 保护所有类中public + protected成员 -->
+						<option>-keep class com.***</option> <!-- 保护所有类名 -->
+						<!-- 不混淆所有的set/get方法 -->
+						<option>-keepclassmembers public class * {void set*(***);public ***
+							get*();}</option>
+						<!-- 使用给定文件中的关键字作为要混淆方法的名称，${basedir}为当前工程根路径 -->
+						<option>-obfuscationdictionary ${basedir}/SpecificSymbol.txt</option>
+					</options>
+					<!-- 依赖的包 -->
+					<libs>
+						<lib>${java.home}/lib/rt.jar</lib>
+						<lib>${java.home}/lib/jce.jar</lib>
+					</libs>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<fork>true</fork><!--必须添加这个配置-->
+				</configuration>
+			</plugin>
+			<!-- 跳过单元测试 -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<skipTests>true</skipTests>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ebig.hdi.modules.license.dao.LicenseAgentInfoDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.ebig.hdi.modules.license.entity.LicenseAgentInfoEntity" id="licenseAgentInfoMap">
+        <result property="id" column="id"/>
+        <result property="supplierId" column="supplier_id"/>
+        <result property="agentId" column="agent_id"/>
+        <result property="classifyId" column="classify_id"/>
+        <result property="name" column="name"/>
+        <result property="number" column="number"/>
+        <result property="beginTime" column="begin_time"/>
+        <result property="endTime" column="end_time"/>
+        <result property="picUrl" column="pic_url"/>
+        <result property="status" column="status"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="createId" column="create_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="editId" column="edit_id"/>
+        <result property="editTime" column="edit_time"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="newLicenseId" column="new_license_id"/>
+    </resultMap>
+    
+	<insert id="saveAgent" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+		INSERT INTO hdi_org_agent_info (
+		  agent_name,
+		  credit_code,
+		  supplier_id,
+		  status,
+		  del_flag,
+		  create_id,
+		  dept_id,
+		  create_time,
+		  agent_code
+		) 
+		VALUES (
+		  #{agentName},
+		  #{creditCode},
+		  #{supplierId},
+		  #{status},
+		  #{delFlag},
+		  #{createId},
+		  #{deptId},
+		  #{createTime},
+		  #{agentCode} 
+		)
+		<selectKey resultType="int" order="AFTER" keyProperty="id">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
+	
+	<select id="listForPage" parameterType="com.ebig.hdi.modules.license.entity.vo.LicenseAgentInfoVO" resultType="com.ebig.hdi.modules.license.entity.vo.LicenseAgentInfoVO">
+		select * from view_hdi_license_agent 
+		where status = 1 and del_flag = 0 
+		<if test="fileterDept != null and fileterDept != ''">
+			and ${fileterDept}
+		</if>
+		<if test="classifyId != null">
+			and classify_id = #{classifyId}
+		</if>
+		<if test="agentName != null and agentName != ''">
+			and agent_name like CONCAT('%',#{agentName},'%')
+		</if>
+		<if test="nameOrNumber != null and nameOrNumber != ''">
+			and (name like CONCAT('%',#{nameOrNumber},'%') or number like CONCAT('%',#{nameOrNumber},'%'))
+		</if>
+		<if test="beginTimeStr != null and beginTimeStr != ''">
+			and end_time &gt;= #{beginTimeStr,jdbcType=DATE}
+		</if>
+		<if test="endTimeStr != null and endTimeStr != ''">
+			and end_time &lt;= #{endTimeStr,jdbcType=DATE}
+		</if>
+		<if test="licenseStatus != null">
+			and license_status = #{licenseStatus}
+		</if>
+		<if test="isDefaultOrder == 1">
+			order by IFNULL(edit_time, create_time) desc
+		</if>
+	</select>
+	
+	<select id="selectByAgentId" resultType="com.ebig.hdi.modules.license.entity.vo.LicenseAgentInfoVO">
+		select * from view_hdi_license_agent 
+		where id = #{id} and del_flag = 0 and status = 1
+	</select>
+	
+	<select id="selectByNewLicenseId" resultType="com.ebig.hdi.modules.license.entity.vo.LicenseAgentInfoVO">
+		select * from view_hdi_license_agent 
+		where new_license_id = #{id} and del_flag = 0 and status = 1
+	</select>
+	
+	<!-- 根据代理商名称查询信息 -->
+	<select id="selectByAgentName" resultType="map">
+		select * from hdi_org_agent_info where agent_name = #{agentName} and del_flag=0
+	</select>
+	
+	<!-- 根据代理商信用代码查询信息 -->
+	<select id="selectByCreditCode" resultType="map">
+		select * from hdi_org_agent_info where credit_code = #{creditCode} and del_flag=0
+	</select>
+</mapper>
