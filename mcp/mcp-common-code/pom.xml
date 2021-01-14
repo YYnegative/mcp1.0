@@ -37,7 +37,7 @@
 		<fastjson.version>1.2.47</fastjson.version>
 		<hutool.version>4.1.1</hutool.version>
 		<commons-digester.version>3.2</commons-digester.version>
-		<poi.version>3.9</poi.version>
+		<poi.version>4.1.2</poi.version>
 		<fastdfs.version>1.26.2</fastdfs.version>
 		<itextpdf.version>5.4.2</itextpdf.version>
 		<itext-asian.version>5.2.0</itext-asian.version>
