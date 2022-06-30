@@ -39,7 +39,7 @@
 		<commons-digester.version>3.2</commons-digester.version>
 		<poi.version>3.9</poi.version>
 		<fastdfs.version>1.26.2</fastdfs.version>
-		<itextpdf.version>5.4.2</itextpdf.version>
+		<itextpdf.version>5.5.12</itextpdf.version>
 		<itext-asian.version>5.2.0</itext-asian.version>
 		<xmlworker.version>5.4.1</xmlworker.version>
 		<QRCode.version>3.0</QRCode.version>
